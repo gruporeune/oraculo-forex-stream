@@ -32,7 +32,7 @@ const BINARY_ASSETS = [
   "BTC/USD", "ETH/USD", "LTC/USD", "XRP/USD", "ADA/USD"
 ];
 
-const EXPIRATIONS = ["1 min", "2 min", "5 min", "15 min", "30 min"];
+const EXPIRATIONS = ["1 min"];
 
 const generateAnalysis = (): AnalysisData => {
   const asset = BINARY_ASSETS[Math.floor(Math.random() * BINARY_ASSETS.length)];
@@ -68,7 +68,7 @@ export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
 
     // Start progress animation
     const startTime = Date.now();
-    const duration = 5000; // 5 seconds
+    const duration = 60000; // 1 minute
 
     const updateProgress = () => {
       const elapsed = Date.now() - startTime;
@@ -87,10 +87,10 @@ export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
   };
 
   const executeTradeResult = (analysis: AnalysisData) => {
-    // 90% win rate, 10% loss rate
-    const isWin = Math.random() < 0.9;
+    // 75% win rate, 25% loss rate
+    const isWin = Math.random() < 0.75;
     const profitLoss = isWin 
-      ? Math.floor(analysis.betAmount * (Math.random() * 0.8 + 0.7)) // 70-150% profit
+      ? Math.floor(analysis.betAmount * 0.85) // 85% profit
       : -analysis.betAmount; // Total loss
 
     const result: TradeResult = {
@@ -107,10 +107,10 @@ export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
     setShowResult(true);
     onTradeComplete(result);
 
-    // Auto start next analysis after 3 seconds
+    // Auto start next analysis after 5 seconds
     setTimeout(() => {
       startNewAnalysis();
-    }, 3000);
+    }, 5000);
   };
 
   useEffect(() => {
