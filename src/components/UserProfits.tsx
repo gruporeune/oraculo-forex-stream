@@ -12,7 +12,7 @@ export const UserProfits = ({ users }: UserProfitsProps) => {
   const sortedUsers = [...users].sort((a, b) => b.profit - a.profit);
 
   return (
-    <Card className="bg-card/80 backdrop-blur-md border border-border/50 h-[600px] overflow-hidden">
+    <Card className="bg-gradient-to-br from-glass-3d to-glass-bg backdrop-blur-xl border border-glass-border shadow-shadow-3d h-[600px] overflow-hidden">
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-gold">Top Traders</h2>

@@ -39,20 +39,29 @@ All colors MUST be HSL.
     --input: 225 15% 12%;
     --ring: 45 100% 55%;
 
-    /* Custom design tokens for O ORÁCULO */
+    /* Custom design tokens for O ORÁCULO - Futuristic 3D */
     --gold: 45 100% 55%;
     --gold-light: 45 100% 70%;
     --gold-dark: 45 100% 40%;
+    --neon-blue: 200 100% 60%;
+    --neon-purple: 280 100% 70%;
+    --cyber-green: 120 100% 50%;
     
-    --glass-bg: 225 15% 8% / 0.8;
-    --glass-border: 45 100% 55% / 0.2;
+    --glass-bg: 225 15% 8% / 0.1;
+    --glass-border: 45 100% 55% / 0.3;
+    --glass-3d: 225 15% 12% / 0.15;
     
-    --gradient-primary: linear-gradient(135deg, hsl(45 100% 55% / 0.1), hsl(45 100% 40% / 0.05));
+    --gradient-primary: linear-gradient(135deg, hsl(45 100% 55% / 0.2), hsl(45 100% 40% / 0.1));
     --gradient-gold: linear-gradient(135deg, hsl(45 100% 55%), hsl(45 100% 70%));
-    --gradient-glass: linear-gradient(135deg, hsl(225 15% 8% / 0.8), hsl(225 15% 12% / 0.6));
+    --gradient-glass: linear-gradient(135deg, hsl(225 15% 8% / 0.15), hsl(225 15% 12% / 0.1));
+    --gradient-3d: linear-gradient(145deg, hsl(225 15% 12% / 0.2), hsl(225 15% 8% / 0.05), hsl(225 15% 15% / 0.1));
+    --gradient-neon: linear-gradient(90deg, hsl(200 100% 60% / 0.3), hsl(280 100% 70% / 0.3));
     
-    --shadow-gold: 0 0 30px hsl(45 100% 55% / 0.3);
+    --shadow-gold: 0 0 30px hsl(45 100% 55% / 0.4);
     --shadow-glass: 0 8px 32px hsl(225 15% 0% / 0.4);
+    --shadow-3d: 0 20px 40px hsl(225 15% 0% / 0.6), inset 0 1px 0 hsl(225 15% 20% / 0.3);
+    --shadow-neon: 0 0 20px hsl(200 100% 60% / 0.5), 0 0 40px hsl(280 100% 70% / 0.3);
+    --shadow-cyber: 0 0 15px hsl(120 100% 50% / 0.4);
     
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 

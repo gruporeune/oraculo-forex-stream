@@ -5,6 +5,7 @@ import { TrendingUp, TrendingDown, Activity, Users } from "lucide-react";
 import { AnimatedCandlesticks } from "./AnimatedCandlesticks";
 import { TradesList } from "./TradesList";
 import { UserProfits } from "./UserProfits";
+import { TradeAnalysis, TradeResult } from "./TradeAnalysis";
 
 export interface Trade {
   id: string;
@@ -72,6 +73,37 @@ export const TradingDashboard = () => {
   const [totalProfit, setTotalProfit] = useState(0);
   const [activeTrades, setActiveTrades] = useState(0);
 
+  const handleTradeComplete = (result: TradeResult) => {
+    // Convert TradeResult to Trade format
+    const newTrade: Trade = {
+      id: result.id,
+      pair: result.asset,
+      type: result.result === "WIN" ? "BUY" : "SELL",
+      amount: result.betAmount,
+      profit: result.profit,
+      timestamp: result.timestamp,
+      status: "closed"
+    };
+
+    setTrades(prev => [newTrade, ...prev].slice(0, 20));
+    setTotalProfit(prev => prev + result.profit);
+    setActiveTrades(prev => prev + 1);
+
+    // Update user profits occasionally
+    if (Math.random() > 0.7 && result.result === "WIN") {
+      setUsers(prev => {
+        const updated = [...prev];
+        const randomIndex = Math.floor(Math.random() * updated.length);
+        updated[randomIndex] = {
+          ...updated[randomIndex],
+          profit: updated[randomIndex].profit + Math.abs(result.profit),
+          trades: updated[randomIndex].trades + 1
+        };
+        return updated;
+      });
+    }
+  };
+
   // Initialize with some data
   useEffect(() => {
     const initialTrades = Array.from({ length: 5 }, generateRandomTrade);
@@ -130,53 +162,64 @@ export const TradingDashboard = () => {
             O ORÁCULO
           </h1>
           <p className="text-xl text-muted-foreground">
-            Sistema Avançado de Trading Forex
+            IA vencedora para Opções Binarias
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="bg-card/80 backdrop-blur-md border border-border/50 hover:border-gold/30 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-glass-3d to-glass-bg backdrop-blur-xl border border-glass-border shadow-shadow-3d hover:shadow-shadow-neon transition-all duration-300 animate-neon-pulse">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Lucro Total</p>
-                  <p className="text-2xl font-bold text-success">
+                  <p className="text-3xl font-bold text-success">
                     R$ {totalProfit.toLocaleString('pt-BR')}
                   </p>
                 </div>
-                <TrendingUp className="h-8 w-8 text-success" />
+                <div className="p-3 rounded-xl bg-success/20 text-success shadow-shadow-cyber">
+                  <TrendingUp className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-card/80 backdrop-blur-md border border-border/50 hover:border-gold/30 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-glass-3d to-glass-bg backdrop-blur-xl border border-glass-border shadow-shadow-3d hover:shadow-shadow-gold transition-all duration-300">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Trades Ativos</p>
-                  <p className="text-2xl font-bold text-gold">
+                  <p className="text-3xl font-bold text-gold">
                     {activeTrades}
                   </p>
                 </div>
-                <Activity className="h-8 w-8 text-gold" />
+                <div className="p-3 rounded-xl bg-gold/20 text-gold shadow-shadow-gold">
+                  <Activity className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </Card>
 
-          <Card className="bg-card/80 backdrop-blur-md border border-border/50 hover:border-gold/30 transition-all duration-300">
+          <Card className="bg-gradient-to-br from-glass-3d to-glass-bg backdrop-blur-xl border border-glass-border shadow-shadow-3d hover:shadow-shadow-neon transition-all duration-300">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Usuários Ativos</p>
-                  <p className="text-2xl font-bold text-gold">
+                  <p className="text-3xl font-bold text-neon-blue">
                     {users.length}
                   </p>
                 </div>
-                <Users className="h-8 w-8 text-gold" />
+                <div className="p-3 rounded-xl bg-neon-blue/20 text-neon-blue shadow-shadow-neon">
+                  <Users className="h-8 w-8" />
+                </div>
               </div>
             </div>
           </Card>
+        </div>
+
+        {/* Analysis Section */}
+        <div className="mb-8">
+          <TradeAnalysis onTradeComplete={handleTradeComplete} />
         </div>
 
         {/* Main Dashboard Grid */}

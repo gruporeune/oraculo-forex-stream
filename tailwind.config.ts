@@ -61,6 +61,13 @@ export default {
 					light: 'hsl(var(--gold-light))',
 					dark: 'hsl(var(--gold-dark))'
 				},
+				neon: {
+					blue: 'hsl(var(--neon-blue))',
+					purple: 'hsl(var(--neon-purple))'
+				},
+				cyber: {
+					green: 'hsl(var(--cyber-green))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -109,6 +116,26 @@ export default {
 				'pulse-gold': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.7' }
+				},
+				'progress-fill': {
+					from: { width: '0%' },
+					to: { width: '100%' }
+				},
+				'cyber-glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 20px hsl(120 100% 50% / 0.4), inset 0 0 20px hsl(120 100% 50% / 0.1)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 40px hsl(120 100% 50% / 0.8), inset 0 0 40px hsl(120 100% 50% / 0.2)' 
+					}
+				},
+				'neon-pulse': {
+					'0%, 100%': { 
+						boxShadow: '0 0 15px hsl(200 100% 60% / 0.5), 0 0 30px hsl(280 100% 70% / 0.3)' 
+					},
+					'50%': { 
+						boxShadow: '0 0 25px hsl(200 100% 60% / 0.8), 0 0 50px hsl(280 100% 70% / 0.6)' 
+					}
 				}
 			},
 			animation: {
@@ -117,7 +144,10 @@ export default {
 				'float': 'float 6s ease-in-out infinite',
 				'glow': 'glow 2s ease-in-out infinite',
 				'slide-up': 'slide-up 0.5s ease-out',
-				'pulse-gold': 'pulse-gold 2s ease-in-out infinite'
+				'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
+				'progress-fill': 'progress-fill 3s ease-out forwards',
+				'cyber-glow': 'cyber-glow 2s ease-in-out infinite',
+				'neon-pulse': 'neon-pulse 1.5s ease-in-out infinite'
 			},
 			backdropBlur: {
 				xs: '2px'
