@@ -1,4 +1,3 @@
-import { TestimonialsColumn } from "@/components/ui/testimonials-columns";
 import { motion } from "framer-motion";
 
 const testimonials = [
@@ -58,9 +57,6 @@ const testimonials = [
   }
 ];
 
-const firstColumn = testimonials.slice(0, 3);
-const secondColumn = testimonials.slice(3, 6);
-const thirdColumn = testimonials.slice(6, 9);
 
 export function TestimonialsSection() {
   return (
@@ -82,10 +78,34 @@ export function TestimonialsSection() {
           </p>
         </motion.div>
 
-        <div className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
-          <TestimonialsColumn testimonials={firstColumn} duration={15} />
-          <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={19} />
-          <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={17} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+          {testimonials.slice(0, 6).map((testimonial, index) => (
+            <motion.div
+              key={testimonial.name}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="p-6 rounded-2xl border border-border bg-card/80 backdrop-blur-sm shadow-lg"
+            >
+              <div className="text-sm text-muted-foreground leading-relaxed mb-4">
+                "{testimonial.text}"
+              </div>
+              <div className="flex items-center gap-3">
+                <img
+                  width={40}
+                  height={40}
+                  src={testimonial.image}
+                  alt={testimonial.name}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+                <div className="flex flex-col">
+                  <div className="font-medium tracking-tight leading-5 text-foreground">{testimonial.name}</div>
+                  <div className="leading-5 opacity-60 tracking-tight text-muted-foreground">{testimonial.role}</div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
