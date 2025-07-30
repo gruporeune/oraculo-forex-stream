@@ -19,7 +19,11 @@ export function HeroSection() {
         duration: 0.8
       }} className="max-w-4xl mx-auto">
           <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-            aaaa
+            Opere opções binárias com{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+              inteligência artificial
+            </span>{" "}
+            facilmente
           </h1>
           
           <motion.p initial={{
