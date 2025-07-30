@@ -68,7 +68,7 @@ com até 99% de assertividade.</motion.p>
           delay: 0.6
         }} className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-purple-600 mb-2">75%</div>
+              <div className="text-3xl font-bold text-purple-600 mb-2">99%</div>
               <div className="text-sm text-muted-foreground">Taxa de assertividade</div>
             </div>
             <div className="text-center">
