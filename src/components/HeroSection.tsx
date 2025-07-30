@@ -1,87 +1,82 @@
-import { SplineScene } from "@/components/ui/splite";
-import { Card } from "@/components/ui/card";
-import { Spotlight } from "@/components/ui/spotlight";
-import { MovingSpotlight } from "@/components/ui/moving-spotlight";
 import { Button } from "@/components/ui/button";
-import { GradualSpacing } from "@/components/ui/gradual-spacing";
 import { motion } from "framer-motion";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <Card className="w-full max-w-7xl mx-auto bg-background/5 backdrop-blur-3xl border-gold/20 relative overflow-hidden">
-        <Spotlight
-          className="-top-40 left-0 md:left-60 md:-top-20"
-          fill="var(--gold)"
-        />
-        <MovingSpotlight />
-        
-        <div className="flex flex-col lg:flex-row h-full min-h-[600px]">
-          {/* Left content */}
-          <div className="flex-1 p-8 lg:p-12 relative z-10 flex flex-col justify-center">
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.2 }}
-                className="mb-6"
-              >
-                <h1 className="text-4xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-primary mb-4 text-center lg:text-left">
-                  O ORÁCULO
-                </h1>
-              </motion.div>
-              
-              <div className="mb-8">
-                <GradualSpacing
-                  text="A revolução chegou! Pare de quebrar a cabeça operando e perdendo dinheiro. Nossa IA de alta precisão gera sinais assertivos que transformam traders iniciantes em verdadeiros oráculos do mercado financeiro."
-                  className="text-base lg:text-lg text-muted-foreground text-center lg:text-left"
-                  duration={0.3}
-                  delayMultiple={0.02}
-                />
-              </div>
-              <p className="text-lg text-gold mb-8 font-semibold">
-                🎯 Sinais com 75% de assertividade<br/>
-                🤖 Operações 100% automatizadas<br/>
-                💰 Lucros diários garantidos
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  size="lg" 
-                  className="bg-gradient-primary text-black font-bold px-8 py-4 text-lg hover:shadow-glow transition-all duration-300"
-                >
-                  COMEÇAR AGORA
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="border-gold text-gold hover:bg-gold/10 px-8 py-4 text-lg"
-                >
-                  VER DEMONSTRAÇÃO
-                </Button>
-              </div>
-            </motion.div>
-          </div>
+    <section className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl"></div>
+      </div>
 
-          {/* Right content - 3D Scene */}
-          <div className="flex-1 relative min-h-[400px] lg:min-h-full">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.3 }}
-              className="w-full h-full"
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="max-w-4xl mx-auto"
+        >
+          <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
+            Opere opções binárias com{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+              inteligência artificial
+            </span>{" "}
+            facilmente
+          </h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
+          >
+            Comece agora com nossa IA que gera sinais com 75% de assertividade.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
+          >
+            <Button
+              size="lg"
+              className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-4 text-lg font-semibold min-w-[200px]"
             >
-              <SplineScene 
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
-            </motion.div>
-          </div>
-        </div>
-      </Card>
+              Abrir sua conta
+            </Button>
+            <Button
+              variant="outline"
+              size="lg"
+              className="border-purple-500 text-purple-600 hover:bg-purple-50 px-8 py-4 text-lg min-w-[200px]"
+            >
+              Ver demonstração
+            </Button>
+          </motion.div>
+
+          {/* Stats */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
+          >
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-2">75%</div>
+              <div className="text-sm text-muted-foreground">Taxa de assertividade</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-2">24/7</div>
+              <div className="text-sm text-muted-foreground">Operação automática</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-600 mb-2">1%</div>
+              <div className="text-sm text-muted-foreground">Lucro diário garantido</div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </div>
     </section>
   );
 }
