@@ -163,9 +163,11 @@ export default function LoginPage() {
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", duration: 0.8 }}
-                  className="mx-auto w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center relative overflow-hidden"
+                  className="flex items-center justify-center space-x-2 mb-4"
                 >
-                  <span className="text-white font-bold text-sm">O</span>
+                  <span className="text-3xl font-bold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400 tracking-wider">
+                    O ORÁCULO
+                  </span>
                 </motion.div>
 
                 <motion.h1

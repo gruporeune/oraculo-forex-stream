@@ -145,14 +145,6 @@ export default function RegisterPage() {
           <div className="relative bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/[0.05] shadow-2xl overflow-hidden">
             {/* Logo and header */}
             <div className="text-center space-y-1 mb-6">
-              <motion.div
-                initial={{ scale: 0.5, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", duration: 0.8 }}
-                className="mx-auto w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center relative overflow-hidden"
-              >
-                <span className="text-white font-bold">O</span>
-              </motion.div>
 
               <motion.h1
                 initial={{ opacity: 0, y: 10 }}

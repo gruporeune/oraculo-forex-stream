@@ -4,6 +4,7 @@ import { BenefitsSection } from "@/components/BenefitsSection";
 import { ResourcesSection } from "@/components/ResourcesSection";
 import { HowToStartSection } from "@/components/HowToStartSection";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
+import { ReferralSection } from "@/components/ReferralSection";
 import { VideoSection } from "@/components/VideoSection";
 
 export default function LandingPage() {
@@ -15,6 +16,7 @@ export default function LandingPage() {
       <ResourcesSection />
       <HowToStartSection />
       <TestimonialsSection />
+      <ReferralSection />
       <VideoSection />
       
       {/* Footer */}
