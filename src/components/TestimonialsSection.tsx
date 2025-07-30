@@ -1,5 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { TestimonialsColumn, firstColumn, secondColumn, thirdColumn } from "@/components/ui/testimonials-columns";
 import { Star } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -74,48 +73,10 @@ export function TestimonialsSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {testimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.name}
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <Card className="glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 h-full">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4 mb-4">
-                    <Avatar className="w-12 h-12">
-                      <AvatarImage src={testimonial.image} alt={testimonial.name} />
-                      <AvatarFallback className="bg-gradient-primary text-black font-bold">
-                        {testimonial.name.split(' ').map(n => n[0]).join('')}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-foreground">{testimonial.name}</h4>
-                      <p className="text-sm text-muted-foreground">{testimonial.role}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: testimonial.rating }).map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-gold text-gold" />
-                    ))}
-                  </div>
-
-                  <blockquote className="text-muted-foreground mb-4 italic">
-                    "{testimonial.text}"
-                  </blockquote>
-
-                  <div className="text-center">
-                    <span className="text-2xl font-bold text-green-500">+{testimonial.profit}</span>
-                    <p className="text-sm text-muted-foreground">Lucro acumulado</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+        <div className="flex justify-center gap-6 mt-10 [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)] max-h-[740px] overflow-hidden">
+          <TestimonialsColumn testimonials={firstColumn} duration={15} />
+          <TestimonialsColumn testimonials={secondColumn} className="hidden md:block" duration={19} />
+          <TestimonialsColumn testimonials={thirdColumn} className="hidden lg:block" duration={17} />
         </div>
       </div>
     </section>

@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Brain, TrendingUp, Shield, Zap, Users, Trophy } from "lucide-react";
+import { CardSpotlight } from "@/components/ui/card-spotlight";
+import { Brain, TrendingUp, Shield, Zap, Users, Trophy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 
 const features = [
@@ -64,21 +64,19 @@ export function FeaturesSection() {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 h-full">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-4 rounded-full bg-gradient-primary w-fit">
+              <CardSpotlight className="h-full" color="rgba(255, 173, 112, 0.15)">
+                <div className="text-center">
+                  <div className="mx-auto mb-4 p-3 rounded-full bg-gradient-primary w-fit">
                     <feature.icon className="w-8 h-8 text-black" />
                   </div>
-                  <CardTitle className="text-xl font-bold text-foreground mb-2">
+                  <h3 className="text-xl font-bold text-white mb-4">
                     {feature.title}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-center text-muted-foreground leading-relaxed">
+                  </h3>
+                  <p className="text-gray-300">
                     {feature.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
+                  </p>
+                </div>
+              </CardSpotlight>
             </motion.div>
           ))}
         </div>
