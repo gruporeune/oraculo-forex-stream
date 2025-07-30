@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GradientCard } from "@/components/ui/gradient-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Crown, Gem, Diamond } from "lucide-react";
@@ -144,23 +144,23 @@ export function PlansSection() {
                 </div>
               )}
               
-              <Card className={`glass-card ${plan.borderColor} border-2 hover:shadow-glow transition-all duration-300 h-full flex flex-col`}>
-                <CardHeader className="text-center pb-4">
+              <GradientCard className="h-full flex flex-col">
+                <div className="text-center pb-4">
                   <div className={`mx-auto mb-4 p-3 rounded-full bg-background/20 w-fit ${plan.color}`}>
                     <plan.icon className="w-8 h-8" />
                   </div>
-                  <CardTitle className={`text-2xl font-bold ${plan.color}`}>
+                  <h3 className={`text-2xl font-bold ${plan.color}`}>
                     {plan.name}
-                  </CardTitle>
+                  </h3>
                   <div className="text-3xl font-bold text-foreground mb-2">
                     {plan.price}
                   </div>
-                  <CardDescription className="text-sm">
+                  <p className="text-sm text-muted-foreground">
                     {plan.description}
-                  </CardDescription>
-                </CardHeader>
+                  </p>
+                </div>
 
-                <CardContent className="flex-1 flex flex-col">
+                <div className="flex-1 flex flex-col">
                   <div className="space-y-3 mb-6 flex-1">
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-3">
@@ -186,8 +186,8 @@ export function PlansSection() {
                   >
                     {plan.name === 'FREE' ? 'COMEÇAR GRÁTIS' : 'ASSINAR AGORA'}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </GradientCard>
             </motion.div>
           ))}
         </div>

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Star, Crown, Gem, Diamond, Check, ArrowLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import { BinaryFloatingElements } from "@/components/BinaryFloatingElements";
+
 
 const planDetails = {
   free: {
@@ -84,7 +84,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-gradient-radial from-background via-background to-background/50 relative overflow-hidden">
-      <BinaryFloatingElements />
       
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
         <div className="w-full max-w-4xl">

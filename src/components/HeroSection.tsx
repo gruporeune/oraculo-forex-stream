@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Spotlight } from "@/components/ui/spotlight";
 import { MovingSpotlight } from "@/components/ui/moving-spotlight";
 import { Button } from "@/components/ui/button";
+import { GradualSpacing } from "@/components/ui/gradual-spacing";
 import { motion } from "framer-motion";
 
 export function HeroSection() {
@@ -23,14 +24,25 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h1 className="text-5xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-primary mb-6">
-                O ORÁCULO PRO
-              </h1>
-              <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
-                A revolução chegou! Pare de quebrar a cabeça operando e perdendo dinheiro. 
-                Nossa IA de alta precisão gera sinais assertivos que transformam traders 
-                iniciantes em verdadeiros oráculos do mercado financeiro.
-              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="mb-6"
+              >
+                <h1 className="text-4xl lg:text-6xl font-bold bg-clip-text text-transparent bg-gradient-primary mb-4 text-center lg:text-left">
+                  O ORÁCULO
+                </h1>
+              </motion.div>
+              
+              <div className="mb-8">
+                <GradualSpacing
+                  text="A revolução chegou! Pare de quebrar a cabeça operando e perdendo dinheiro. Nossa IA de alta precisão gera sinais assertivos que transformam traders iniciantes em verdadeiros oráculos do mercado financeiro."
+                  className="text-base lg:text-lg text-muted-foreground text-center lg:text-left"
+                  duration={0.3}
+                  delayMultiple={0.02}
+                />
+              </div>
               <p className="text-lg text-gold mb-8 font-semibold">
                 🎯 Sinais com 75% de assertividade<br/>
                 🤖 Operações 100% automatizadas<br/>
