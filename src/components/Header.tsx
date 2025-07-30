@@ -28,8 +28,8 @@ export function Header() {
             <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-sm">O</span>
             </div>
-            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
-              ORÁCULO
+            <span className="text-3xl font-bold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400 tracking-wider">
+              O ORÁCULO
             </span>
           </motion.div>
 
@@ -64,10 +64,14 @@ export function Header() {
             <Button
               variant="ghost"
               className="text-muted-foreground hover:text-foreground"
+              onClick={() => window.location.href = '/login'}
             >
               Entrar
             </Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white">
+            <Button 
+              className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white"
+              onClick={() => window.location.href = '/register'}
+            >
               Registrar
             </Button>
           </div>
@@ -109,10 +113,17 @@ export function Header() {
                 Como Começar
               </button>
               <div className="flex flex-col space-y-2 pt-4">
-                <Button variant="ghost" className="justify-start">
+                <Button 
+                  variant="ghost" 
+                  className="justify-start"
+                  onClick={() => window.location.href = '/login'}
+                >
                   Entrar
                 </Button>
-                <Button className="bg-gradient-to-r from-purple-600 to-purple-500 text-white justify-start">
+                <Button 
+                  className="bg-gradient-to-r from-purple-600 to-purple-500 text-white justify-start"
+                  onClick={() => window.location.href = '/register'}
+                >
                   Registrar
                 </Button>
               </div>
