@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { SplineScene } from "@/components/ui/splite";
-import { Card } from "@/components/ui/card";
-import { Spotlight } from "@/components/ui/spotlight";
+import { InteractiveRobotSpline } from "@/components/ui/interactive-3d-robot";
 import { VideoModal } from "@/components/ui/video-modal";
 import { useState } from "react";
 
 export function HeroSection() {
+  const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   return (
@@ -17,17 +16,27 @@ export function HeroSection() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl"></div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-20">
+      {/* Content positioned above robot */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center flex flex-col min-h-screen">
         {/* Headline section - positioned at top */}
-        <div className="text-center mb-16 pt-20">
+        <div className="flex-shrink-0 pt-20 pb-8">
+          <div className="text-center text-white drop-shadow-lg w-full max-w-4xl mx-auto pointer-events-none">
+          
           <motion.div 
-            initial={{ opacity: 0, y: 50 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ duration: 0.8 }} 
-            className="w-full max-w-4xl mx-auto"
+            initial={{
+              opacity: 0,
+              y: 50
+            }} 
+            animate={{
+              opacity: 1,
+              y: 0
+            }} 
+            transition={{
+              duration: 0.8
+            }} 
+            className="w-full pointer-events-auto"
           >
-            <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight text-white">
+            <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
               Opere opções binárias com a{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
                 inteligência artificial
@@ -36,18 +45,36 @@ export function HeroSection() {
             </h1>
             
             <motion.p 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.2 }} 
+              initial={{
+                opacity: 0,
+                y: 30
+              }} 
+              animate={{
+                opacity: 1,
+                y: 0
+              }} 
+              transition={{
+                duration: 0.8,
+                delay: 0.2
+              }} 
               className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
             >
               Comece agora a usar o oráculo e ganhe 1% de lucro ao dia de forma automática ou gere sinais com até 99% de assertividade.
             </motion.p>
 
             <motion.div 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.4 }} 
+              initial={{
+                opacity: 0,
+                y: 30
+              }} 
+              animate={{
+                opacity: 1,
+                y: 0
+              }} 
+              transition={{
+                duration: 0.8,
+                delay: 0.4
+              }} 
               className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16"
             >
               <Button 
@@ -69,10 +96,19 @@ export function HeroSection() {
 
             {/* Stats */}
             <motion.div 
-              initial={{ opacity: 0, y: 30 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              transition={{ duration: 0.8, delay: 0.6 }} 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto mb-16"
+              initial={{
+                opacity: 0,
+                y: 30
+              }} 
+              animate={{
+                opacity: 1,
+                y: 0
+              }} 
+              transition={{
+                duration: 0.8,
+                delay: 0.6
+              }} 
+              className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto"
             >
               <div className="text-center">
                 <div className="text-3xl font-bold text-purple-600 mb-2">99%</div>
@@ -88,40 +124,16 @@ export function HeroSection() {
               </div>
             </motion.div>
           </motion.div>
+          </div>
         </div>
         
-        {/* New Hero Section with Spline */}
-        <motion.div 
-          initial={{ opacity: 0, y: 50 }} 
-          animate={{ opacity: 1, y: 0 }} 
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="w-full h-[500px] relative overflow-hidden rounded-lg"
-        >
-          <Spotlight
-            className="-top-40 left-0 md:left-60 md:-top-20"
-            fill="white"
+        {/* 3D Robot positioned below headline */}
+        <div className="flex-1 relative">
+          <InteractiveRobotSpline
+            scene={ROBOT_SCENE_URL}
+            className="w-full h-full"
           />
-          
-          <div className="flex h-full bg-black/20 backdrop-blur-sm rounded-lg border border-white/10">
-            {/* Left content */}
-            <div className="flex-1 p-8 relative z-10 flex flex-col justify-center">
-              <h2 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400">
-                ORÁCULO IA
-              </h2>
-              <p className="mt-4 text-neutral-300 max-w-lg">
-                Tecnologia avançada de inteligência artificial para maximizar seus lucros no mercado de opções binárias com precisão incomparável.
-              </p>
-            </div>
-
-            {/* Right content - 3D Scene */}
-            <div className="flex-1 relative">
-              <SplineScene 
-                scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-                className="w-full h-full"
-              />
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Video Modal */}
