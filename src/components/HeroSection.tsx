@@ -4,8 +4,6 @@ import { Spotlight } from "@/components/ui/spotlight";
 import { MovingSpotlight } from "@/components/ui/moving-spotlight";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ParticleTextEffect } from "@/components/ui/interactive-text-particle";
-import { GradualSpacing } from "@/components/ui/gradual-spacing";
 
 export function HeroSection() {
   return (
@@ -25,20 +23,14 @@ export function HeroSection() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="mb-6 flex justify-center">
-                <ParticleTextEffect
-                  text="O ORÁCULO PRO"
-                  colors={['ffad70', 'f7d297', 'edb9a1', 'e697ac', 'b38dca']}
-                  className="mx-auto"
-                />
-              </div>
-              <div className="mb-8">
-                <GradualSpacing
-                  text="A revolução chegou! Pare de quebrar a cabeça operando e perdendo dinheiro. Nossa IA de alta precisão gera sinais assertivos que transformam traders iniciantes em verdadeiros oráculos do mercado financeiro."
-                  className="text-lg lg:text-xl text-muted-foreground leading-relaxed max-w-2xl"
-                  delayMultiple={0.02}
-                />
-              </div>
+              <h1 className="text-5xl lg:text-7xl font-bold bg-clip-text text-transparent bg-gradient-primary mb-6">
+                O ORÁCULO PRO
+              </h1>
+              <p className="text-xl lg:text-2xl text-muted-foreground mb-8 max-w-2xl leading-relaxed">
+                A revolução chegou! Pare de quebrar a cabeça operando e perdendo dinheiro. 
+                Nossa IA de alta precisão gera sinais assertivos que transformam traders 
+                iniciantes em verdadeiros oráculos do mercado financeiro.
+              </p>
               <p className="text-lg text-gold mb-8 font-semibold">
                 🎯 Sinais com 75% de assertividade<br/>
                 🤖 Operações 100% automatizadas<br/>

@@ -1,4 +1,4 @@
-import { GradientCard } from "@/components/ui/gradient-card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, Star, Crown, Gem, Diamond } from "lucide-react";
@@ -144,59 +144,50 @@ export function PlansSection() {
                 </div>
               )}
               
-              <GradientCard className="mx-auto">
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-50">
-                    <Badge className="bg-gradient-primary text-black font-bold px-4 py-1">
-                      MAIS POPULAR
-                    </Badge>
+              <Card className={`glass-card ${plan.borderColor} border-2 hover:shadow-glow transition-all duration-300 h-full flex flex-col`}>
+                <CardHeader className="text-center pb-4">
+                  <div className={`mx-auto mb-4 p-3 rounded-full bg-background/20 w-fit ${plan.color}`}>
+                    <plan.icon className="w-8 h-8" />
                   </div>
-                )}
-
-                {/* Icon circle */}
-                <div className="w-12 h-12 rounded-full flex items-center justify-center mb-6">
-                  <plan.icon className="w-8 h-8 text-gold" />
-                </div>
-
-                {/* Content */}
-                <div className="mb-auto">
-                  <h3 className="text-2xl font-medium text-white mb-3">
+                  <CardTitle className={`text-2xl font-bold ${plan.color}`}>
                     {plan.name}
-                  </h3>
-                  <div className="text-3xl font-bold text-gold mb-2">
+                  </CardTitle>
+                  <div className="text-3xl font-bold text-foreground mb-2">
                     {plan.price}
                   </div>
-                  <p className="text-sm mb-6 text-gray-300">
+                  <CardDescription className="text-sm">
                     {plan.description}
-                  </p>
-                  
-                  <div className="space-y-3 mb-6">
+                  </CardDescription>
+                </CardHeader>
+
+                <CardContent className="flex-1 flex flex-col">
+                  <div className="space-y-3 mb-6 flex-1">
                     {plan.features.map((feature, i) => (
                       <div key={i} className="flex items-center gap-3">
                         <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                        <span className="text-sm text-gray-300">{feature}</span>
+                        <span className="text-sm text-muted-foreground">{feature}</span>
                       </div>
                     ))}
                     {plan.excluded.map((excluded, i) => (
                       <div key={i} className="flex items-center gap-3 opacity-50">
-                        <div className="w-4 h-4 rounded-full border border-gray-600 flex-shrink-0" />
-                        <span className="text-sm text-gray-500 line-through">{excluded}</span>
+                        <div className="w-4 h-4 rounded-full border border-muted flex-shrink-0" />
+                        <span className="text-sm text-muted-foreground line-through">{excluded}</span>
                       </div>
                     ))}
                   </div>
-                </div>
 
-                <Button
-                  onClick={() => navigate(plan.route)}
-                  className={`w-full ${plan.name === 'MASTER' 
-                    ? 'bg-gradient-primary text-black hover:shadow-glow' 
-                    : 'border-2 border-gold text-gold bg-transparent hover:bg-gold/10'
-                  } transition-all duration-300 mt-auto`}
-                  variant={plan.name === 'MASTER' ? 'default' : 'outline'}
-                >
-                  {plan.name === 'FREE' ? 'COMEÇAR GRÁTIS' : 'ASSINAR AGORA'}
-                </Button>
-              </GradientCard>
+                  <Button
+                    onClick={() => navigate(plan.route)}
+                    className={`w-full ${plan.name === 'MASTER' 
+                      ? 'bg-gradient-primary text-black hover:shadow-glow' 
+                      : `border-2 ${plan.borderColor} ${plan.color} bg-transparent hover:bg-current hover:bg-opacity-10`
+                    } transition-all duration-300`}
+                    variant={plan.name === 'MASTER' ? 'default' : 'outline'}
+                  >
+                    {plan.name === 'FREE' ? 'COMEÇAR GRÁTIS' : 'ASSINAR AGORA'}
+                  </Button>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </div>
