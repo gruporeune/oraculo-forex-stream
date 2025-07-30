@@ -136,6 +136,10 @@ export default {
 					'50%': { 
 						boxShadow: '0 0 25px hsl(200 100% 60% / 0.8), 0 0 50px hsl(280 100% 70% / 0.6)' 
 					}
+				},
+				'spotlight': {
+					'0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
+					'100%': { opacity: '1', transform: 'translate(-50%, -40%) scale(1)' },
 				}
 			},
 			animation: {
@@ -147,7 +151,8 @@ export default {
 				'pulse-gold': 'pulse-gold 2s ease-in-out infinite',
 				'progress-fill': 'progress-fill 3s ease-out forwards',
 				'cyber-glow': 'cyber-glow 2s ease-in-out infinite',
-				'neon-pulse': 'neon-pulse 1.5s ease-in-out infinite'
+				'neon-pulse': 'neon-pulse 1.5s ease-in-out infinite',
+				'spotlight': 'spotlight 2s ease 0.75s 1 forwards'
 			},
 			backdropBlur: {
 				xs: '2px'

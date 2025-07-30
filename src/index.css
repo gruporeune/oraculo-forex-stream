@@ -48,6 +48,9 @@ All colors MUST be HSL.
     --cyber-green: 120 100% 50%;
     
     --glass-bg: 225 15% 8% / 0.1;
+    
+    /* Spotlight animation */
+    --spotlight-opacity: 0;
     --glass-border: 45 100% 55% / 0.3;
     --glass-3d: 225 15% 12% / 0.15;
     
