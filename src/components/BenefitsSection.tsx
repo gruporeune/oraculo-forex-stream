@@ -10,7 +10,7 @@ const benefits = [
   },
   {
     icon: Target,
-    title: "75% de Assertividade",
+    title: "99% de Assertividade",
     description: "Sinais comprovados com alta precisão para operações CALL e PUT em expirações de 1, 5 e 15 minutos.",
   },
   {

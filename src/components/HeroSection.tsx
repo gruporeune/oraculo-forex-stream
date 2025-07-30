@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { InteractiveRobotSpline } from "@/components/ui/interactive-3d-robot";
+import { VideoModal } from "@/components/ui/video-modal";
+import { useState } from "react";
 
 export function HeroSection() {
   const ROBOT_SCENE_URL = "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
@@ -13,16 +16,12 @@ export function HeroSection() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl"></div>
       </div>
 
-      {/* 3D Robot */}
-      <div className="absolute inset-0 z-0">
-        <InteractiveRobotSpline
-          scene={ROBOT_SCENE_URL}
-          className="w-full h-full"
-        />
-      </div>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center flex items-center justify-center min-h-screen">
-        <div className="text-center text-white drop-shadow-lg w-full max-w-4xl mx-auto pointer-events-none">
+      {/* Content positioned above robot */}
+      <div className="relative z-10 max-w-7xl mx-auto px-4 py-20 text-center flex flex-col min-h-screen">
+        {/* Headline section - positioned at top */}
+        <div className="flex-shrink-0 pt-20 pb-8">
+          <div className="text-center text-white drop-shadow-lg w-full max-w-4xl mx-auto pointer-events-none">
+          
           <motion.div 
             initial={{
               opacity: 0,
@@ -38,11 +37,11 @@ export function HeroSection() {
             className="w-full pointer-events-auto"
           >
             <h1 className="text-5xl lg:text-7xl font-bold mb-8 leading-tight">
-              Opere opções binárias com{" "}
+              Opere opções binárias com a{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
                 inteligência artificial
               </span>{" "}
-              facilmente
+              mais assertiva do mercado financeiro
             </h1>
             
             <motion.p 
@@ -60,7 +59,7 @@ export function HeroSection() {
               }} 
               className="text-xl lg:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed"
             >
-              Comece agora com nossa IA que gera sinais com até 99% de assertividade.
+              Comece agora a usar o oráculo e ganhe 1% de lucro ao dia de forma automática ou gere sinais com até 99% de assertividade.
             </motion.p>
 
             <motion.div 
@@ -89,7 +88,7 @@ export function HeroSection() {
                 variant="outline" 
                 size="lg" 
                 className="border-purple-500 text-purple-600 hover:bg-purple-50 px-8 py-4 text-lg min-w-[200px]"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => setIsVideoModalOpen(true)}
               >
                 Ver demonstração
               </Button>
@@ -125,8 +124,23 @@ export function HeroSection() {
               </div>
             </motion.div>
           </motion.div>
+          </div>
+        </div>
+        
+        {/* 3D Robot positioned below headline */}
+        <div className="flex-1 relative">
+          <InteractiveRobotSpline
+            scene={ROBOT_SCENE_URL}
+            className="w-full h-full"
+          />
         </div>
       </div>
+
+      {/* Video Modal */}
+      <VideoModal 
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+      />
     </section>
   );
 }

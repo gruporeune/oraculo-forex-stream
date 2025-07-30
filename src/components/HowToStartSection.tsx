@@ -41,7 +41,7 @@ const plans = [
     price: "$20",
     description: "Para resultados consistentes",
     icon: Check,
-    features: ["20 sinais por dia", "1% lucro diário até 200%", "Grupo VIP", "Área de membros"],
+    features: ["20 sinais por dia", "1% lucro diário até 200%", "Suporte básico"],
     color: "border-green-500",
     buttonVariant: "outline" as const,
   },
@@ -50,17 +50,16 @@ const plans = [
     price: "$100",
     description: "O plano dos profissionais",
     icon: Crown, 
-    features: ["100 sinais por dia", "1% lucro diário até 200%", "Grupo VIP", "Suporte prioritário"],
+    features: ["100 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Suporte prioritário"],
     color: "border-purple-500",
     buttonVariant: "default" as const,
-    popular: true,
   },
   {
     name: "PREMIUM",
     price: "$500", 
     description: "Para traders de alto volume",
     icon: Gem,
-    features: ["500 sinais por dia", "1% lucro diário até 200%", "Suporte VIP 24/7"],
+    features: ["500 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Grupo VIP"],
     color: "border-blue-500",
     buttonVariant: "outline" as const,
   },
@@ -69,9 +68,10 @@ const plans = [
     price: "$1,000",
     description: "O máximo em performance", 
     icon: Diamond,
-    features: ["1000 sinais por dia", "1% lucro diário até 200%", "Mentoria 1:1"],
+    features: ["1000 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Grupo VIP", "Suporte VIP 24/7"],
     color: "border-yellow-500",
     buttonVariant: "outline" as const,
+    popular: true,
   },
 ];
 
@@ -185,6 +185,7 @@ export function HowToStartSection() {
                       ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white' 
                       : 'border-purple-500 text-purple-600 hover:bg-purple-50'
                     }`}
+                    onClick={() => window.location.href = '/register'}
                   >
                     {plan.name === 'FREE' ? 'COMEÇAR GRÁTIS' : 'ASSINAR AGORA'}
                   </Button>

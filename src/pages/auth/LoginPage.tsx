@@ -1,9 +1,9 @@
-'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -28,7 +28,20 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   // For 3D card effect
   const mouseX = useMotionValue(0);
@@ -47,13 +60,25 @@ export default function LoginPage() {
     mouseY.set(0);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      setError(error.message || 'Erro ao fazer login');
+    } finally {
       setIsLoading(false);
-      navigate('/dashboard');
-    }, 2000);
+    }
   };
 
   return (
@@ -161,6 +186,17 @@ export default function LoginPage() {
                   Faça login para continuar no ORÁCULO
                 </motion.p>
               </div>
+
+              {/* Error message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-500/20 border border-red-500/50 text-red-200 text-sm p-3 rounded-lg mb-4"
+                >
+                  {error}
+                </motion.div>
+              )}
 
               {/* Login form */}
               <form onSubmit={handleSubmit} className="space-y-4">

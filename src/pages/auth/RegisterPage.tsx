@@ -1,9 +1,9 @@
-'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User, Mail, Phone, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -27,7 +27,21 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          navigate('/dashboard');
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,16 +51,55 @@ export default function RegisterPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    setSuccess(null);
     
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Dados do cadastro:', formData);
+    try {
+      const redirectUrl = `${window.location.origin}/`;
+      
+      // Sign up the user
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: 'temp123', // You might want to add a password field
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            full_name: formData.fullName,
+            username: formData.username,
+            phone: formData.phone,
+          }
+        }
+      });
+
+      if (signUpError) {
+        throw signUpError;
+      }
+
+      // Update profile with additional data
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            id: data.user.id,
+            full_name: formData.fullName,
+            updated_at: new Date().toISOString(),
+          });
+
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+        }
+      }
+
+      setSuccess('Conta criada com sucesso! Verifique seu e-mail para confirmar.');
+      
+    } catch (error: any) {
+      setError(error.message || 'Erro ao criar conta');
+    } finally {
       setIsLoading(false);
-      navigate('/dashboard');
-    }, 2000);
+    }
   };
 
   return (
@@ -119,6 +172,27 @@ export default function RegisterPage() {
                 Comece a operar com inteligência artificial
               </motion.p>
             </div>
+
+            {/* Error/Success messages */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-red-500/20 border border-red-500/50 text-red-200 text-sm p-3 rounded-lg mb-4"
+              >
+                {error}
+              </motion.div>
+            )}
+            
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-green-500/20 border border-green-500/50 text-green-200 text-sm p-3 rounded-lg mb-4"
+              >
+                {success}
+              </motion.div>
+            )}
 
             {/* Register form */}
             <form onSubmit={handleSubmit} className="space-y-4">
