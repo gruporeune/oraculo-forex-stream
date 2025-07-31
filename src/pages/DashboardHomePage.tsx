@@ -89,9 +89,9 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center justify-center mb-4">
               <img 
-                src="/lovable-uploads/defa97d4-c459-4dab-aa39-796036f5f5fe.png" 
+                src="/lovable-uploads/819c852d-f577-4e95-b31a-c385b16a271e.png" 
                 alt="Mimos Broker" 
-                className="h-16 w-auto object-contain"
+                className="h-20 w-auto object-contain"
               />
             </div>
             <div className="space-y-2">
