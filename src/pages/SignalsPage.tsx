@@ -77,8 +77,13 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       if (error) throw error;
 
       const formattedSignals = data?.map(signal => ({
-        ...signal,
-        entry_time: new Date(signal.entry_time)
+        id: signal.id,
+        asset_pair: signal.asset_pair,
+        signal_type: signal.signal_type as 'CALL' | 'PUT',
+        expiration_time: signal.expiration_time,
+        confidence_percentage: signal.confidence_percentage,
+        entry_time: new Date(signal.entry_time),
+        analysis: signal.analysis || ''
       })) || [];
 
       setGeneratedSignals(formattedSignals);

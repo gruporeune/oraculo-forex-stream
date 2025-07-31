@@ -17,6 +17,7 @@ export type Database = {
       profiles: {
         Row: {
           available_balance: number | null
+          avatar_url: string | null
           broker_id: string | null
           daily_commissions: number | null
           daily_earnings: number | null
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           available_balance?: number | null
+          avatar_url?: string | null
           broker_id?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           available_balance?: number | null
+          avatar_url?: string | null
           broker_id?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
