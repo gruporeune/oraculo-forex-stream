@@ -40,7 +40,7 @@ export function AppSidebar() {
       className={open ? "w-60" : "w-14"}
       collapsible="icon"
     >
-      <SidebarContent className="bg-purple-900/30 backdrop-blur-xl border-r border-purple-500/20">
+      <SidebarContent className="bg-gradient-to-b from-black via-purple-900/40 to-black backdrop-blur-xl border-r border-purple-500/20">
         <SidebarGroup>
           <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
 
