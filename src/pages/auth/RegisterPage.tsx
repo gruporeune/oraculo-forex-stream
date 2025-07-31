@@ -23,7 +23,8 @@ export default function RegisterPage() {
     fullName: "",
     username: "",
     email: "",
-    phone: ""
+    phone: "",
+    password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
@@ -63,7 +64,7 @@ export default function RegisterPage() {
       // Sign up the user
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
-        password: 'temp123', // You might want to add a password field
+        password: formData.password,
         options: {
           emailRedirectTo: redirectUrl,
           data: {
@@ -282,6 +283,30 @@ export default function RegisterPage() {
                     onBlur={() => setFocusedInput(null)}
                     className="w-full bg-white/5 border-white/10 focus:border-white/20 text-white placeholder:text-white/30 h-11 pl-10 pr-3 focus:bg-white/10"
                     required
+                  />
+                </div>
+              </motion.div>
+
+              {/* Password input */}
+              <motion.div 
+                className="relative"
+                whileFocus={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-white/40 text-sm">🔒</span>
+                  
+                  <Input
+                    type="password"
+                    name="password"
+                    placeholder="Senha"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    onFocus={() => setFocusedInput("password")}
+                    onBlur={() => setFocusedInput(null)}
+                    className="w-full bg-white/5 border-white/10 focus:border-white/20 text-white placeholder:text-white/30 h-11 pl-10 pr-3 focus:bg-white/10"
+                    required
+                    minLength={6}
                   />
                 </div>
               </motion.div>
