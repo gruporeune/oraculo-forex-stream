@@ -38,7 +38,7 @@ const plans = [
   },
   {
     name: "PARTNER", 
-    price: "$20",
+    price: "R$ 200",
     description: "Para resultados consistentes",
     icon: Check,
     features: ["20 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Suporte básico"],
@@ -47,7 +47,7 @@ const plans = [
   },
   {
     name: "MASTER",
-    price: "$100",
+    price: "R$ 600",
     description: "O plano dos profissionais",
     icon: Crown, 
     features: ["100 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Suporte prioritário"],
@@ -56,7 +56,7 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "$500", 
+    price: "R$ 2.750", 
     description: "Para traders de alto volume",
     icon: Gem,
     features: ["500 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Grupo VIP"],
@@ -65,7 +65,7 @@ const plans = [
   },
   {
     name: "PLATINUM",
-    price: "$1,000",
+    price: "R$ 5.000",
     description: "O máximo em performance", 
     icon: Diamond,
     features: ["1000 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Grupo VIP", "Suporte VIP 24/7"],

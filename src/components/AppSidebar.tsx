@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign } from "lucide-react"
+import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -22,6 +22,7 @@ const items = [
   { title: "Sinais", url: "/dashboard/signals", icon: TrendingUp },
   { title: "Área de Membros", url: "/dashboard/members", icon: Users },
   { title: "Materiais Extras", url: "/dashboard/materials", icon: Package },
+  { title: "Planos", url: "/dashboard/plans", icon: CreditCard },
   { title: "Saques", url: "/dashboard/withdrawals", icon: DollarSign },
 ]
 
@@ -32,16 +33,16 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-purple-600/20 text-purple-400 border-purple-500/50" : "hover:bg-white/5"
+    isActive ? "bg-purple-600/30 text-purple-300 border-purple-500/50" : "hover:bg-purple-900/30 hover:text-purple-200"
 
   return (
     <Sidebar
       className={open ? "w-60" : "w-14"}
       collapsible="icon"
     >
-      <SidebarContent className="bg-black/50 backdrop-blur-xl border-r border-white/10">
+      <SidebarContent className="bg-purple-900/30 backdrop-blur-xl border-r border-purple-500/20">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/70">Menu Principal</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>
@@ -54,7 +55,7 @@ export function AppSidebar() {
                       className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
                     >
                       <item.icon className="w-4 h-4" />
-                      {open && <span className="text-white">{item.title}</span>}
+                      {open && <span className="text-white group-hover:text-purple-200 transition-colors">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

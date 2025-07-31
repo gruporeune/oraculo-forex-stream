@@ -63,6 +63,50 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         onWithdraw={handleWithdraw}
       />
 
+      {/* Broker Recommendation Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2 }}
+        className="text-center mb-8"
+      >
+        <h3 className="text-2xl font-bold text-white mb-2">
+          Corretora indicada com mais de{" "}
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">
+            93% de chances de acertos
+          </span>
+        </h3>
+        <p className="text-white/70 text-lg mb-6">
+          Faça um cadastro na:
+        </p>
+        
+        <motion.div
+          whileHover={{ scale: 1.05, rotateY: 5 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative group cursor-pointer max-w-md mx-auto"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+          <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
+            <div className="flex items-center justify-center mb-4">
+              <img 
+                src="/lovable-uploads/defa97d4-c459-4dab-aa39-796036f5f5fe.png" 
+                alt="Mimos Broker" 
+                className="h-16 w-auto object-contain"
+              />
+            </div>
+            <div className="space-y-2">
+              <h4 className="text-xl font-bold text-white">Mimos Broker</h4>
+              <p className="text-purple-200 text-sm">
+                A corretora oficial recomendada pelo ORÁCULO
+              </p>
+            </div>
+            <div className="absolute top-2 right-2">
+              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+            </div>
+          </div>
+        </motion.div>
+      </motion.div>
+
       <AutomaticSignals 
         userPlan={profile?.plan || 'free'}
         onEarningsGenerated={handleEarningsGenerated}

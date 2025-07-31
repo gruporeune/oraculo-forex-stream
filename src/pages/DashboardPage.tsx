@@ -12,6 +12,7 @@ import SignalsPage from './SignalsPage';
 import MembersAreaPage from './MembersAreaPage';
 import MaterialsPage from './MaterialsPage';
 import WithdrawalPage from './WithdrawalPage';
+import PlansPage from './PlansPage';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -166,6 +167,12 @@ export default function DashboardPage() {
                     user={user} 
                     profile={profile} 
                   />
+                } 
+              />
+              <Route 
+                path="/plans" 
+                element={
+                  <PlansPage />
                 } 
               />
               <Route 
