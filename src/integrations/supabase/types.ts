@@ -16,24 +16,148 @@ export type Database = {
     Tables: {
       profiles: {
         Row: {
+          available_balance: number | null
           broker_id: string | null
+          daily_commissions: number | null
+          daily_earnings: number | null
+          daily_signals_used: number | null
           full_name: string | null
           id: string
+          last_reset_date: string | null
+          plan: string | null
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
         }
         Insert: {
+          available_balance?: number | null
           broker_id?: string | null
+          daily_commissions?: number | null
+          daily_earnings?: number | null
+          daily_signals_used?: number | null
           full_name?: string | null
           id: string
+          last_reset_date?: string | null
+          plan?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
         Update: {
+          available_balance?: number | null
           broker_id?: string | null
+          daily_commissions?: number | null
+          daily_earnings?: number | null
+          daily_signals_used?: number | null
           full_name?: string | null
           id?: string
+          last_reset_date?: string | null
+          plan?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signals: {
+        Row: {
+          analysis: string | null
+          asset_pair: string
+          confidence_percentage: number
+          created_at: string | null
+          entry_time: string
+          expiration_time: number
+          id: string
+          is_automatic: boolean | null
+          profit: number | null
+          signal_type: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          analysis?: string | null
+          asset_pair: string
+          confidence_percentage: number
+          created_at?: string | null
+          entry_time: string
+          expiration_time: number
+          id?: string
+          is_automatic?: boolean | null
+          profit?: number | null
+          signal_type: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          analysis?: string | null
+          asset_pair?: string
+          confidence_percentage?: number
+          created_at?: string | null
+          entry_time?: string
+          expiration_time?: number
+          id?: string
+          is_automatic?: boolean | null
+          profit?: number | null
+          signal_type?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signals_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_referrals: {
+        Row: {
+          commission_earned: number | null
+          created_at: string | null
+          id: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          commission_earned?: number | null
+          created_at?: string | null
+          id?: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          commission_earned?: number | null
+          created_at?: string | null
+          id?: string
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_referrals_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
