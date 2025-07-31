@@ -41,7 +41,7 @@ const plans = [
     price: "$20",
     description: "Para resultados consistentes",
     icon: Check,
-    features: ["20 sinais por dia", "1% lucro diário até 200%", "Suporte básico"],
+    features: ["20 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Suporte básico"],
     color: "border-green-500",
     buttonVariant: "outline" as const,
   },

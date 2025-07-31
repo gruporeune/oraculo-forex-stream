@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Home, User, Network, TrendingUp, Settings } from "lucide-react"
+import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -20,6 +20,9 @@ const items = [
   { title: "Perfil", url: "/dashboard/profile", icon: User },
   { title: "Rede", url: "/dashboard/network", icon: Network },
   { title: "Sinais", url: "/dashboard/signals", icon: TrendingUp },
+  { title: "Área de Membros", url: "/dashboard/members", icon: Users },
+  { title: "Materiais Extras", url: "/dashboard/materials", icon: Package },
+  { title: "Saques", url: "/dashboard/withdrawals", icon: DollarSign },
 ]
 
 export function AppSidebar() {

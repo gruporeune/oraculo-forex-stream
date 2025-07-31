@@ -15,10 +15,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
   const { toast } = useToast();
 
   const handleWithdraw = () => {
-    toast({
-      title: "Solicitação de saque",
-      description: "Sua solicitação foi enviada para análise. Você receberá uma confirmação em breve.",
-    });
+    window.location.href = '/dashboard/withdrawals';
   };
 
   const handleEarningsGenerated = async (amount: number) => {

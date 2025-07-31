@@ -9,6 +9,9 @@ import DashboardHomePage from './DashboardHomePage';
 import ProfilePage from './ProfilePage';
 import NetworkPage from './NetworkPage';
 import SignalsPage from './SignalsPage';
+import MembersAreaPage from './MembersAreaPage';
+import MaterialsPage from './MaterialsPage';
+import WithdrawalPage from './WithdrawalPage';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -141,6 +144,34 @@ export default function DashboardPage() {
                 path="/signals" 
                 element={
                   <SignalsPage 
+                    user={user} 
+                    profile={profile} 
+                    onProfileUpdate={() => loadProfile(user.id)} 
+                  />
+                } 
+              />
+              <Route 
+                path="/members" 
+                element={
+                  <MembersAreaPage 
+                    user={user} 
+                    profile={profile} 
+                  />
+                } 
+              />
+              <Route 
+                path="/materials" 
+                element={
+                  <MaterialsPage 
+                    user={user} 
+                    profile={profile} 
+                  />
+                } 
+              />
+              <Route 
+                path="/withdrawals" 
+                element={
+                  <WithdrawalPage 
                     user={user} 
                     profile={profile} 
                     onProfileUpdate={() => loadProfile(user.id)} 

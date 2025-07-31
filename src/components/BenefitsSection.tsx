@@ -79,6 +79,7 @@ export function BenefitsSection() {
           <Button
             size="lg"
             className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-4 text-lg"
+            onClick={() => window.location.href = '/register'}
           >
             Começar Agora
           </Button>
