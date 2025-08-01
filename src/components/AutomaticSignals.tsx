@@ -30,6 +30,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [hasGeneratedToday, setHasGeneratedToday] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [totalProfitToday, setTotalProfitToday] = useState(0);
   const [operationsState, setOperationsState] = useState({
     started: false,
     paused: false,
@@ -118,14 +119,23 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         }));
         
         setSignals(loadedSignals);
+        
+        // Calculate total profit from loaded signals
+        const totalProfit = data.reduce((sum, signal) => sum + (signal.profit || 0), 0);
+        setTotalProfitToday(totalProfit);
+        
+        // Check if profit target is reached
+        const targetReached = totalProfit >= config.targetProfit;
+        setDailyTargetReached(targetReached);
+        setHasGeneratedToday(data.length > 0);
       }
     };
     
     loadTodaysData();
-  }, [userId, config.maxSignals]);
+  }, [userId, config.maxSignals, config.targetProfit]);
   
   useEffect(() => {
-    if (config.maxSignals === 0 || operationsState.completedToday >= config.maxSignals || !operationsState.started || operationsState.paused) return;
+    if (config.maxSignals === 0 || totalProfitToday >= config.targetProfit || !operationsState.started || operationsState.paused) return;
 
     const generateSignal = () => {
       const activeSignals = signals.filter(s => s.status === 'active');
@@ -161,7 +171,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     }, 120000); // Generate new signal every 2 minutes
 
     return () => clearInterval(interval);
-  }, [signals.length, config.maxSignals, operationsState.completedToday, operationsState.started, operationsState.paused]);
+  }, [signals.length, config.maxSignals, operationsState.completedToday, operationsState.started, operationsState.paused, totalProfitToday]);
 
   useEffect(() => {
     if (!operationsState.started || operationsState.paused) return;
@@ -175,35 +185,32 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         const newPrice = signal.currentPrice + priceChange;
         
         if (newProgress >= 100) {
-          // For partner plan, generate exactly the target profit
-          // For other plans, distribute profit across signals with some variation
+          // Calculate remaining profit needed to reach target
+          const remainingProfitNeeded = config.targetProfit - totalProfitToday;
           let finalProfit;
+          
           if (userPlan === 'partner') {
-            finalProfit = config.targetProfit;
+            finalProfit = remainingProfitNeeded; // Exactly what's needed
           } else {
-            // For master plan, make 1 losing trade and 2 winning
-            // For premium and platinum, distribute across multiple trades
+            // For other plans, calculate profit needed considering this might not be the last signal
             const completedSignalsCount = prev.filter(s => s.status === 'completed').length;
             
-            if (userPlan === 'master') {
-              if (completedSignalsCount === 0) {
-                // First trade loses small amount
-                finalProfit = -1.5;
-              } else {
-                // Remaining trades win to reach target
-                const remainingProfit = config.targetProfit + 1.5; // Compensate for loss
-                const remainingTrades = config.maxSignals - completedSignalsCount;
-                finalProfit = remainingProfit / remainingTrades;
-              }
+            if (remainingProfitNeeded <= 0) {
+              // Target already reached, this should stop generation
+              finalProfit = 0;
+            } else if (remainingProfitNeeded <= 2) {
+              // Close to target, give the remaining amount
+              finalProfit = remainingProfitNeeded;
             } else {
-              // For premium and platinum, some losses and wins
-              const shouldLose = Math.random() < 0.2 && completedSignalsCount < config.maxSignals - 1;
+              // Still need significant profit, distribute it
+              const shouldLose = Math.random() < 0.15; // 15% chance of loss
               if (shouldLose) {
-                finalProfit = -(Math.random() * 3 + 1); // Small loss
+                finalProfit = -(Math.random() * 2 + 0.5); // Small loss
               } else {
-                const totalCompleted = completedSignalsCount + 1;
-                const profitPerSignal = config.targetProfit / config.maxSignals;
-                finalProfit = profitPerSignal + (Math.random() - 0.5) * 2;
+                // Give a portion of remaining profit needed
+                const minProfit = Math.min(remainingProfitNeeded * 0.3, 5);
+                const maxProfit = Math.min(remainingProfitNeeded * 0.7, 15);
+                finalProfit = Math.random() * (maxProfit - minProfit) + minProfit;
               }
             }
           }
@@ -236,12 +243,15 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             onEarningsGenerated(finalProfit);
           }
           
-          // Update completed operations count
+          // Update total profit and completed operations count
+          const newTotalProfit = totalProfitToday + finalProfit;
+          setTotalProfitToday(newTotalProfit);
+          
           const newCompletedCount = operationsState.completedToday + 1;
           updateOperationsState({ completedToday: newCompletedCount });
           
-          // Check if we've reached the daily target
-          if (newCompletedCount >= config.maxSignals) {
+          // Check if we've reached the profit target
+          if (newTotalProfit >= config.targetProfit) {
             setDailyTargetReached(true);
             setHasGeneratedToday(true);
           }
@@ -266,7 +276,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
 
     const interval = setInterval(updateSignals, 1000);
     return () => clearInterval(interval);
-  }, [config.targetProfit, config.maxSignals, onEarningsGenerated, isStarted, isPaused]);
+  }, [config.targetProfit, config.maxSignals, onEarningsGenerated, operationsState.started, operationsState.paused, totalProfitToday]);
 
   if (userPlan === 'free') {
     return (
@@ -299,7 +309,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           Operações Automáticas - Plano {userPlan.toUpperCase()}
         </CardTitle>
         <p className="text-white/70 text-sm">
-          Meta diária: R$ {config.targetProfit.toFixed(2)} | Sinais: {signals.filter(s => s.status === 'completed').length}/{config.maxSignals}
+          Meta diária: R$ {config.targetProfit.toFixed(2)} | Progresso: R$ {totalProfitToday.toFixed(2)} | Sinais: {signals.filter(s => s.status === 'completed').length}
         </p>
       </CardHeader>
       <CardContent>
