@@ -55,6 +55,9 @@ export type Database = {
       }
       profiles: {
         Row: {
+          auto_operations_completed_today: number | null
+          auto_operations_paused: boolean | null
+          auto_operations_started: boolean | null
           available_balance: number | null
           avatar_url: string | null
           broker_id: string | null
@@ -72,6 +75,9 @@ export type Database = {
           username: string | null
         }
         Insert: {
+          auto_operations_completed_today?: number | null
+          auto_operations_paused?: boolean | null
+          auto_operations_started?: boolean | null
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null
@@ -89,6 +95,9 @@ export type Database = {
           username?: string | null
         }
         Update: {
+          auto_operations_completed_today?: number | null
+          auto_operations_paused?: boolean | null
+          auto_operations_started?: boolean | null
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null

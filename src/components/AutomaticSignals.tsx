@@ -30,6 +30,11 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [hasGeneratedToday, setHasGeneratedToday] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [operationsState, setOperationsState] = useState({
+    started: false,
+    paused: false,
+    completedToday: 0
+  });
 
   const planConfig = {
     free: { maxSignals: 0, targetProfit: 0 },
@@ -42,12 +47,53 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const config = planConfig[userPlan as keyof typeof planConfig] || planConfig.free;
 
   const assets = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'NZD/USD'];
+
+  // Function to update operations state in database
+  const updateOperationsState = async (updates: Partial<typeof operationsState>) => {
+    if (!userId) return;
+    
+    const newState = { ...operationsState, ...updates };
+    setOperationsState(newState);
+    
+    await supabase
+      .from('profiles')
+      .update({
+        auto_operations_started: newState.started,
+        auto_operations_paused: newState.paused,
+        auto_operations_completed_today: newState.completedToday
+      })
+      .eq('id', userId);
+  };
   
-  // Check if signals were already generated today and load them
+  // Load today's signals and operations state
   useEffect(() => {
-    const loadTodaysSignals = async () => {
+    const loadTodaysData = async () => {
       if (!userId) return;
       
+      // Load user profile to get operations state
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('auto_operations_started, auto_operations_paused, auto_operations_completed_today')
+        .eq('id', userId)
+        .single();
+      
+      if (profile) {
+        setOperationsState({
+          started: profile.auto_operations_started || false,
+          paused: profile.auto_operations_paused || false,
+          completedToday: profile.auto_operations_completed_today || 0
+        });
+        
+        setIsStarted(profile.auto_operations_started || false);
+        setIsPaused(profile.auto_operations_paused || false);
+        
+        // Check if daily target is reached based on database state
+        const targetReached = profile.auto_operations_completed_today >= config.maxSignals;
+        setDailyTargetReached(targetReached);
+        setHasGeneratedToday(profile.auto_operations_completed_today > 0);
+      }
+      
+      // Load today's signals
       const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('signals')
@@ -72,17 +118,14 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         }));
         
         setSignals(loadedSignals);
-        setHasGeneratedToday(loadedSignals.length > 0);
-        // Only mark as reached if ALL operations for the plan are completed
-        setDailyTargetReached(loadedSignals.length >= config.maxSignals);
       }
     };
     
-    loadTodaysSignals();
-  }, [userId]);
+    loadTodaysData();
+  }, [userId, config.maxSignals]);
   
   useEffect(() => {
-    if (config.maxSignals === 0 || dailyTargetReached || hasGeneratedToday || !isStarted || isPaused) return;
+    if (config.maxSignals === 0 || operationsState.completedToday >= config.maxSignals || !operationsState.started || operationsState.paused) return;
 
     const generateSignal = () => {
       if (signals.length >= config.maxSignals) return;
@@ -116,10 +159,10 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     }, 120000); // Generate new signal every 2 minutes
 
     return () => clearInterval(interval);
-  }, [signals.length, config.maxSignals, dailyTargetReached, hasGeneratedToday, isStarted, isPaused]);
+  }, [signals.length, config.maxSignals, operationsState.completedToday, operationsState.started, operationsState.paused]);
 
   useEffect(() => {
-    if (!isStarted || isPaused) return;
+    if (!operationsState.started || operationsState.paused) return;
     
     const updateSignals = () => {
       setSignals(prev => prev.map(signal => {
@@ -187,13 +230,16 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           
           saveSignalToDb();
           // Só gerar earnings se realmente iniciado e não pausado
-          if (isStarted && !isPaused) {
+          if (operationsState.started && !operationsState.paused) {
             onEarningsGenerated(finalProfit);
           }
           
+          // Update completed operations count
+          const newCompletedCount = operationsState.completedToday + 1;
+          updateOperationsState({ completedToday: newCompletedCount });
+          
           // Check if we've reached the daily target
-          const completedSignals = prev.filter(s => s.status === 'completed').length + 1;
-          if (completedSignals >= config.maxSignals) {
+          if (newCompletedCount >= config.maxSignals) {
             setDailyTargetReached(true);
             setHasGeneratedToday(true);
           }
@@ -255,7 +301,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         </p>
       </CardHeader>
       <CardContent>
-        {!isStarted && !dailyTargetReached && !hasGeneratedToday && (
+        {!operationsState.started && !dailyTargetReached && operationsState.completedToday === 0 && (
           <div className="text-center py-8">
             <div className="mb-4">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
@@ -266,7 +312,10 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 Clique no botão abaixo para iniciar suas operações automáticas do dia
               </p>
               <Button 
-                onClick={() => setIsStarted(true)}
+                onClick={() => {
+                  setIsStarted(true);
+                  updateOperationsState({ started: true });
+                }}
                 className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-3 font-semibold"
               >
                 <Play className="w-4 h-4 mr-2" />
@@ -276,17 +325,21 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           </div>
         )}
 
-        {isStarted && !dailyTargetReached && (
+        {operationsState.started && !dailyTargetReached && (
           <div className="flex justify-center mb-4">
             <Button 
-              onClick={() => setIsPaused(!isPaused)}
+              onClick={() => {
+                const newPausedState = !operationsState.paused;
+                setIsPaused(newPausedState);
+                updateOperationsState({ paused: newPausedState });
+              }}
               className={`px-6 py-2 font-semibold ${
-                isPaused 
+                operationsState.paused 
                   ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
                   : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
               } text-white`}
             >
-              {isPaused ? 'Retomar Operações' : 'Pausar Operações'}
+              {operationsState.paused ? 'Retomar Operações' : 'Pausar Operações'}
             </Button>
           </div>
         )}
@@ -353,7 +406,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             </div>
           ))}
           
-          {signals.length === 0 && !dailyTargetReached && isStarted && (
+          {signals.length === 0 && !dailyTargetReached && operationsState.started && !operationsState.paused && (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-white/70">Gerando primeiro sinal automático...</p>
