@@ -105,6 +105,8 @@ export default function RegisterPage() {
           .upsert({
             id: data.user.id,
             full_name: formData.fullName,
+            username: formData.username,
+            phone: formData.phone,
             referred_by: referrerId,
             updated_at: new Date().toISOString(),
           });

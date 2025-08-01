@@ -57,7 +57,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       const referredIds = referralData.map(ref => ref.referred_id);
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, full_name, plan, updated_at')
+        .select('id, full_name, plan, updated_at, username, phone')
         .in('id', referredIds);
 
       if (profilesError) {
@@ -74,8 +74,8 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           plan: profile?.plan || 'free',
           created_at: ref.created_at,
           commission_earned: ref.commission_earned || 0,
-          username: '', // Will be filled when we get user metadata
-          phone: '' // Will be filled when we get user metadata
+          username: profile?.username || '',
+          phone: profile?.phone || ''
         };
       });
 

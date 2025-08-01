@@ -64,10 +64,12 @@ export type Database = {
           full_name: string | null
           id: string
           last_reset_date: string | null
+          phone: string | null
           plan: string | null
           referral_code: string | null
           referred_by: string | null
           updated_at: string
+          username: string | null
         }
         Insert: {
           available_balance?: number | null
@@ -79,10 +81,12 @@ export type Database = {
           full_name?: string | null
           id: string
           last_reset_date?: string | null
+          phone?: string | null
           plan?: string | null
           referral_code?: string | null
           referred_by?: string | null
           updated_at?: string
+          username?: string | null
         }
         Update: {
           available_balance?: number | null
@@ -94,10 +98,12 @@ export type Database = {
           full_name?: string | null
           id?: string
           last_reset_date?: string | null
+          phone?: string | null
           plan?: string | null
           referral_code?: string | null
           referred_by?: string | null
           updated_at?: string
+          username?: string | null
         }
         Relationships: [
           {
