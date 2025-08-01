@@ -64,7 +64,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           currentPrice: Math.random() * 1.5 + 1.0, // Simulated current price
           progress: 100, // All loaded signals are completed
           profit: dbSignal.profit || 0,
-          status: 'completed',
+          status: 'completed', // Keep as completed for UI display
           startTime: new Date(dbSignal.entry_time)
         }));
         
@@ -171,7 +171,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 confidence_percentage: 85,
                 is_automatic: true,
                 profit: finalProfit,
-                status: 'completed',
+                status: finalProfit > 0 ? 'won' : 'lost',
                 analysis: `Operação automática do plano ${userPlan.toUpperCase()}`
               });
             } catch (error) {
