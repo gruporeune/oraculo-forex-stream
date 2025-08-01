@@ -88,10 +88,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
           <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center justify-center mb-4">
-              <img 
+               <img 
                 src="/lovable-uploads/819c852d-f577-4e95-b31a-c385b16a271e.png" 
                 alt="Mimos Broker" 
-                className="h-24 w-auto object-contain"
+                className="h-32 w-auto object-contain"
               />
             </div>
             <div className="space-y-2">
@@ -110,6 +110,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
       <AutomaticSignals 
         userPlan={profile?.plan || 'free'}
         onEarningsGenerated={handleEarningsGenerated}
+        userId={user?.id}
       />
     </motion.div>
   );

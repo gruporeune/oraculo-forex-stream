@@ -151,7 +151,7 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent" />
         <div className="absolute top-0 left-0 p-4 md:p-8 flex justify-between w-full z-10">
-          <img src="https://storage.googleapis.com/hostinger-horizons-assets-prod/2336c78e-def0-4586-a63c-7123d4877007/16ef3be39fa59c7fc9eac2f3fb2f9004.png" alt="Área de Membros Logo" className="h-8 md:h-12" />
+          {/* Logo removida conforme solicitado */}
         </div>
         <div className="absolute bottom-0 left-0 p-4 md:p-8 text-white max-w-lg z-10">
           <h1 className="text-3xl md:text-5xl font-extrabold mb-4 text-shadow">A história do Bitcoin</h1>

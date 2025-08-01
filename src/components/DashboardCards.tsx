@@ -24,7 +24,7 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'BRL'
     }).format(value);
   };
 

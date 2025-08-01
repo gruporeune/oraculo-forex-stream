@@ -104,7 +104,7 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
   
-  /* Hide Lovable badge */
+  /* Hide Lovable badge completely */
   [data-powered-by="lovable"] {
     display: none !important;
   }
@@ -114,6 +114,21 @@ All colors MUST be HSL.
   }
   
   iframe[src*="lovable"] {
+    display: none !important;
+  }
+  
+  /* Hide any element with "lovable" in class name or text */
+  [class*="lovable"], [class*="Lovable"] {
+    display: none !important;
+  }
+  
+  /* Hide edit with lovable text */
+  *:contains("Edit with") {
+    display: none !important;
+  }
+  
+  /* Additional aggressive hiding */
+  a[href*="lovable"] {
     display: none !important;
   }
 }
