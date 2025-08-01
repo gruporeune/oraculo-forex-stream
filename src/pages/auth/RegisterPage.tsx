@@ -115,17 +115,24 @@ export default function RegisterPage() {
         
         // Create referral relationship if referrer exists
         if (referrerId) {
-          const { error: referralError } = await supabase
+          console.log('Creating referral relationship:', { referrerId, userId: data.user.id });
+          
+          const { data: referralData, error: referralError } = await supabase
             .from('user_referrals')
             .insert({
               referrer_id: referrerId,
               referred_id: data.user.id,
               commission_earned: 0
-            });
+            })
+            .select();
             
           if (referralError) {
             console.error('Referral creation error:', referralError);
+          } else {
+            console.log('Referral created successfully:', referralData);
           }
+        } else {
+          console.log('No referrer found for code:', referralCode);
         }
       }
 

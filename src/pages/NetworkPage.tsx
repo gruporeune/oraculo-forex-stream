@@ -19,6 +19,8 @@ interface Referral {
   plan: string;
   created_at: string;
   commission_earned: number;
+  username?: string;
+  phone?: string;
 }
 
 export default function NetworkPage({ user, profile }: NetworkPageProps) {
@@ -34,30 +36,48 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
   const loadReferrals = async () => {
     try {
-      const { data, error } = await supabase
+      // First get the user_referrals
+      const { data: referralData, error: referralError } = await supabase
         .from('user_referrals')
-        .select(`
-          id,
-          commission_earned,
-          referred_id,
-          profiles!user_referrals_referred_id_fkey (
-            full_name,
-            plan,
-            created_at
-          )
-        `)
+        .select('*')
         .eq('referrer_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (referralError) {
+        console.error('Error loading referrals:', referralError);
+        return;
+      }
 
-      const formattedReferrals = data?.map(ref => ({
-        id: ref.id,
-        full_name: (ref as any).profiles?.full_name || 'Usuário',
-        plan: (ref as any).profiles?.plan || 'free',
-        created_at: (ref as any).profiles?.created_at,
-        commission_earned: ref.commission_earned
-      })) || [];
+      if (!referralData || referralData.length === 0) {
+        setReferrals([]);
+        return;
+      }
+
+      // Then get the profile information for each referred user
+      const referredIds = referralData.map(ref => ref.referred_id);
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, plan, updated_at')
+        .in('id', referredIds);
+
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        return;
+      }
+
+      // Combine the data
+      const formattedReferrals = referralData.map(ref => {
+        const profile = profilesData?.find(p => p.id === ref.referred_id);
+        return {
+          id: ref.id,
+          full_name: profile?.full_name || 'Usuário',
+          plan: profile?.plan || 'free',
+          created_at: ref.created_at,
+          commission_earned: ref.commission_earned || 0,
+          username: '', // Will be filled when we get user metadata
+          phone: '' // Will be filled when we get user metadata
+        };
+      });
 
       setReferrals(formattedReferrals);
     } catch (error) {
@@ -210,8 +230,14 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                       </div>
                       <div>
                         <p className="text-white font-medium">{referral.full_name}</p>
+                        {referral.username && (
+                          <p className="text-white/50 text-xs">@{referral.username}</p>
+                        )}
+                        {referral.phone && (
+                          <p className="text-white/50 text-xs">{referral.phone}</p>
+                        )}
                         <p className="text-white/60 text-sm">
-                          Indicado em {new Date(referral.created_at).toLocaleDateString('pt-BR')}
+                          Indicado em {new Date(referral.created_at).toLocaleDateString('pt-BR')} às {new Date(referral.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                         </p>
                       </div>
                     </div>

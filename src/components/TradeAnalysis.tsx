@@ -11,6 +11,7 @@ export interface AnalysisData {
   betAmount: number;
   prediction: "CALL" | "PUT";
   confidence: number;
+  detailedAnalysis?: string;
 }
 
 export interface TradeResult {
@@ -51,6 +52,43 @@ const generateAnalysis = (): AnalysisData => {
   };
 };
 
+const generateDetailedAnalysis = (analysis: AnalysisData): string => {
+  const analysisReasons = [
+    "Identificação de padrão de reversão em suporte/resistência forte",
+    "Convergência de médias móveis exponenciais de 9 e 21 períodos",
+    "Divergência positiva detectada no indicador RSI",
+    "Rompimento confirmado de linha de tendência principal",
+    "Formação de martelo doji em zona de confluência",
+    "Breakout de canal de volatilidade com volume crescente",
+    "Sinal de compra do MACD com histograma em alta",
+    "Teste e rejeição de nível de Fibonacci 61.8%",
+    "Padrão de vela engolfing bullish/bearish identificado",
+    "Confluência entre RSI oversold e suporte horizontal"
+  ];
+  
+  const marketConditions = [
+    "Mercado em tendência lateral com breakout iminente",
+    "Forte pressão compradora detectada pelos indicadores",
+    "Volatilidade controlada favorecendo movimentos direcionais",
+    "Zona de acumulação institucional identificada",
+    "Momentum positivo sustentado por fundamentos técnicos",
+    "Correção técnica completada, retomada de tendência esperada"
+  ];
+  
+  const riskFactors = [
+    "Atenção para possível reversão em resistência dinâmica",
+    "Volume de negociação abaixo da média nas últimas sessões",
+    "Possível influência de notícias macroeconômicas no período",
+    "Recomendado aguardar confirmação do movimento inicial"
+  ];
+  
+  const reason = analysisReasons[Math.floor(Math.random() * analysisReasons.length)];
+  const condition = marketConditions[Math.floor(Math.random() * marketConditions.length)];
+  const risk = riskFactors[Math.floor(Math.random() * riskFactors.length)];
+  
+  return `Análise: ${reason}. Condição de mercado: ${condition}. Observação: ${risk}.`;
+};
+
 export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
   const [currentAnalysis, setCurrentAnalysis] = useState<AnalysisData | null>(null);
   const [progress, setProgress] = useState(0);
@@ -60,6 +98,7 @@ export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
 
   const startNewAnalysis = () => {
     const analysis = generateAnalysis();
+    analysis.detailedAnalysis = generateDetailedAnalysis(analysis);
     setCurrentAnalysis(analysis);
     setProgress(0);
     setIsAnalyzing(true);
@@ -206,6 +245,16 @@ export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {
               value={progress} 
               className="h-3 bg-secondary/50 [&>div]:bg-gradient-to-r [&>div]:from-gold [&>div]:to-cyber-green [&>div]:animate-pulse" 
             />
+          </div>
+        )}
+
+        {/* Detailed Analysis */}
+        {currentAnalysis.detailedAnalysis && (
+          <div className="bg-secondary/30 backdrop-blur-sm rounded-lg p-4 border border-border/30 mb-6">
+            <h4 className="text-sm font-semibold text-foreground mb-2">Análise Técnica Detalhada</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {currentAnalysis.detailedAnalysis}
+            </p>
           </div>
         )}
 
