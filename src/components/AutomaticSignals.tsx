@@ -40,9 +40,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
 
   const assets = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'NZD/USD'];
   
-  // Check if signals were already generated today
+  // Check if signals were already generated today and load them
   useEffect(() => {
-    const checkTodaysSignals = async () => {
+    const loadTodaysSignals = async () => {
       if (!userId) return;
       
       const today = new Date().toISOString().split('T')[0];
@@ -55,12 +55,26 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         .lt('created_at', `${today}T23:59:59.999Z`);
       
       if (!error && data && data.length > 0) {
+        // Convert database signals to component format
+        const loadedSignals: Signal[] = data.map((dbSignal, index) => ({
+          id: dbSignal.id,
+          asset: dbSignal.asset_pair,
+          direction: dbSignal.signal_type as 'CALL' | 'PUT',
+          entryPrice: Math.random() * 1.5 + 1.0, // Simulated entry price
+          currentPrice: Math.random() * 1.5 + 1.0, // Simulated current price
+          progress: 100, // All loaded signals are completed
+          profit: dbSignal.profit || 0,
+          status: 'completed',
+          startTime: new Date(dbSignal.entry_time)
+        }));
+        
+        setSignals(loadedSignals);
         setHasGeneratedToday(true);
         setDailyTargetReached(true);
       }
     };
     
-    checkTodaysSignals();
+    loadTodaysSignals();
   }, [userId]);
   
   useEffect(() => {
@@ -143,6 +157,29 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             }
           }
           
+          // Save signal to database
+          const saveSignalToDb = async () => {
+            if (!userId) return;
+            
+            try {
+              await supabase.from('signals').insert({
+                user_id: userId,
+                asset_pair: signal.asset,
+                signal_type: signal.direction,
+                entry_time: signal.startTime.toISOString(),
+                expiration_time: 60, // 1 minute expiration
+                confidence_percentage: 85,
+                is_automatic: true,
+                profit: finalProfit,
+                status: 'completed',
+                analysis: `Operação automática do plano ${userPlan.toUpperCase()}`
+              });
+            } catch (error) {
+              console.error('Error saving signal to database:', error);
+            }
+          };
+          
+          saveSignalToDb();
           onEarningsGenerated(finalProfit);
           
           // Check if we've reached the daily target
