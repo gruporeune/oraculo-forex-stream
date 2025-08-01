@@ -58,7 +58,7 @@ export function HeroSection() {
                 }} 
                 className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-12 max-w-2xl leading-relaxed"
               >
-                Comece agora a usar o oráculo e ganhe 1% de lucro ao dia de forma automática ou gere sinais com até 99% de assertividade.
+                Comece agora a usar o oráculo e ganhe até 2% de lucro ao dia de forma automática ou gere sinais com até 99% de assertividade.
               </motion.p>
 
               <motion.div 
@@ -118,8 +118,8 @@ export function HeroSection() {
                   <div className="text-sm text-muted-foreground">Operação automática</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">1%</div>
-                  <div className="text-sm text-muted-foreground">Lucro diário garantido</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">2%</div>
+                  <div className="text-sm text-muted-foreground">Até 2% lucro diário</div>
                 </div>
               </motion.div>
             </motion.div>
