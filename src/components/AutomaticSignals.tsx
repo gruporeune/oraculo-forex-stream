@@ -128,7 +128,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     if (config.maxSignals === 0 || operationsState.completedToday >= config.maxSignals || !operationsState.started || operationsState.paused) return;
 
     const generateSignal = () => {
-      if (signals.length >= config.maxSignals) return;
+      const activeSignals = signals.filter(s => s.status === 'active');
+      if (activeSignals.length >= 1) return; // Only allow 1 active signal at a time
 
       const asset = assets[Math.floor(Math.random() * assets.length)];
       const direction = Math.random() > 0.5 ? 'CALL' : 'PUT';
@@ -149,8 +150,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       setSignals(prev => [...prev, newSignal]);
     };
 
-    // Generate first signal immediately if none exist
-    if (signals.length === 0) {
+    // Generate first signal immediately if no active signals exist
+    const activeSignals = signals.filter(s => s.status === 'active');
+    if (activeSignals.length === 0) {
       generateSignal();
     }
 
