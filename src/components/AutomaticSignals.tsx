@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp, TrendingDown, Clock, Activity } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { TrendingUp, TrendingDown, Clock, Activity, Play } from 'lucide-react';
 
 interface AutomaticSignalsProps {
   userPlan: string;
@@ -27,6 +28,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [signals, setSignals] = useState<Signal[]>([]);
   const [dailyTargetReached, setDailyTargetReached] = useState(false);
   const [hasGeneratedToday, setHasGeneratedToday] = useState(false);
+  const [isStarted, setIsStarted] = useState(false);
 
   const planConfig = {
     free: { maxSignals: 0, targetProfit: 0 },
@@ -79,7 +81,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   }, [userId]);
   
   useEffect(() => {
-    if (config.maxSignals === 0 || dailyTargetReached || hasGeneratedToday) return;
+    if (config.maxSignals === 0 || dailyTargetReached || hasGeneratedToday || !isStarted) return;
 
     const generateSignal = () => {
       if (signals.length >= config.maxSignals) return;
@@ -113,7 +115,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     }, 120000); // Generate new signal every 2 minutes
 
     return () => clearInterval(interval);
-  }, [signals.length, config.maxSignals, dailyTargetReached, hasGeneratedToday]);
+  }, [signals.length, config.maxSignals, dailyTargetReached, hasGeneratedToday, isStarted]);
 
   useEffect(() => {
     const updateSignals = () => {
@@ -247,6 +249,27 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         </p>
       </CardHeader>
       <CardContent>
+        {!isStarted && !dailyTargetReached && !hasGeneratedToday && (
+          <div className="text-center py-8">
+            <div className="mb-4">
+              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
+                <Play className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-white font-semibold mb-2">Pronto para começar!</h3>
+              <p className="text-white/70 text-sm mb-4">
+                Clique no botão abaixo para iniciar suas operações automáticas do dia
+              </p>
+              <Button 
+                onClick={() => setIsStarted(true)}
+                className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-3 font-semibold"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Iniciar Operações Automáticas
+              </Button>
+            </div>
+          </div>
+        )}
+
         {dailyTargetReached && (
           <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
             <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
@@ -309,7 +332,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             </div>
           ))}
           
-          {signals.length === 0 && !dailyTargetReached && (
+          {signals.length === 0 && !dailyTargetReached && isStarted && (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
               <p className="text-white/70">Gerando primeiro sinal automático...</p>
