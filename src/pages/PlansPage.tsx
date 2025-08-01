@@ -13,7 +13,7 @@ const plans = [
     icon: Star,
     features: [
       "20 sinais por dia",
-      "1% lucro diário até 200%",
+      "0,5% lucro diário até 200%",
       "Área de membros exclusiva",
       "Suporte básico",
       "Análises de mercado",
@@ -39,7 +39,7 @@ const plans = [
       "Webinars exclusivos",
       "Relatórios personalizados"
     ],
-    popular: true,
+    popular: false,
     gradient: "from-purple-600 to-purple-400",
     borderColor: "border-purple-500/50",
     buttonColor: "bg-purple-600 hover:bg-purple-700"
@@ -52,7 +52,7 @@ const plans = [
     icon: Gem,
     features: [
       "500 sinais por dia",
-      "1% lucro diário até 200%",
+      "1,5% lucro diário até 200%",
       "Área de membros Premium",
       "Grupo VIP Telegram",
       "Consultoria 1:1 mensal",
@@ -60,7 +60,7 @@ const plans = [
       "Acesso antecipado a novos recursos",
       "Suporte 24/7"
     ],
-    popular: false,
+    popular: true,
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700"
@@ -73,7 +73,7 @@ const plans = [
     icon: Diamond,
     features: [
       "1000 sinais por dia",
-      "1% lucro diário até 200%",
+      "2% lucro diário até 200%",
       "Área de membros Elite",
       "Grupo VIP exclusivo",
       "Consultoria semanal 1:1",
