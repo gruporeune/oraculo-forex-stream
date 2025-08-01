@@ -61,6 +61,10 @@ export default function RegisterPage() {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
+      // Check for referral code in URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCode = urlParams.get('ref');
+      
       // Sign up the user
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
@@ -79,18 +83,49 @@ export default function RegisterPage() {
         throw signUpError;
       }
 
-      // Update profile with additional data
+      // Update profile with additional data and referral
       if (data.user) {
+        let referrerId = null;
+        
+        // If there's a referral code, find the referrer
+        if (referralCode) {
+          const { data: referrerData } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('referral_code', referralCode)
+            .single();
+          
+          if (referrerData) {
+            referrerId = referrerData.id;
+          }
+        }
+        
         const { error: profileError } = await supabase
           .from('profiles')
           .upsert({
             id: data.user.id,
             full_name: formData.fullName,
+            referred_by: referrerId,
             updated_at: new Date().toISOString(),
           });
 
         if (profileError) {
           console.error('Profile update error:', profileError);
+        }
+        
+        // Create referral relationship if referrer exists
+        if (referrerId) {
+          const { error: referralError } = await supabase
+            .from('user_referrals')
+            .insert({
+              referrer_id: referrerId,
+              referred_id: data.user.id,
+              commission_earned: 0
+            });
+            
+          if (referralError) {
+            console.error('Referral creation error:', referralError);
+          }
         }
       }
 

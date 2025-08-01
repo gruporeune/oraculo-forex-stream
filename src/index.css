@@ -103,4 +103,50 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+  
+  /* Hide Lovable badge */
+  [data-powered-by="lovable"] {
+    display: none !important;
+  }
+  
+  .lovable-badge {
+    display: none !important;
+  }
+  
+  iframe[src*="lovable"] {
+    display: none !important;
+  }
+}
+
+/* Responsive improvements for the landing page */
+@layer components {
+  .hero-responsive {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .hero-content {
+    @apply flex flex-col lg:flex-row items-center gap-8 lg:gap-12;
+  }
+  
+  .hero-text {
+    @apply w-full lg:w-1/2 text-center lg:text-left;
+  }
+  
+  .hero-image {
+    @apply w-full lg:w-1/2 flex justify-center;
+  }
+  
+  .robot-container {
+    @apply w-full max-w-md lg:max-w-lg xl:max-w-xl aspect-square;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }

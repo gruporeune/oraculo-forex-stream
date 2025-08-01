@@ -182,16 +182,6 @@ export default function PlansPage() {
         ))}
       </div>
 
-      <div className="mt-12 text-center">
-        <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-xl p-6 max-w-4xl mx-auto">
-          <h3 className="text-xl font-bold text-white mb-4">
-            🔥 Garantia de 7 dias ou seu dinheiro de volta!
-          </h3>
-          <p className="text-white/70">
-            Teste nossa IA por 7 dias. Se não ficar satisfeito, devolvemos 100% do seu investimento.
-          </p>
-        </div>
-      </div>
     </motion.div>
   );
 }

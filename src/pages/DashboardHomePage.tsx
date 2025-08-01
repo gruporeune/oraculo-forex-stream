@@ -91,7 +91,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               <img 
                 src="/lovable-uploads/819c852d-f577-4e95-b31a-c385b16a271e.png" 
                 alt="Mimos Broker" 
-                className="h-20 w-auto object-contain"
+                className="h-24 w-auto object-contain"
               />
             </div>
             <div className="space-y-2">
