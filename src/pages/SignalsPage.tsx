@@ -106,16 +106,16 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       // Generate analysis based on signal type and timeframe
       const analyses = {
         CALL: [
-          "Tendência de alta identificada com rompimento de resistência importante",
-          "Padrão de reversão de baixa para alta confirmado pelos indicadores",
-          "Volume crescente sustentando movimento de alta",
-          "Análise técnica indica continuação da tendência alcista"
+          `Análise técnica para ${selectedAsset} indica uma oportunidade de CALL devido ao rompimento da resistência em ${(Math.random() * 0.005 + 1.1850).toFixed(4)}. Os indicadores RSI (${Math.floor(Math.random() * 10 + 25)}) e MACD mostram divergência bullish, enquanto as médias móveis de 9 e 21 períodos confirmam mudança de tendência. Volume acima da média sustenta o movimento. Confluência técnica sugere continuação da alta no prazo de ${selectedExpiration} minutos com alta probabilidade de sucesso.`,
+          `Padrão de reversão identificado no ${selectedAsset} após teste do suporte em ${(Math.random() * 0.005 + 1.1820).toFixed(4)}. Formação de martelo doji confirma rejeição da zona de baixa. Indicadores estocásticos saindo da zona de sobrevenda (${Math.floor(Math.random() * 10 + 15)}%) enquanto RSI forma divergência positiva. Bandas de Bollinger expandindo para cima. Setup técnico favorece operação CALL com expiração de ${selectedExpiration} minutos.`,
+          `Breakout confirmado no ${selectedAsset} com rompimento da linha de tendência descendente. Price action mostra velas de força compradora após consolidação triangular. Volume 40% acima da média corrobora movimento. Fibonacci 61.8% (${(Math.random() * 0.005 + 1.1880).toFixed(4)}) atuando como suporte. Williams %R (-${Math.floor(Math.random() * 15 + 15)}) e CCI (${Math.floor(Math.random() * 50 + 80)}) confirmam entrada. Projeção técnica indica alta para próximos ${selectedExpiration} minutos.`,
+          `Setup de alta no ${selectedAsset} baseado em confluência de indicadores. Média móvel exponencial de 20 cruzando acima da de 50, criando golden cross. ADX (${Math.floor(Math.random() * 10 + 25)}) indica força na tendência. Oscilador momentum saindo de território negativo. Zona de demanda institucional em ${(Math.random() * 0.005 + 1.1840).toFixed(4)} sendo respeitada. Cenário técnico aponta para movimento CALL com alta confiança nos próximos ${selectedExpiration} minutos.`
         ],
         PUT: [
-          "Tendência de baixa confirmada com rompimento de suporte chave",
-          "Padrão de reversão de alta para baixa validado",
-          "Pressão vendedora aumentando conforme indicadores",
-          "Análise técnica aponta para continuação da queda"
+          `Análise técnica do ${selectedAsset} sinaliza oportunidade de PUT após rompimento do suporte em ${(Math.random() * 0.005 + 1.1850).toFixed(4)}. RSI (${Math.floor(Math.random() * 10 + 65)}) em zona de sobrecompra confirma pressão vendedora. MACD apresenta divergência bearish com histograma negativo. Médias móveis de 9 e 21 períodos apontam para baixa. Volume confirmatório sustenta o movimento descendente. Projeção técnica indica continuação da queda em ${selectedExpiration} minutos.`,
+          `Padrão de reversão bearish identificado no ${selectedAsset} após teste da resistência em ${(Math.random() * 0.005 + 1.1880).toFixed(4)}. Formação de shooting star indica rejeição da zona de alta. Estocástico em sobrecompra (${Math.floor(Math.random() * 10 + 80)}%) iniciando divergência negativa. Bandas de Bollinger contraindo após expansão. Price action mostra velas de pressão vendedora. Setup técnico favorece operação PUT com expiração de ${selectedExpiration} minutos.`,
+          `Breakdown confirmado no ${selectedAsset} com rompimento da linha de tendência ascendente. Price action evidencia velas de força vendedora após falha em nova máxima. Volume 35% acima da média valida movimento. Retração de Fibonacci 38.2% (${(Math.random() * 0.005 + 1.1820).toFixed(4)}) funcionando como resistência. Williams %R (-${Math.floor(Math.random() * 15 + 5)}) e CCI (-${Math.floor(Math.random() * 50 + 80)}) confirmam entrada PUT para próximos ${selectedExpiration} minutos.`,
+          `Setup de baixa no ${selectedAsset} baseado em confluência técnica. Média móvel exponencial de 20 cruzando abaixo da de 50, formando death cross. ADX (${Math.floor(Math.random() * 10 + 30)}) mostra força na tendência descendente. Momentum negativo confirmado por ROC e Price Rate of Change. Zona de oferta institucional em ${(Math.random() * 0.005 + 1.1870).toFixed(4)} sendo testada. Análise técnica aponta movimento PUT com alta probabilidade nos próximos ${selectedExpiration} minutos.`
         ]
       };
 

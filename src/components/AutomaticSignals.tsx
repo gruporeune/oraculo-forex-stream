@@ -29,6 +29,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [dailyTargetReached, setDailyTargetReached] = useState(false);
   const [hasGeneratedToday, setHasGeneratedToday] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const planConfig = {
     free: { maxSignals: 0, targetProfit: 0 },
@@ -81,7 +82,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   }, [userId]);
   
   useEffect(() => {
-    if (config.maxSignals === 0 || dailyTargetReached || hasGeneratedToday || !isStarted) return;
+    if (config.maxSignals === 0 || dailyTargetReached || hasGeneratedToday || !isStarted || isPaused) return;
 
     const generateSignal = () => {
       if (signals.length >= config.maxSignals) return;
@@ -115,9 +116,11 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     }, 120000); // Generate new signal every 2 minutes
 
     return () => clearInterval(interval);
-  }, [signals.length, config.maxSignals, dailyTargetReached, hasGeneratedToday, isStarted]);
+  }, [signals.length, config.maxSignals, dailyTargetReached, hasGeneratedToday, isStarted, isPaused]);
 
   useEffect(() => {
+    if (!isStarted || isPaused) return;
+    
     const updateSignals = () => {
       setSignals(prev => prev.map(signal => {
         if (signal.status === 'completed') return signal;
@@ -183,7 +186,10 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           };
           
           saveSignalToDb();
-          onEarningsGenerated(finalProfit);
+          // Só gerar earnings se realmente iniciado e não pausado
+          if (isStarted && !isPaused) {
+            onEarningsGenerated(finalProfit);
+          }
           
           // Check if we've reached the daily target
           const completedSignals = prev.filter(s => s.status === 'completed').length + 1;
@@ -212,7 +218,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
 
     const interval = setInterval(updateSignals, 1000);
     return () => clearInterval(interval);
-  }, [config.targetProfit, config.maxSignals, onEarningsGenerated]);
+  }, [config.targetProfit, config.maxSignals, onEarningsGenerated, isStarted, isPaused]);
 
   if (userPlan === 'free') {
     return (
@@ -267,6 +273,21 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 Iniciar Operações Automáticas
               </Button>
             </div>
+          </div>
+        )}
+
+        {isStarted && !dailyTargetReached && (
+          <div className="flex justify-center mb-4">
+            <Button 
+              onClick={() => setIsPaused(!isPaused)}
+              className={`px-6 py-2 font-semibold ${
+                isPaused 
+                  ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
+                  : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
+              } text-white`}
+            >
+              {isPaused ? 'Retomar Operações' : 'Pausar Operações'}
+            </Button>
           </div>
         )}
 
