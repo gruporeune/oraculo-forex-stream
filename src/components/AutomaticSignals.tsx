@@ -69,8 +69,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         }));
         
         setSignals(loadedSignals);
-        setHasGeneratedToday(true);
-        setDailyTargetReached(true);
+        setHasGeneratedToday(loadedSignals.length > 0);
+        // Only mark as reached if ALL operations for the plan are completed
+        setDailyTargetReached(loadedSignals.length >= config.maxSignals);
       }
     };
     
