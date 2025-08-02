@@ -29,6 +29,9 @@ export default function LoginPage() {
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,6 +81,33 @@ export default function LoginPage() {
       setError(error.message || 'Erro ao fazer login');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) {
+      setError('Por favor, digite seu email primeiro');
+      return;
+    }
+
+    setIsResettingPassword(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      setResetSuccess(true);
+    } catch (error: any) {
+      setError(error.message || 'Erro ao enviar email de recuperação');
+    } finally {
+      setIsResettingPassword(false);
     }
   };
 
@@ -280,9 +310,13 @@ export default function LoginPage() {
                   </div>
                   
                   <div className="text-xs">
-                    <a href="#" className="text-white/60 hover:text-white transition-colors duration-200">
+                    <button 
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-white/60 hover:text-white transition-colors duration-200"
+                    >
                       Esqueceu a senha?
-                    </a>
+                    </button>
                   </div>
                 </div>
 
@@ -346,6 +380,94 @@ export default function LoginPage() {
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Forgot Password Modal */}
+      <AnimatePresence>
+        {showForgotPassword && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowForgotPassword(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-black/80 backdrop-blur-xl rounded-2xl p-6 border border-white/10 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-bold text-white mb-2">
+                  Recuperar Senha
+                </h3>
+                <p className="text-white/60 text-sm">
+                  {resetSuccess 
+                    ? "Email enviado! Verifique sua caixa de entrada."
+                    : "Digite seu email para receber o link de recuperação"
+                  }
+                </p>
+              </div>
+
+              {!resetSuccess ? (
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-white/40" />
+                    <Input
+                      type="email"
+                      placeholder="Seu email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full bg-white/5 border-white/20 text-white placeholder:text-white/30 h-10 pl-10 pr-3"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(false)}
+                      className="flex-1 py-2 px-4 rounded-lg border border-white/20 text-white/70 hover:text-white hover:border-white/30 transition-colors duration-200"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isResettingPassword}
+                      className="flex-1 py-2 px-4 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-colors duration-200 disabled:opacity-50"
+                    >
+                      {isResettingPassword ? (
+                        <div className="w-4 h-4 border-2 border-black/70 border-t-transparent rounded-full animate-spin mx-auto" />
+                      ) : (
+                        "Enviar"
+                      )}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-green-500/20 rounded-full flex items-center justify-center">
+                    <Mail className="w-8 h-8 text-green-400" />
+                  </div>
+                  <p className="text-white/80 text-sm mb-4">
+                    Enviamos um link de recuperação para <strong>{email}</strong>
+                  </p>
+                  <button
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetSuccess(false);
+                    }}
+                    className="py-2 px-6 rounded-lg bg-white text-black font-medium hover:bg-white/90 transition-colors duration-200"
+                  >
+                    Fechar
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
