@@ -32,6 +32,36 @@ export type Database = {
         }
         Relationships: []
       }
+      daily_earnings_history: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          operations_count: number
+          total_commissions: number
+          total_earnings: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          operations_count?: number
+          total_commissions?: number
+          total_earnings?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          operations_count?: number
+          total_commissions?: number
+          total_earnings?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       material_suggestions: {
         Row: {
           created_at: string
