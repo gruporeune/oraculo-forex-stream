@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardCards } from '@/components/DashboardCards';
 import { AutomaticSignals } from '@/components/AutomaticSignals';
+import { EarningsHistory } from '@/components/EarningsHistory';
 import { useToast } from '@/hooks/use-toast';
 
 interface DashboardHomePageProps {
@@ -112,6 +113,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         onEarningsGenerated={handleEarningsGenerated}
         userId={user?.id}
       />
+
+      <EarningsHistory userId={user?.id} />
     </motion.div>
   );
 }
