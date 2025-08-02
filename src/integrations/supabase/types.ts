@@ -251,6 +251,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_plan_commission: {
+        Args: { plan_name: string }
+        Returns: number
+      }
       make_user_admin: {
         Args: { target_email: string }
         Returns: boolean
