@@ -6,6 +6,23 @@ import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
 
 const plans = [
   {
+    name: "FREE",
+    price: "R$ 0",
+    originalPrice: "R$ 0",
+    description: "Para conhecer a plataforma",
+    icon: Star,
+    features: [
+      "Acesso ao dashboard",
+      "Área de membros com conteúdo educativo",
+      "Suporte básico",
+      "Análises básicas de mercado"
+    ],
+    popular: false,
+    gradient: "from-gray-600 to-gray-400",
+    borderColor: "border-gray-500/50",
+    buttonColor: "bg-gray-600 hover:bg-gray-700"
+  },
+  {
     name: "PARTNER",
     price: "R$ 200",
     originalPrice: "R$ 299",

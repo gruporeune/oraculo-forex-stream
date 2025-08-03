@@ -116,16 +116,13 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
     }
   };
 
-  // Check if user has access to members area (partner plan or higher)
-  if (!profile || !['partner', 'master', 'premium', 'platinum'].includes(profile.plan)) {
+  // Check if user has access to members area (now includes free plan)
+  if (!profile) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center text-white">
           <h1 className="text-3xl font-bold mb-4">Área de Membros</h1>
-          <p className="text-lg mb-6">Você precisa de um plano Partner ou superior para acessar esta área.</p>
-          <Button onClick={() => window.location.href = '/dashboard'} className="bg-purple-600 hover:bg-purple-700">
-            Voltar ao Dashboard
-          </Button>
+          <p className="text-lg mb-6">Carregando...</p>
         </div>
       </div>
     );

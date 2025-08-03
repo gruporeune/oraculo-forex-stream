@@ -31,6 +31,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [isStarted, setIsStarted] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [totalProfitToday, setTotalProfitToday] = useState(0);
+  const [targetAchievedTime, setTargetAchievedTime] = useState<Date | null>(null);
   const [operationsState, setOperationsState] = useState({
     started: false,
     paused: false,
@@ -127,6 +128,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         // Check if profit target is reached
         const targetReached = totalProfit >= config.targetProfit;
         setDailyTargetReached(targetReached);
+        if (targetReached && !targetAchievedTime) {
+          setTargetAchievedTime(new Date());
+        }
         setHasGeneratedToday(data.length > 0);
       }
     };
@@ -254,6 +258,29 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           if (newTotalProfit >= config.targetProfit) {
             setDailyTargetReached(true);
             setHasGeneratedToday(true);
+            if (!targetAchievedTime) {
+              setTargetAchievedTime(new Date());
+              
+              // Save earnings to history immediately when target is reached
+              const saveEarningsHistory = async () => {
+                if (!userId) return;
+                
+                try {
+                  const today = new Date().toISOString().split('T')[0];
+                  await supabase.from('daily_earnings_history').upsert({
+                    user_id: userId,
+                    date: today,
+                    total_earnings: newTotalProfit,
+                    total_commissions: 0, // Only operations earnings here
+                    operations_count: newCompletedCount
+                  });
+                } catch (error) {
+                  console.error('Error saving earnings history:', error);
+                }
+              };
+              
+              saveEarningsHistory();
+            }
           }
           
           return {
@@ -313,7 +340,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         </p>
       </CardHeader>
       <CardContent>
-        {!operationsState.started && !dailyTargetReached && operationsState.completedToday === 0 && (
+        {!operationsState.started && operationsState.completedToday === 0 && (
           <div className="text-center py-8">
             <div className="mb-4">
               <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
@@ -337,30 +364,73 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           </div>
         )}
 
-        {operationsState.started && !dailyTargetReached && (
-          <div className="flex justify-center mb-4">
-            <Button 
-              onClick={() => {
-                const newPausedState = !operationsState.paused;
-                setIsPaused(newPausedState);
-                updateOperationsState({ paused: newPausedState });
-              }}
-              className={`px-6 py-2 font-semibold ${
-                operationsState.paused 
-                  ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
-                  : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
-              } text-white`}
-            >
-              {operationsState.paused ? 'Retomar Operações' : 'Pausar Operações'}
-            </Button>
-          </div>
+        {operationsState.started && (
+          (() => {
+            // Check if it's been 24 hours since target was achieved to reset operations
+            if (dailyTargetReached && targetAchievedTime) {
+              const now = new Date();
+              const timeDiff = now.getTime() - targetAchievedTime.getTime();
+              const hoursElapsed = timeDiff / (1000 * 60 * 60);
+              
+              // Reset after 24 hours
+              if (hoursElapsed >= 24) {
+                setDailyTargetReached(false);
+                setTargetAchievedTime(null);
+                setTotalProfitToday(0);
+                setSignals([]);
+                updateOperationsState({ 
+                  started: true, // Keep started as true for new cycle
+                  paused: false, // Reset pause state
+                  completedToday: 0 
+                });
+              }
+            }
+            
+            const currentTargetReached = dailyTargetReached && targetAchievedTime && (
+              (new Date().getTime() - targetAchievedTime.getTime()) / (1000 * 60 * 60) < 23
+            );
+            
+            if (!currentTargetReached) {
+              return (
+                <div className="flex justify-center mb-4">
+                  <Button 
+                    onClick={() => {
+                      const newPausedState = !operationsState.paused;
+                      setIsPaused(newPausedState);
+                      updateOperationsState({ paused: newPausedState });
+                    }}
+                    className={`px-6 py-2 font-semibold ${
+                      operationsState.paused 
+                        ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
+                        : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
+                    } text-white`}
+                  >
+                    {operationsState.paused ? 'Retomar Operações' : 'Pausar Operações'}
+                  </Button>
+                </div>
+              );
+            }
+            return null;
+          })()
         )}
 
-        {dailyTargetReached && (
-          <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
-            <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
-            <p className="text-green-300 text-sm">Lucro gerado: R$ {config.targetProfit.toFixed(2)}</p>
-          </div>
+        {dailyTargetReached && targetAchievedTime && (
+          (() => {
+            const now = new Date();
+            const timeDiff = now.getTime() - targetAchievedTime.getTime();
+            const hoursElapsed = timeDiff / (1000 * 60 * 60);
+            
+            // Hide message 1 hour before 24h (23 hours after achievement)
+            if (hoursElapsed < 23) {
+              return (
+                <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
+                  <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
+                  <p className="text-green-300 text-sm">Lucro gerado: R$ {config.targetProfit.toFixed(2)}</p>
+                </div>
+              );
+            }
+            return null;
+          })()
         )}
         
         <div className="space-y-4">
