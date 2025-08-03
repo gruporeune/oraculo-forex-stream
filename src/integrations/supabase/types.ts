@@ -83,6 +83,42 @@ export type Database = {
         }
         Relationships: []
       }
+      materials: {
+        Row: {
+          category: string | null
+          created_at: string
+          description: string | null
+          file_type: string
+          file_url: string
+          id: string
+          is_active: boolean | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_type: string
+          file_url: string
+          id?: string
+          is_active?: boolean | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          is_active?: boolean | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           auto_operations_completed_today: number | null
