@@ -321,6 +321,10 @@ export type Database = {
         Args: { plan_name: string }
         Returns: number
       }
+      calculate_plan_commission_level: {
+        Args: { plan_name: string; level: number }
+        Returns: number
+      }
       make_user_admin: {
         Args: { target_email: string }
         Returns: boolean
