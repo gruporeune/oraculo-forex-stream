@@ -127,6 +127,7 @@ export type Database = {
           available_balance: number | null
           avatar_url: string | null
           broker_id: string | null
+          cycle_start_time: string | null
           daily_commissions: number | null
           daily_earnings: number | null
           daily_signals_used: number | null
@@ -147,6 +148,7 @@ export type Database = {
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null
+          cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
           daily_signals_used?: number | null
@@ -167,6 +169,7 @@ export type Database = {
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null
+          cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
           daily_signals_used?: number | null

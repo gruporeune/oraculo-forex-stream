@@ -141,7 +141,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       .update({
         auto_operations_started: newState.started,
         auto_operations_paused: newState.paused,
-        auto_operations_completed_today: newState.completedToday
+        auto_operations_completed_today: newState.completedToday,
+        cycle_start_time: newState.cycleStartTime
       })
       .eq('id', userId);
   };
@@ -181,20 +182,36 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       // Load user profile to get operations state
       const { data: profile } = await supabase
         .from('profiles')
-        .select('auto_operations_started, auto_operations_paused, auto_operations_completed_today')
+        .select('auto_operations_started, auto_operations_paused, auto_operations_completed_today, cycle_start_time')
         .eq('id', userId)
         .single();
       
       if (profile) {
+        const savedCycleTime = profile.cycle_start_time ? new Date(profile.cycle_start_time) : null;
+        
         setOperationsState({
           started: profile.auto_operations_started || false,
           paused: profile.auto_operations_paused || false,
           completedToday: profile.auto_operations_completed_today || 0,
-          cycleStartTime: null
+          cycleStartTime: savedCycleTime?.toISOString() || null
         });
         
         setIsStarted(profile.auto_operations_started || false);
         setIsPaused(profile.auto_operations_paused || false);
+        setCycleStartTime(savedCycleTime);
+        
+        // Check if we have a saved cycle and if target was already reached
+        if (savedCycleTime && profile.auto_operations_completed_today > 0) {
+          // Check if 24 hours passed since cycle start to determine if we need to reset
+          const now = new Date();
+          const timeDiff = now.getTime() - savedCycleTime.getTime();
+          const hoursElapsed = timeDiff / (1000 * 60 * 60);
+          
+          if (hoursElapsed >= 24) {
+            // More than 24 hours passed, reset everything
+            await resetCycle();
+          }
+        }
       }
       
       // Load today's signals
@@ -465,10 +482,17 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     const startTime = new Date();
     setCycleStartTime(startTime);
     setIsStarted(true);
+    
     await updateOperationsState({ 
       started: true, 
       cycleStartTime: startTime.toISOString() 
     });
+    
+    // Also save cycle_start_time directly to database
+    await supabase
+      .from('profiles')
+      .update({ cycle_start_time: startTime.toISOString() })
+      .eq('id', userId);
   };
 
   const isOperationActive = operationsState.started && !operationsState.paused && !dailyTargetReached;
@@ -528,16 +552,15 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           </div>
         )}
 
-        {dailyTargetReached && targetAchievedTime && (
+        {dailyTargetReached && cycleStartTime && (
           (() => {
+            // Use the actual cycle start time from database to calculate next cycle
+            const nextCycleTime = new Date(cycleStartTime.getTime() + 24 * 60 * 60 * 1000);
             const now = new Date();
-            const timeDiff = now.getTime() - targetAchievedTime.getTime();
-            const hoursElapsed = timeDiff / (1000 * 60 * 60);
+            const timeDiff = nextCycleTime.getTime() - now.getTime();
             
-            // Hide message 1 hour before 24h (23 hours after achievement)
-            if (hoursElapsed < 23) {
-              const nextCycleTime = new Date(targetAchievedTime.getTime() + 24 * 60 * 60 * 1000);
-              
+            // Only show if there's still time left (more than 1 hour)
+            if (timeDiff > 60 * 60 * 1000) {
               return (
                 <>
                   <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
