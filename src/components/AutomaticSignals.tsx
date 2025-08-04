@@ -212,6 +212,15 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           setTargetAchievedTime(savedCycleTime);
         }
         
+        // Prevent any new operations if target is already reached
+        if (targetAlreadyReached) {
+          setOperationsState(prev => ({
+            ...prev,
+            started: true,
+            paused: true // Force pause to prevent new operations
+          }));
+        }
+        
         // Check if we have a saved cycle and if 24 hours passed to reset
         if (savedCycleTime) {
           const now = new Date();
@@ -291,13 +300,22 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   useEffect(() => {
     // Prevent signal generation if target is reached or operations are not active
     if (config.maxSignals === 0 || dailyTargetReached || !operationsState.started || operationsState.paused) return;
+    
+    // Extra safety check - if we already have the target profit, don't generate more signals
+    if (totalProfitToday >= config.targetProfit) {
+      setDailyTargetReached(true);
+      return;
+    }
 
     const generateSignal = () => {
       const activeSignals = signals.filter(s => s.status === 'active');
       if (activeSignals.length >= 1) return; // Only allow 1 active signal at a time
       
-      // Double check target before generating
-      if (totalProfitToday >= config.targetProfit) return;
+      // Triple check target before generating to prevent extra operations
+      if (totalProfitToday >= config.targetProfit || dailyTargetReached) {
+        setDailyTargetReached(true);
+        return;
+      }
 
       const asset = assets[Math.floor(Math.random() * assets.length)];
       const direction = Math.random() > 0.5 ? 'CALL' : 'PUT';
@@ -340,7 +358,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       setSignals(prev => prev.map(signal => {
         if (signal.status === 'completed') return signal;
 
-        const newProgress = Math.min(signal.progress + Math.random() * 5, 100);
+        // Increase progress speed - range from 8 to 15 instead of 0 to 5
+        const newProgress = Math.min(signal.progress + Math.random() * 7 + 8, 100);
         const priceChange = (Math.random() - 0.5) * 0.001;
         const newPrice = signal.currentPrice + priceChange;
         
@@ -414,6 +433,10 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           if (newTotalProfit >= config.targetProfit && !dailyTargetReached) {
             setDailyTargetReached(true);
             setHasGeneratedToday(true);
+            
+            // Immediately pause operations to prevent more signals
+            updateOperationsState({ paused: true });
+            
             if (!targetAchievedTime) {
               setTargetAchievedTime(new Date());
               
@@ -464,7 +487,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       }));
     };
 
-    const interval = setInterval(updateSignals, 1000);
+    const interval = setInterval(updateSignals, 500); // Update every 500ms instead of 1000ms for faster progress
     return () => clearInterval(interval);
   }, [config.targetProfit, config.maxSignals, onEarningsGenerated, operationsState.started, operationsState.paused, totalProfitToday]);
 
