@@ -24,6 +24,31 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
 
   useEffect(() => {
     loadNetworkData();
+    
+    // Set up real-time subscription to update network when new referrals are added
+    const channel = supabase
+      .channel('network-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_referrals'
+      }, () => {
+        // Reload network data when user_referrals table changes
+        loadNetworkData();
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'profiles'
+      }, () => {
+        // Reload network data when profiles table changes
+        loadNetworkData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [userId]);
 
   const loadNetworkData = async () => {
@@ -46,7 +71,7 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
       .from('profiles')
       .select('id, username, full_name, plan')
       .eq('id', nodeId)
-      .single();
+      .maybeSingle();
 
     if (!profile) return null;
 

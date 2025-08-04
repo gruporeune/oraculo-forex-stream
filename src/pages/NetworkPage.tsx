@@ -22,17 +22,50 @@ interface Referral {
   commission_earned: number;
   username?: string;
   phone?: string;
+  level?: number;
+  referrer_name?: string;
 }
 
 export default function NetworkPage({ user, profile }: NetworkPageProps) {
   const [referrals, setReferrals] = useState<Referral[]>([]);
+  const [indirectReferrals, setIndirectReferrals] = useState<Referral[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   const referralLink = `${window.location.origin}/register?ref=${profile?.referral_code}`;
 
   useEffect(() => {
-    loadReferrals();
+    const loadData = async () => {
+      setIsLoading(true);
+      await loadReferrals();
+      await loadIndirectReferrals();
+      setIsLoading(false);
+    };
+    
+    loadData();
+
+    // Set up real-time subscriptions
+    const channel = supabase
+      .channel('network-updates')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_referrals'
+      }, () => {
+        loadData();
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'profiles'
+      }, () => {
+        loadData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user.id]);
 
   const loadReferrals = async () => {
@@ -83,8 +116,135 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       setReferrals(formattedReferrals);
     } catch (error) {
       console.error('Error loading referrals:', error);
-    } finally {
-      setIsLoading(false);
+    }
+  };
+
+  const loadIndirectReferrals = async () => {
+    try {
+      // Get direct referrals IDs first
+      const { data: directReferralData } = await supabase
+        .from('user_referrals')
+        .select('referred_id')
+        .eq('referrer_id', user.id);
+
+      const flatDirectIds = directReferralData?.map(d => d.referred_id) || [];
+
+      if (flatDirectIds.length === 0) {
+        setIndirectReferrals([]);
+        return;
+      }
+
+      // Buscar indicados de 2º nível (indicados dos meus indicados diretos)
+      const { data: level2Referrals, error: level2Error } = await supabase
+        .from('user_referrals')
+        .select(`
+          id,
+          referred_id,
+          referrer_id,
+          commission_earned,
+          created_at
+        `)
+        .in('referrer_id', flatDirectIds);
+
+      if (level2Error) {
+        console.error('Error loading level 2 referrals:', level2Error);
+        return;
+      }
+
+      // Get profile data for level 2 referrals
+      const level2Ids = level2Referrals?.map(r => r.referred_id) || [];
+      const { data: level2Profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, plan, username, phone')
+        .in('id', level2Ids);
+
+      // Get referrer names for level 2
+      const level2ReferrerIds = level2Referrals?.map(r => r.referrer_id) || [];
+      const { data: level2Referrers } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', level2ReferrerIds);
+
+      // Buscar indicados de 3º nível
+      const { data: level3Referrals, error: level3Error } = await supabase
+        .from('user_referrals')
+        .select(`
+          id,
+          referred_id,
+          referrer_id,
+          commission_earned,
+          created_at
+        `)
+        .in('referrer_id', level2Ids);
+
+      if (level3Error) {
+        console.error('Error loading level 3 referrals:', level3Error);
+      }
+
+      // Get profile data for level 3 referrals
+      const level3Ids = level3Referrals?.map(r => r.referred_id) || [];
+      const { data: level3Profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, plan, username, phone')
+        .in('id', level3Ids);
+
+      // Get referrer names for level 3
+      const level3ReferrerIds = level3Referrals?.map(r => r.referrer_id) || [];
+      const { data: level3Referrers } = await supabase
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', level3ReferrerIds);
+
+      // Format indirect referrals data
+      const indirectList: Referral[] = [];
+
+      // Add level 2 referrals
+      if (level2Referrals) {
+        level2Referrals.forEach(ref => {
+          const profile = level2Profiles?.find(p => p.id === ref.referred_id);
+          const referrer = level2Referrers?.find(r => r.id === ref.referrer_id);
+          
+          if (profile) {
+            indirectList.push({
+              id: ref.id,
+              full_name: profile.full_name || 'Usuário',
+              plan: profile.plan || 'free',
+              created_at: ref.created_at,
+              commission_earned: ref.commission_earned || 0,
+              username: profile.username || '',
+              phone: profile.phone || '',
+              level: 2,
+              referrer_name: referrer?.full_name || 'Indicador'
+            });
+          }
+        });
+      }
+
+      // Add level 3 referrals
+      if (level3Referrals) {
+        level3Referrals.forEach(ref => {
+          const profile = level3Profiles?.find(p => p.id === ref.referred_id);
+          const referrer = level3Referrers?.find(r => r.id === ref.referrer_id);
+          
+          if (profile) {
+            indirectList.push({
+              id: ref.id,
+              full_name: profile.full_name || 'Usuário',
+              plan: profile.plan || 'free',
+              created_at: ref.created_at,
+              commission_earned: ref.commission_earned || 0,
+              username: profile.username || '',
+              phone: profile.phone || '',
+              level: 3,
+              referrer_name: referrer?.full_name || 'Indicador'
+            });
+          }
+        });
+      }
+
+      setIndirectReferrals(indirectList);
+    } catch (error) {
+      console.error('Error loading indirect referrals:', error);
     }
   };
 
@@ -201,12 +361,12 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
         </CardContent>
       </Card>
 
-      {/* Referrals List */}
+      {/* Direct Referrals List */}
       <Card className="bg-black/40 border-white/10">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Seus Indicados Diretos
+            Seus Indicados Diretos (Nível 1)
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -218,7 +378,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           ) : referrals.length === 0 ? (
             <div className="text-center py-8">
               <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/70 mb-2">Nenhum indicado ainda</p>
+              <p className="text-white/70 mb-2">Nenhum indicado direto ainda</p>
               <p className="text-white/50 text-sm">Compartilhe seu link para começar a ganhar comissões</p>
             </div>
           ) : (
@@ -227,7 +387,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                 <div key={referral.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center">
                         <span className="text-white font-medium">
                           {referral.full_name.charAt(0)}
                         </span>
@@ -246,6 +406,82 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
+                      <Badge className="bg-green-600 text-white">
+                        Nível 1 - 10%
+                      </Badge>
+                      <Badge className={`${getPlanColor(referral.plan)} text-white uppercase`}>
+                        {referral.plan}
+                      </Badge>
+                      <div className="text-right">
+                        <p className="text-green-400 font-medium">
+                          {formatCurrency(referral.commission_earned)}
+                        </p>
+                        <p className="text-white/60 text-xs">Comissão</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Indirect Referrals List */}
+      <Card className="bg-black/40 border-white/10">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Seus Indicados Indiretos (Níveis 2 e 3)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-white/70">Carregando indicados indiretos...</p>
+            </div>
+          ) : indirectReferrals.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
+              <p className="text-white/70 mb-2">Nenhum indicado indireto ainda</p>
+              <p className="text-white/50 text-sm">Seus indicados diretos ainda não trouxeram novas pessoas</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {indirectReferrals.map((referral) => (
+                <div key={referral.id} className="bg-white/5 rounded-lg p-4 border border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        referral.level === 2 ? 'bg-blue-600' : 'bg-purple-600'
+                      }`}>
+                        <span className="text-white font-medium">
+                          {referral.full_name.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-white font-medium">{referral.full_name}</p>
+                        {referral.username && (
+                          <p className="text-white/50 text-xs">@{referral.username}</p>
+                        )}
+                        {referral.phone && (
+                          <p className="text-white/50 text-xs">{referral.phone}</p>
+                        )}
+                        <p className="text-white/50 text-xs">
+                          Indicado por: {referral.referrer_name}
+                        </p>
+                        <p className="text-white/60 text-sm">
+                          Indicado em {new Date(referral.created_at).toLocaleDateString('pt-BR')} às {new Date(referral.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`text-white ${
+                        referral.level === 2 ? 'bg-blue-600' : 'bg-purple-600'
+                      }`}>
+                        Nível {referral.level} - {referral.level === 2 ? '3%' : '2%'}
+                      </Badge>
                       <Badge className={`${getPlanColor(referral.plan)} text-white uppercase`}>
                         {referral.plan}
                       </Badge>
