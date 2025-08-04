@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Clock, Activity, Play, Brain, Zap, Bot } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Activity, Play, Brain, Zap, Bot, Timer } from 'lucide-react';
 
 interface AutomaticSignalsProps {
   userPlan: string;
@@ -23,6 +23,45 @@ interface Signal {
   status: 'active' | 'completed';
   startTime: Date;
 }
+
+// Countdown Timer Component
+const CountdownTimer = ({ targetTime }: { targetTime: Date }) => {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const updateTimer = () => {
+      const now = new Date();
+      const timeDiff = targetTime.getTime() - now.getTime();
+      
+      if (timeDiff <= 0) {
+        setTimeLeft('00:00:00');
+        return;
+      }
+      
+      const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+      const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+      
+      setTimeLeft(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    };
+
+    updateTimer();
+    const interval = setInterval(updateTimer, 1000);
+    return () => clearInterval(interval);
+  }, [targetTime]);
+
+  return (
+    <div className="bg-blue-600/20 border border-blue-500/50 rounded-lg p-4 mb-4">
+      <div className="flex items-center justify-center gap-3">
+        <Timer className="w-5 h-5 text-blue-400" />
+        <div className="text-center">
+          <p className="text-blue-400 font-medium text-sm">Próximo ciclo inicia em:</p>
+          <p className="text-white text-2xl font-bold font-mono">{timeLeft}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 // AI Analysis Component
 const AIAnalysisIndicators = ({ isActive }: { isActive: boolean }) => {
@@ -497,14 +536,16 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             
             // Hide message 1 hour before 24h (23 hours after achievement)
             if (hoursElapsed < 23) {
+              const nextCycleTime = new Date(targetAchievedTime.getTime() + 24 * 60 * 60 * 1000);
+              
               return (
-                <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
-                  <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
-                  <p className="text-green-300 text-sm">Lucro gerado: R$ {config.targetProfit.toFixed(2)}</p>
-                  <p className="text-green-200 text-xs mt-1">
-                    Próximo ciclo inicia em: {Math.ceil(24 - hoursElapsed)} horas
-                  </p>
-                </div>
+                <>
+                  <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
+                    <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
+                    <p className="text-green-300 text-sm">Lucro gerado: R$ {config.targetProfit.toFixed(2)}</p>
+                  </div>
+                  <CountdownTimer targetTime={nextCycleTime} />
+                </>
               );
             }
             return null;

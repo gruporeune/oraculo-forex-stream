@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Link, Copy, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import NetworkGraph from '@/components/NetworkGraph';
 
 interface NetworkPageProps {
   user: any;
@@ -171,6 +172,9 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
         </Card>
       </div>
 
+      {/* Network Graph */}
+      <NetworkGraph userId={user.id} userProfile={profile} />
+
       {/* Referral Link */}
       <Card className="bg-black/40 border-white/10">
         <CardHeader>
@@ -192,7 +196,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             </Button>
           </div>
           <p className="text-white/70 text-sm mt-2">
-            Compartilhe este link e ganhe 10% de comissão sobre os planos adquiridos pelos seus indicados.
+            Compartilhe este link e ganhe comissões de até 3 níveis: <strong>10%</strong> no 1º nível, <strong>3%</strong> no 2º nível e <strong>2%</strong> no 3º nível.
           </p>
         </CardContent>
       </Card>
