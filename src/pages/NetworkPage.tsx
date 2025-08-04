@@ -256,7 +256,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
     });
   };
 
-  const totalCommissions = referrals.reduce((sum, ref) => sum + ref.commission_earned, 0);
+  const totalCommissions = profile?.available_balance || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

@@ -186,19 +186,33 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
   };
 
   const countByLevel = (node: NetworkNode, targetLevel: number): number => {
-    if (!node.referrals) return 0;
+    if (!node || !node.referrals) return 0;
     
     let count = 0;
-    if (targetLevel === 2) {
-      count = node.referrals.length;
+    
+    // Level 1: Direct referrals
+    if (targetLevel === 1) {
+      return node.referrals.length;
     }
     
-    for (const child of node.referrals) {
-      if (targetLevel === 3) {
+    // Level 2: Children of direct referrals
+    if (targetLevel === 2) {
+      for (const child of node.referrals) {
         count += child.referrals?.length || 0;
-      } else if (targetLevel > 3) {
-        count += countByLevel(child, targetLevel - 1);
       }
+      return count;
+    }
+    
+    // Level 3: Grandchildren of direct referrals
+    if (targetLevel === 3) {
+      for (const child of node.referrals) {
+        if (child.referrals) {
+          for (const grandchild of child.referrals) {
+            count += grandchild.referrals?.length || 0;
+          }
+        }
+      }
+      return count;
     }
     
     return count;
@@ -232,15 +246,15 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
         </CardTitle>
         <div className="grid grid-cols-3 gap-4 mt-4">
           <div className="text-center">
-            <p className="text-white text-lg font-bold">{networkData ? countByLevel(networkData, 2) : 0}</p>
+            <p className="text-white text-lg font-bold">{networkData ? countByLevel(networkData, 1) : 0}</p>
             <p className="text-white/60 text-sm">Nível 1 (10%)</p>
           </div>
           <div className="text-center">
-            <p className="text-white text-lg font-bold">{networkData ? countByLevel(networkData, 3) : 0}</p>
+            <p className="text-white text-lg font-bold">{networkData ? countByLevel(networkData, 2) : 0}</p>
             <p className="text-white/60 text-sm">Nível 2 (3%)</p>
           </div>
           <div className="text-center">
-            <p className="text-white text-lg font-bold">{networkData ? countTotalReferrals(networkData) - countByLevel(networkData, 2) - countByLevel(networkData, 3) : 0}</p>
+            <p className="text-white text-lg font-bold">{networkData ? countByLevel(networkData, 3) : 0}</p>
             <p className="text-white/60 text-sm">Nível 3 (2%)</p>
           </div>
         </div>
