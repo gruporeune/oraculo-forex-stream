@@ -182,7 +182,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       // Load user profile to get operations state
       const { data: profile } = await supabase
         .from('profiles')
-        .select('auto_operations_started, auto_operations_paused, auto_operations_completed_today, cycle_start_time')
+        .select('auto_operations_started, auto_operations_paused, auto_operations_completed_today, cycle_start_time, daily_earnings')
         .eq('id', userId)
         .single();
       
@@ -200,9 +200,20 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         setIsPaused(profile.auto_operations_paused || false);
         setCycleStartTime(savedCycleTime);
         
-        // Check if we have a saved cycle and if target was already reached
-        if (savedCycleTime && profile.auto_operations_completed_today > 0) {
-          // Check if 24 hours passed since cycle start to determine if we need to reset
+        // Set total profit from database
+        setTotalProfitToday(profile.daily_earnings || 0);
+        
+        // Check if target was already reached based on daily_earnings
+        const targetAlreadyReached = (profile.daily_earnings || 0) >= config.targetProfit;
+        setDailyTargetReached(targetAlreadyReached);
+        
+        // If target was reached and we have a cycle start time, set the target achieved time
+        if (targetAlreadyReached && savedCycleTime) {
+          setTargetAchievedTime(savedCycleTime);
+        }
+        
+        // Check if we have a saved cycle and if 24 hours passed to reset
+        if (savedCycleTime) {
           const now = new Date();
           const timeDiff = now.getTime() - savedCycleTime.getTime();
           const hoursElapsed = timeDiff / (1000 * 60 * 60);
@@ -406,28 +417,30 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             if (!targetAchievedTime) {
               setTargetAchievedTime(new Date());
               
-              // Save earnings to history immediately when target is reached - individual entry
-              const saveEarningsHistory = async () => {
-                if (!userId) return;
-                
-                try {
-                  const now = new Date();
-                  const today = now.toISOString().split('T')[0];
-                  
-                  // Create individual entry for this cycle's earnings with current timestamp
-                  await supabase.from('daily_earnings_history').insert({
-                    user_id: userId,
-                    date: today,
-                    total_earnings: config.targetProfit, // Exact target amount for this cycle
-                    total_commissions: 0,
-                    operations_count: newCompletedCount
-                  });
-                  
-                  console.log('Earnings history saved successfully');
-                } catch (error) {
-                  console.error('Error saving earnings history:', error);
-                }
-              };
+               // Save earnings to history immediately when target is reached - individual entry
+               const saveEarningsHistory = async () => {
+                 if (!userId) return;
+                 
+                 try {
+                   // Get current date in Brazil timezone
+                   const now = new Date();
+                   const brasilDate = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+                   const today = brasilDate.toISOString().split('T')[0];
+                   
+                   // Create individual entry for this cycle's earnings with current timestamp
+                   await supabase.from('daily_earnings_history').insert({
+                     user_id: userId,
+                     date: today,
+                     total_earnings: config.targetProfit, // Exact target amount for this cycle
+                     total_commissions: 0,
+                     operations_count: newCompletedCount
+                   });
+                   
+                   console.log('Earnings history saved successfully');
+                 } catch (error) {
+                   console.error('Error saving earnings history:', error);
+                 }
+               };
               
               saveEarningsHistory();
             }
