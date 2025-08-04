@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { TrendingUp, TrendingDown, Clock, Activity, Play } from 'lucide-react';
+import { TrendingUp, TrendingDown, Clock, Activity, Play, Brain, Zap, Bot } from 'lucide-react';
 
 interface AutomaticSignalsProps {
   userPlan: string;
@@ -24,6 +24,44 @@ interface Signal {
   startTime: Date;
 }
 
+// AI Analysis Component
+const AIAnalysisIndicators = ({ isActive }: { isActive: boolean }) => {
+  if (!isActive) return null;
+  
+  return (
+    <div className="flex justify-center items-center gap-6 py-4 mb-4 bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg border border-purple-500/20">
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          <Brain className="w-8 h-8 text-blue-400 animate-pulse" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+        </div>
+        <span className="text-xs text-blue-300 font-medium">ChatGPT 4.0</span>
+      </div>
+      
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          <Zap className="w-8 h-8 text-purple-400 animate-bounce" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping delay-150"></div>
+        </div>
+        <span className="text-xs text-purple-300 font-medium">DeepSeek</span>
+      </div>
+      
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          <Bot className="w-8 h-8 text-cyan-400 animate-pulse delay-300" />
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-ping delay-300"></div>
+        </div>
+        <span className="text-xs text-cyan-300 font-medium">Manus AI</span>
+      </div>
+      
+      <div className="ml-4 text-center">
+        <p className="text-white/80 text-sm font-medium">Analisando mercado...</p>
+        <p className="text-white/60 text-xs">IAs trabalhando em conjunto</p>
+      </div>
+    </div>
+  );
+};
+
 export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: AutomaticSignalsProps) {
   const [signals, setSignals] = useState<Signal[]>([]);
   const [dailyTargetReached, setDailyTargetReached] = useState(false);
@@ -32,10 +70,12 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   const [isPaused, setIsPaused] = useState(false);
   const [totalProfitToday, setTotalProfitToday] = useState(0);
   const [targetAchievedTime, setTargetAchievedTime] = useState<Date | null>(null);
+  const [cycleStartTime, setCycleStartTime] = useState<Date | null>(null);
   const [operationsState, setOperationsState] = useState({
     started: false,
     paused: false,
-    completedToday: 0
+    completedToday: 0,
+    cycleStartTime: null as string | null
   });
 
   const planConfig = {
@@ -66,7 +106,34 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       })
       .eq('id', userId);
   };
-  
+
+  // Check if 24 hours have passed since cycle start
+  const checkCycleReset = () => {
+    if (!cycleStartTime) return false;
+    
+    const now = new Date();
+    const timeDiff = now.getTime() - cycleStartTime.getTime();
+    const hoursElapsed = timeDiff / (1000 * 60 * 60);
+    
+    return hoursElapsed >= 24;
+  };
+
+  // Reset cycle after 24 hours
+  const resetCycle = async () => {
+    setDailyTargetReached(false);
+    setTargetAchievedTime(null);
+    setTotalProfitToday(0);
+    setSignals([]);
+    setCycleStartTime(new Date());
+    
+    await updateOperationsState({ 
+      started: true,
+      paused: false,
+      completedToday: 0,
+      cycleStartTime: new Date().toISOString()
+    });
+  };
+
   // Load today's signals and operations state
   useEffect(() => {
     const loadTodaysData = async () => {
@@ -83,7 +150,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         setOperationsState({
           started: profile.auto_operations_started || false,
           paused: profile.auto_operations_paused || false,
-          completedToday: profile.auto_operations_completed_today || 0
+          completedToday: profile.auto_operations_completed_today || 0,
+          cycleStartTime: null
         });
         
         setIsStarted(profile.auto_operations_started || false);
@@ -137,6 +205,19 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     
     loadTodaysData();
   }, [userId, config.maxSignals, config.targetProfit]);
+
+  // Check for cycle reset every minute
+  useEffect(() => {
+    if (!operationsState.started || !cycleStartTime) return;
+
+    const interval = setInterval(() => {
+      if (checkCycleReset()) {
+        resetCycle();
+      }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(interval);
+  }, [operationsState.started, cycleStartTime]);
   
   useEffect(() => {
     if (config.maxSignals === 0 || totalProfitToday >= config.targetProfit || !operationsState.started || operationsState.paused) return;
@@ -261,17 +342,20 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             if (!targetAchievedTime) {
               setTargetAchievedTime(new Date());
               
-              // Save earnings to history immediately when target is reached
+              // Save earnings to history immediately when target is reached - individual entry
               const saveEarningsHistory = async () => {
                 if (!userId) return;
                 
                 try {
-                  const today = new Date().toISOString().split('T')[0];
-                  await supabase.from('daily_earnings_history').upsert({
+                  const now = new Date();
+                  const historyDate = now.toISOString().split('T')[0];
+                  
+                  // Create individual entry for this cycle's earnings
+                  await supabase.from('daily_earnings_history').insert({
                     user_id: userId,
-                    date: today,
-                    total_earnings: newTotalProfit,
-                    total_commissions: 0, // Only operations earnings here
+                    date: historyDate,
+                    total_earnings: config.targetProfit, // Exact target amount for this cycle
+                    total_commissions: 0,
                     operations_count: newCompletedCount
                   });
                 } catch (error) {
@@ -328,6 +412,18 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     );
   }
 
+  const handleStartOperations = async () => {
+    const startTime = new Date();
+    setCycleStartTime(startTime);
+    setIsStarted(true);
+    await updateOperationsState({ 
+      started: true, 
+      cycleStartTime: startTime.toISOString() 
+    });
+  };
+
+  const isOperationActive = operationsState.started && !operationsState.paused && !dailyTargetReached;
+
   return (
     <Card className="bg-black/40 border-white/10">
       <CardHeader>
@@ -340,6 +436,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         </p>
       </CardHeader>
       <CardContent>
+        {/* AI Analysis Indicators */}
+        <AIAnalysisIndicators isActive={isOperationActive} />
+
         {!operationsState.started && operationsState.completedToday === 0 && (
           <div className="text-center py-8">
             <div className="mb-4">
@@ -351,10 +450,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 Clique no botão abaixo para iniciar suas operações automáticas do dia
               </p>
               <Button 
-                onClick={() => {
-                  setIsStarted(true);
-                  updateOperationsState({ started: true });
-                }}
+                onClick={handleStartOperations}
                 className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-3 font-semibold"
               >
                 <Play className="w-4 h-4 mr-2" />
@@ -364,54 +460,23 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           </div>
         )}
 
-        {operationsState.started && (
-          (() => {
-            // Check if it's been 24 hours since target was achieved to reset operations
-            if (dailyTargetReached && targetAchievedTime) {
-              const now = new Date();
-              const timeDiff = now.getTime() - targetAchievedTime.getTime();
-              const hoursElapsed = timeDiff / (1000 * 60 * 60);
-              
-              // Reset after 24 hours
-              if (hoursElapsed >= 24) {
-                setDailyTargetReached(false);
-                setTargetAchievedTime(null);
-                setTotalProfitToday(0);
-                setSignals([]);
-                updateOperationsState({ 
-                  started: true, // Keep started as true for new cycle
-                  paused: false, // Reset pause state
-                  completedToday: 0 
-                });
-              }
-            }
-            
-            const currentTargetReached = dailyTargetReached && targetAchievedTime && (
-              (new Date().getTime() - targetAchievedTime.getTime()) / (1000 * 60 * 60) < 23
-            );
-            
-            if (!currentTargetReached) {
-              return (
-                <div className="flex justify-center mb-4">
-                  <Button 
-                    onClick={() => {
-                      const newPausedState = !operationsState.paused;
-                      setIsPaused(newPausedState);
-                      updateOperationsState({ paused: newPausedState });
-                    }}
-                    className={`px-6 py-2 font-semibold ${
-                      operationsState.paused 
-                        ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
-                        : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
-                    } text-white`}
-                  >
-                    {operationsState.paused ? 'Retomar Operações' : 'Pausar Operações'}
-                  </Button>
-                </div>
-              );
-            }
-            return null;
-          })()
+        {operationsState.started && !dailyTargetReached && (
+          <div className="flex justify-center mb-4">
+            <Button 
+              onClick={() => {
+                const newPausedState = !operationsState.paused;
+                setIsPaused(newPausedState);
+                updateOperationsState({ paused: newPausedState });
+              }}
+              className={`px-6 py-2 font-semibold ${
+                operationsState.paused 
+                  ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600' 
+                  : 'bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-700 hover:to-orange-600'
+              } text-white`}
+            >
+              {operationsState.paused ? 'Retomar Operações' : 'Pausar Operações'}
+            </Button>
+          </div>
         )}
 
         {dailyTargetReached && targetAchievedTime && (
@@ -426,6 +491,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 <div className="bg-green-600/20 border border-green-500/50 rounded-lg p-4 mb-4">
                   <p className="text-green-400 font-medium">🎉 Meta diária atingida!</p>
                   <p className="text-green-300 text-sm">Lucro gerado: R$ {config.targetProfit.toFixed(2)}</p>
+                  <p className="text-green-200 text-xs mt-1">
+                    Próximo ciclo inicia em: {Math.ceil(24 - hoursElapsed)} horas
+                  </p>
                 </div>
               );
             }
