@@ -156,11 +156,6 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         
         setIsStarted(profile.auto_operations_started || false);
         setIsPaused(profile.auto_operations_paused || false);
-        
-        // Check if daily target is reached based on database state
-        const targetReached = profile.auto_operations_completed_today >= config.maxSignals;
-        setDailyTargetReached(targetReached);
-        setHasGeneratedToday(profile.auto_operations_completed_today > 0);
       }
       
       // Load today's signals
@@ -193,13 +188,20 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         const totalProfit = data.reduce((sum, signal) => sum + (signal.profit || 0), 0);
         setTotalProfitToday(totalProfit);
         
-        // Check if profit target is reached
+        // Check if profit target is reached - but only if operations are not in progress
         const targetReached = totalProfit >= config.targetProfit;
         setDailyTargetReached(targetReached);
         if (targetReached && !targetAchievedTime) {
           setTargetAchievedTime(new Date());
         }
         setHasGeneratedToday(data.length > 0);
+      } else {
+        // No signals loaded, reset state to allow fresh start
+        setSignals([]);
+        setTotalProfitToday(0);
+        setDailyTargetReached(false);
+        setTargetAchievedTime(null);
+        setHasGeneratedToday(false);
       }
     };
     
@@ -220,11 +222,15 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   }, [operationsState.started, cycleStartTime]);
   
   useEffect(() => {
-    if (config.maxSignals === 0 || totalProfitToday >= config.targetProfit || !operationsState.started || operationsState.paused) return;
+    // Prevent signal generation if target is reached or operations are not active
+    if (config.maxSignals === 0 || dailyTargetReached || !operationsState.started || operationsState.paused) return;
 
     const generateSignal = () => {
       const activeSignals = signals.filter(s => s.status === 'active');
       if (activeSignals.length >= 1) return; // Only allow 1 active signal at a time
+      
+      // Double check target before generating
+      if (totalProfitToday >= config.targetProfit) return;
 
       const asset = assets[Math.floor(Math.random() * assets.length)];
       const direction = Math.random() > 0.5 ? 'CALL' : 'PUT';
@@ -245,18 +251,20 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       setSignals(prev => [...prev, newSignal]);
     };
 
-    // Generate first signal immediately if no active signals exist
+    // Generate first signal immediately if no active signals exist and target not reached
     const activeSignals = signals.filter(s => s.status === 'active');
-    if (activeSignals.length === 0) {
+    if (activeSignals.length === 0 && !dailyTargetReached) {
       generateSignal();
     }
 
     const interval = setInterval(() => {
-      generateSignal();
+      if (!dailyTargetReached) {
+        generateSignal();
+      }
     }, 120000); // Generate new signal every 2 minutes
 
     return () => clearInterval(interval);
-  }, [signals.length, config.maxSignals, operationsState.completedToday, operationsState.started, operationsState.paused, totalProfitToday]);
+  }, [signals.length, config.maxSignals, operationsState.completedToday, operationsState.started, operationsState.paused, totalProfitToday, dailyTargetReached]);
 
   useEffect(() => {
     if (!operationsState.started || operationsState.paused) return;
@@ -336,7 +344,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
           updateOperationsState({ completedToday: newCompletedCount });
           
           // Check if we've reached the profit target
-          if (newTotalProfit >= config.targetProfit) {
+          if (newTotalProfit >= config.targetProfit && !dailyTargetReached) {
             setDailyTargetReached(true);
             setHasGeneratedToday(true);
             if (!targetAchievedTime) {
@@ -348,16 +356,18 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 
                 try {
                   const now = new Date();
-                  const historyDate = now.toISOString().split('T')[0];
+                  const today = now.toISOString().split('T')[0];
                   
-                  // Create individual entry for this cycle's earnings
+                  // Create individual entry for this cycle's earnings with current timestamp
                   await supabase.from('daily_earnings_history').insert({
                     user_id: userId,
-                    date: historyDate,
+                    date: today,
                     total_earnings: config.targetProfit, // Exact target amount for this cycle
                     total_commissions: 0,
                     operations_count: newCompletedCount
                   });
+                  
+                  console.log('Earnings history saved successfully');
                 } catch (error) {
                   console.error('Error saving earnings history:', error);
                 }
