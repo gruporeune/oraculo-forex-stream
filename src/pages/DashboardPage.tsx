@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import { supabase } from '@/integrations/supabase/client';
+import { useDailySignalsReset } from '@/hooks/useDailySignalsReset';
 import DashboardHomePage from './DashboardHomePage';
 import ProfilePage from './ProfilePage';
 import NetworkPage from './NetworkPage';
@@ -18,6 +19,9 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
+
+  // Use the daily signals reset hook
+  useDailySignalsReset(user?.id);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(

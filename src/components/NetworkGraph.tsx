@@ -75,19 +75,27 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
 
     if (!profile) return null;
 
-    // Get direct referrals
-    const { data: referralData } = await supabase
-      .from('user_referrals')
-      .select('referred_id, commission_earned')
-      .eq('referrer_id', nodeId);
+    // Get direct referrals using referred_by column
+    const { data: directReferrals } = await supabase
+      .from('profiles')
+      .select('id, username, full_name, plan')
+      .eq('referred_by', nodeId);
 
     const referrals: NetworkNode[] = [];
     
-    if (referralData && referralData.length > 0) {
-      for (const ref of referralData) {
-        const childNode = await buildNetworkTree(ref.referred_id, level + 1);
+    if (directReferrals && directReferrals.length > 0) {
+      for (const referralProfile of directReferrals) {
+        const childNode = await buildNetworkTree(referralProfile.id, level + 1);
         if (childNode) {
-          childNode.commission_earned = ref.commission_earned;
+          // Get commission for this referral
+          const { data: commissionData } = await supabase
+            .from('user_referrals')
+            .select('commission_earned')
+            .eq('referrer_id', nodeId)
+            .eq('referred_id', referralProfile.id)
+            .maybeSingle();
+          
+          childNode.commission_earned = commissionData?.commission_earned || 0;
           referrals.push(childNode);
         }
       }
