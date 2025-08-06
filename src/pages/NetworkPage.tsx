@@ -153,12 +153,19 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             .eq('id', profile.referred_by)
             .maybeSingle();
 
+          // Calculate level 2 commission for me (current user gets 3% of level 2 referrals)
+          const level2Commission = profile.plan !== 'free' ? 
+            (profile.plan === 'partner' ? 6.0 :
+             profile.plan === 'master' ? 18.0 :
+             profile.plan === 'premium' ? 82.5 :
+             profile.plan === 'platinum' ? 150.0 : 0) : 0;
+
           level2WithCommissions.push({
             id: profile.id,
             full_name: profile.full_name || 'Usuário',
             plan: profile.plan || 'free',
             created_at: commissionData?.created_at || profile.updated_at,
-            commission_earned: 0, // Level 2 commission goes to my direct referral, not to me
+            commission_earned: level2Commission,
             username: profile.username || '',
             phone: profile.phone || '',
             level: 2,
@@ -192,12 +199,19 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             .eq('id', profile.referred_by)
             .maybeSingle();
 
+          // Calculate level 3 commission for me (current user gets 2% of level 3 referrals)
+          const level3Commission = profile.plan !== 'free' ? 
+            (profile.plan === 'partner' ? 4.0 :
+             profile.plan === 'master' ? 12.0 :
+             profile.plan === 'premium' ? 55.0 :
+             profile.plan === 'platinum' ? 100.0 : 0) : 0;
+
           level3WithCommissions.push({
             id: profile.id,
             full_name: profile.full_name || 'Usuário',
             plan: profile.plan || 'free',
             created_at: commissionData?.created_at || profile.updated_at,
-            commission_earned: 0, // Level 3 commission goes to level 2 referrer, not to me
+            commission_earned: level3Commission,
             username: profile.username || '',
             phone: profile.phone || '',
             level: 3,

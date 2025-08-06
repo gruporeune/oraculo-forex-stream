@@ -85,19 +85,19 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
         </CardContent>
       </Card>
 
-      {/* SUAS COMISSÕES */}
+      {/* COMISSÕES TOTAIS */}
       <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-4 h-4" />
-            SUAS COMISSÕES
+            COMISSÕES TOTAIS
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.daily_commissions || 0)}
           </div>
-          <p className="text-xs text-white/70">Comissões do dia</p>
+          <p className="text-xs text-white/70">Indicações do dia</p>
         </CardContent>
       </Card>
 
