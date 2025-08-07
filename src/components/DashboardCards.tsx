@@ -95,7 +95,7 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">
-            {formatCurrency(profile?.daily_commissions || 0)}
+            {formatCurrency(profile?.total_referral_commissions || 0)}
           </div>
           <p className="text-xs text-white/70">Indicações do dia</p>
         </CardContent>

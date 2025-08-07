@@ -138,6 +138,7 @@ export type Database = {
           plan: string | null
           referral_code: string | null
           referred_by: string | null
+          total_referral_commissions: number | null
           updated_at: string
           username: string | null
         }
@@ -159,6 +160,7 @@ export type Database = {
           plan?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          total_referral_commissions?: number | null
           updated_at?: string
           username?: string | null
         }
@@ -180,6 +182,7 @@ export type Database = {
           plan?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          total_referral_commissions?: number | null
           updated_at?: string
           username?: string | null
         }

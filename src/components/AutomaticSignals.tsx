@@ -207,9 +207,10 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
         const targetAlreadyReached = (profile.daily_earnings || 0) >= config.targetProfit;
         setDailyTargetReached(targetAlreadyReached);
         
-        // If target was reached and we have a cycle start time, set the target achieved time
+        // If target was reached and we have a cycle start time, calculate when it will reset (24h later)
         if (targetAlreadyReached && savedCycleTime) {
-          setTargetAchievedTime(savedCycleTime);
+          const resetTime = new Date(savedCycleTime.getTime() + 24 * 60 * 60 * 1000);
+          setTargetAchievedTime(resetTime);
         }
         
         // Prevent any new operations if target is already reached
@@ -438,7 +439,9 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
             updateOperationsState({ paused: true });
             
             if (!targetAchievedTime) {
-              setTargetAchievedTime(new Date());
+              // Set target achieved time to 24 hours from now for countdown
+              const resetTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
+              setTargetAchievedTime(resetTime);
               
                // Save earnings to history immediately when target is reached - individual entry
                const saveEarningsHistory = async () => {
@@ -565,6 +568,11 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                 <Play className="w-4 h-4 mr-2" />
                 Iniciar Operações Automáticas
               </Button>
+              <div className="mt-4 bg-blue-600/20 border border-blue-500/50 rounded-lg p-3">
+                <p className="text-blue-300 text-sm font-medium text-center">
+                  ⚡ As operações são feitas na categoria de BLITZ/5s
+                </p>
+              </div>
             </div>
           </div>
         )}
