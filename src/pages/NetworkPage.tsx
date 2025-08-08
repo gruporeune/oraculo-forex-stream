@@ -279,7 +279,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{referrals.length}</div>
-            <p className="text-xs text-white/70">Pessoas indicadas</p>
+            <p className="text-xs text-white/70">Indicados diretos (Nível 1)</p>
           </CardContent>
         </Card>
 
