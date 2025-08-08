@@ -4,10 +4,11 @@ import { DollarSign, TrendingUp, Users, Wallet, Package } from 'lucide-react';
 
 interface DashboardCardsProps {
   profile: any;
+  userPlans: any[];
   onWithdraw: () => void;
 }
 
-export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
+export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCardsProps) {
   const planLimits = {
     free: { signals: 5, dailyEarnings: 0 },
     partner: { signals: 20, dailyEarnings: 0.10 },
@@ -16,10 +17,17 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
     platinum: { signals: 1000, dailyEarnings: 20.00 }
   };
 
-  const currentPlan = profile?.plan || 'free';
-  const limits = planLimits[currentPlan as keyof typeof planLimits];
-  const usedSignals = profile?.daily_signals_used || 0;
-  const remainingSignals = limits.signals - usedSignals;
+  // Calculate total signals from all active plans
+  const totalSignals = userPlans?.reduce((total, plan) => {
+    const planSignals = planLimits[plan.plan_name as keyof typeof planLimits]?.signals || 0;
+    return total + planSignals;
+  }, 0) || 5; // Default to 5 for free plan
+
+  const totalUsedSignals = userPlans?.reduce((total, plan) => total + (plan.daily_signals_used || 0), 0) || 0;
+  const remainingSignals = totalSignals - totalUsedSignals;
+
+  // Get plan names for display
+  const planNames = userPlans?.length > 0 ? userPlans.map(p => p.plan_name.toUpperCase()).join(', ') : 'FREE';
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -41,17 +49,17 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-      {/* SEU PLANO */}
-      <Card className={`bg-gradient-to-br ${getPlanColor(currentPlan)}`}>
+      {/* SEUS PLANOS */}
+      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Package className="w-4 h-4" />
-            SEU PLANO
+            SEUS PLANOS
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white uppercase">{currentPlan}</div>
-          <p className="text-xs text-white/70">{limits.signals} sinais/dia</p>
+          <div className="text-2xl font-bold text-white">{planNames}</div>
+          <p className="text-xs text-white/70">{totalSignals} sinais/dia</p>
         </CardContent>
       </Card>
 
@@ -64,7 +72,7 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">{remainingSignals}/{limits.signals}</div>
+          <div className="text-2xl font-bold text-white">{remainingSignals}/{totalSignals}</div>
           <p className="text-xs text-white/70">Disponíveis hoje</p>
         </CardContent>
       </Card>
@@ -85,17 +93,17 @@ export function DashboardCards({ profile, onWithdraw }: DashboardCardsProps) {
         </CardContent>
       </Card>
 
-      {/* COMISSÕES TOTAIS */}
+      {/* COMISSÕES DO DIA */}
       <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-4 h-4" />
-            COMISSÕES TOTAIS
+            COMISSÕES DO DIA
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">
-            {formatCurrency(profile?.total_referral_commissions || 0)}
+            {formatCurrency(profile?.daily_referral_commissions || 0)}
           </div>
           <p className="text-xs text-white/70">Indicações do dia</p>
         </CardContent>

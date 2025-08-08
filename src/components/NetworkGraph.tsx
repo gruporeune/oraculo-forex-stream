@@ -63,7 +63,7 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
     }
   };
 
-  const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode> => {
+  const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
     if (level > 3) return null; // Limit to 3 levels
 
     // Get user profile

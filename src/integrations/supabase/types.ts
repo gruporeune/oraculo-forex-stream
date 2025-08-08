@@ -130,6 +130,7 @@ export type Database = {
           cycle_start_time: string | null
           daily_commissions: number | null
           daily_earnings: number | null
+          daily_referral_commissions: number | null
           daily_signals_used: number | null
           full_name: string | null
           id: string
@@ -152,6 +153,7 @@ export type Database = {
           cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
+          daily_referral_commissions?: number | null
           daily_signals_used?: number | null
           full_name?: string | null
           id: string
@@ -174,6 +176,7 @@ export type Database = {
           cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
+          daily_referral_commissions?: number | null
           daily_signals_used?: number | null
           full_name?: string | null
           id?: string
@@ -248,6 +251,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_plans: {
+        Row: {
+          auto_operations_completed_today: number
+          auto_operations_paused: boolean
+          auto_operations_started: boolean
+          created_at: string
+          cycle_start_time: string | null
+          daily_earnings: number
+          daily_signals_used: number
+          id: string
+          is_active: boolean
+          last_reset_date: string
+          plan_name: string
+          purchase_date: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_operations_completed_today?: number
+          auto_operations_paused?: boolean
+          auto_operations_started?: boolean
+          created_at?: string
+          cycle_start_time?: string | null
+          daily_earnings?: number
+          daily_signals_used?: number
+          id?: string
+          is_active?: boolean
+          last_reset_date?: string
+          plan_name: string
+          purchase_date?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_operations_completed_today?: number
+          auto_operations_paused?: boolean
+          auto_operations_started?: boolean
+          created_at?: string
+          cycle_start_time?: string | null
+          daily_earnings?: number
+          daily_signals_used?: number
+          id?: string
+          is_active?: boolean
+          last_reset_date?: string
+          plan_name?: string
+          purchase_date?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       user_referrals: {
         Row: {

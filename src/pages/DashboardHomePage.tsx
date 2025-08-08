@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { DashboardCards } from '@/components/DashboardCards';
-import { AutomaticSignals } from '@/components/AutomaticSignals';
+import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,7 +13,29 @@ interface DashboardHomePageProps {
 }
 
 export default function DashboardHomePage({ user, profile, onProfileUpdate }: DashboardHomePageProps) {
+  const [userPlans, setUserPlans] = useState<any[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (user?.id) {
+      loadUserPlans();
+    }
+  }, [user?.id]);
+
+  const loadUserPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setUserPlans(data || []);
+    } catch (error) {
+      console.error('Error loading user plans:', error);
+    }
+  };
 
   const handleWithdraw = () => {
     window.location.href = '/dashboard/withdrawals';
@@ -61,6 +83,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
 
       <DashboardCards 
         profile={profile} 
+        userPlans={userPlans}
         onWithdraw={handleWithdraw}
       />
 
@@ -108,10 +131,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         </motion.div>
       </motion.div>
 
-      <AutomaticSignals 
-        userPlan={profile?.plan || 'free'}
-        onEarningsGenerated={handleEarningsGenerated}
-        userId={user?.id}
+      <MultiPlanAutomaticSignals 
+        user={user}
+        userPlans={userPlans}
+        onPlansUpdate={loadUserPlans}
       />
 
       <EarningsHistory userId={user?.id} />

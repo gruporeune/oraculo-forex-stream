@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const plans = [
   {
@@ -90,9 +91,33 @@ const plans = [
 ];
 
 export default function PlansPage() {
-  const handlePurchase = (planName: string, price: string) => {
-    // TODO: Integração com gateway de pagamento
-    console.log(`Comprando plano ${planName} por ${price}`);
+  const handlePurchase = async (planName: string, price: string) => {
+    try {
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      // Insert new plan purchase
+      const { error } = await supabase
+        .from('user_plans')
+        .insert({
+          user_id: user.id,
+          plan_name: planName.toLowerCase()
+        });
+
+      if (error) {
+        console.error('Error purchasing plan:', error);
+        return;
+      }
+
+      console.log(`Plano ${planName} comprado com sucesso!`);
+      // TODO: Integração com gateway de pagamento real
+    } catch (error) {
+      console.error('Error in handlePurchase:', error);
+    }
   };
 
   return (

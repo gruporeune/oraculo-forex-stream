@@ -236,7 +236,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
     });
   };
 
-  const totalCommissions = profile?.available_balance || 0;
+  const totalCommissions = profile?.total_referral_commissions || 0;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -305,7 +305,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
-              {formatCurrency(profile?.daily_commissions || 0)}
+              {formatCurrency(profile?.daily_referral_commissions || 0)}
             </div>
             <p className="text-xs text-white/70">Ganhos do dia</p>
           </CardContent>
