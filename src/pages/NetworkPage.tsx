@@ -113,21 +113,40 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       // Get detailed commission data for each referral
       const formattedReferrals = [];
       for (const profile of directReferralsData) {
-        // Get detailed commission history by plan
+        // Get detailed commission history by plan (ordered by date desc to show latest first)
         const { data: detailedCommissions } = await supabase
           .from('referral_commissions')
           .select('plan_name, commission_amount, created_at, commission_level')
           .eq('referrer_id', user.id)
           .eq('referred_id', profile.id)
-          .eq('commission_level', 1); // Level 1 for direct referrals
+          .eq('commission_level', 1) // Level 1 for direct referrals
+          .order('created_at', { ascending: false });
 
         const totalCommission = detailedCommissions?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
         const latestCommissionDate = detailedCommissions?.[0]?.created_at || profile.updated_at;
 
+        // Get the current highest active plan from user_plans table
+        const { data: activePlans } = await supabase
+          .from('user_plans')
+          .select('plan_name')
+          .eq('user_id', profile.id)
+          .eq('is_active', true);
+
+        let currentPlan = profile.plan || 'free';
+        if (activePlans && activePlans.length > 0) {
+          const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+          const highestPlan = activePlans.reduce((highest, current) => {
+            const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
+            const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
+            return currentPriority > highestPriority ? current : highest;
+          });
+          currentPlan = highestPlan.plan_name;
+        }
+
         formattedReferrals.push({
           id: profile.id,
           full_name: profile.full_name || 'Usuário',
-          plan: profile.plan || 'free',
+          plan: currentPlan, // Use the highest active plan
           created_at: latestCommissionDate,
           commission_earned: totalCommission,
           username: profile.username || '',
@@ -174,20 +193,39 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             .eq('id', profile.referred_by)
             .maybeSingle();
 
-          // Get commission data if it exists
+          // Get commission data if it exists (ordered by date desc)
           const { data: commissionData } = await supabase
             .from('referral_commissions')
             .select('plan_name, commission_amount, created_at, commission_level')
             .eq('referrer_id', user.id)
             .eq('referred_id', profile.id)
-            .eq('commission_level', 2);
+            .eq('commission_level', 2)
+            .order('created_at', { ascending: false });
 
           const totalCommission = commissionData?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
+
+          // Get the current highest active plan from user_plans table
+          const { data: activePlans } = await supabase
+            .from('user_plans')
+            .select('plan_name')
+            .eq('user_id', profile.id)
+            .eq('is_active', true);
+
+          let currentPlan = profile.plan || 'free';
+          if (activePlans && activePlans.length > 0) {
+            const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+            const highestPlan = activePlans.reduce((highest, current) => {
+              const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
+              const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
+              return currentPriority > highestPriority ? current : highest;
+            });
+            currentPlan = highestPlan.plan_name;
+          }
 
           formattedIndirectReferrals.push({
             id: profile.id,
             full_name: profile.full_name || 'Usuário',
-            plan: profile.plan || 'free',
+            plan: currentPlan, // Use the highest active plan
             created_at: commissionData?.[0]?.created_at || profile.updated_at,
             commission_earned: totalCommission,
             username: profile.username || '',
@@ -216,20 +254,39 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
               .eq('id', profile.referred_by)
               .maybeSingle();
 
-            // Get commission data if it exists
+            // Get commission data if it exists (ordered by date desc)
             const { data: commissionData } = await supabase
               .from('referral_commissions')
               .select('plan_name, commission_amount, created_at, commission_level')
               .eq('referrer_id', user.id)
               .eq('referred_id', profile.id)
-              .eq('commission_level', 3);
+              .eq('commission_level', 3)
+              .order('created_at', { ascending: false });
 
             const totalCommission = commissionData?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
+
+            // Get the current highest active plan from user_plans table
+            const { data: activePlans } = await supabase
+              .from('user_plans')
+              .select('plan_name')
+              .eq('user_id', profile.id)
+              .eq('is_active', true);
+
+            let currentPlan = profile.plan || 'free';
+            if (activePlans && activePlans.length > 0) {
+              const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+              const highestPlan = activePlans.reduce((highest, current) => {
+                const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
+                const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
+                return currentPriority > highestPriority ? current : highest;
+              });
+              currentPlan = highestPlan.plan_name;
+            }
 
             formattedIndirectReferrals.push({
               id: profile.id,
               full_name: profile.full_name || 'Usuário',
-              plan: profile.plan || 'free',
+              plan: currentPlan, // Use the highest active plan
               created_at: commissionData?.[0]?.created_at || profile.updated_at,
               commission_earned: totalCommission,
               username: profile.username || '',
@@ -400,9 +457,12 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         {referral.phone && (
                           <p className="text-white/50 text-xs">{referral.phone}</p>
                         )}
-                        <p className="text-white/60 text-sm">
-                          Indicado em {new Date(referral.created_at).toLocaleDateString('pt-BR')} às {new Date(referral.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                       <p className="text-white/60 text-sm">
+                         {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 ? 
+                           `Primeira comissão: ${new Date(referral.commissions_by_plan[referral.commissions_by_plan.length - 1].created_at).toLocaleDateString('pt-BR')}` :
+                           `Indicado em ${new Date(referral.created_at).toLocaleDateString('pt-BR')}`
+                         }
+                       </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -426,21 +486,22 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <p className="text-white/70 text-xs mb-2">Histórico de Comissões por Plano:</p>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {referral.commissions_by_plan.map((commission, index) => (
-                          <div key={index} className="bg-white/5 rounded p-2 flex justify-between items-center">
-                            <div>
-                              <Badge className={`${getPlanColor(commission.plan_name)} text-white uppercase text-xs`}>
-                                {commission.plan_name}
-                              </Badge>
-                              <p className="text-white/50 text-xs mt-1">
-                                {new Date(commission.created_at).toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                            <p className="text-green-400 font-medium text-sm">
-                              {formatCurrency(commission.commission_amount)}
-                            </p>
-                          </div>
-                        ))}
+                         {referral.commissions_by_plan.map((commission, index) => (
+                           <div key={index} className="bg-white/5 rounded p-2 flex justify-between items-center">
+                             <div>
+                               <Badge className={`${getPlanColor(commission.plan_name)} text-white uppercase text-xs`}>
+                                 {commission.plan_name}
+                               </Badge>
+                               <p className="text-white/50 text-xs mt-1">
+                                 {new Date(commission.created_at).toLocaleDateString('pt-BR')} às{' '}
+                                 {new Date(commission.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                               </p>
+                             </div>
+                             <p className="text-green-400 font-medium text-sm">
+                               {formatCurrency(commission.commission_amount)}
+                             </p>
+                           </div>
+                         ))}
                       </div>
                     </div>
                   )}
@@ -492,12 +553,12 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         {referral.phone && (
                           <p className="text-white/50 text-xs">{referral.phone}</p>
                         )}
-                        <p className="text-white/50 text-xs">
-                          Indicado por: {referral.referrer_name}
-                        </p>
-                        <p className="text-white/60 text-sm">
-                          Indicado em {new Date(referral.created_at).toLocaleDateString('pt-BR')} às {new Date(referral.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
+                         <p className="text-white/60 text-sm">
+                           Indicado por: {referral.referrer_name} {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 ? 
+                             `• Primeira comissão: ${new Date(referral.commissions_by_plan[referral.commissions_by_plan.length - 1].created_at).toLocaleDateString('pt-BR')}` :
+                             `• Sem comissões ainda`
+                           }
+                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -510,9 +571,9 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         {referral.plan}
                       </Badge>
                       <div className="text-right">
-                        <p className="text-green-400 font-medium">
-                          {formatCurrency(referral.commission_earned)}
-                        </p>
+                         <p className="text-blue-400 font-medium">
+                           {formatCurrency(referral.commission_earned)}
+                         </p>
                         <p className="text-white/60 text-xs">Comissão Total</p>
                       </div>
                     </div>
@@ -529,13 +590,14 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                               <Badge className={`${getPlanColor(commission.plan_name)} text-white uppercase text-xs`}>
                                 {commission.plan_name}
                               </Badge>
-                              <p className="text-white/50 text-xs mt-1">
-                                {new Date(commission.created_at).toLocaleDateString('pt-BR')}
-                              </p>
-                            </div>
-                            <p className="text-green-400 font-medium text-sm">
-                              {formatCurrency(commission.commission_amount)}
-                            </p>
+                               <p className="text-white/50 text-xs mt-1">
+                                 {new Date(commission.created_at).toLocaleDateString('pt-BR')} às{' '}
+                                 {new Date(commission.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                               </p>
+                             </div>
+                             <p className="text-blue-400 font-medium text-sm">
+                               {formatCurrency(commission.commission_amount)}
+                             </p>
                           </div>
                         ))}
                       </div>

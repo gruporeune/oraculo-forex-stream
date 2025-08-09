@@ -105,14 +105,16 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
       for (const referralProfile of directReferrals) {
         const childNode = await buildNetworkTree(referralProfile.id, level + 1);
         if (childNode) {
-          // Get total commission for all plans of this referral
+          // Get total commission for all plans of this referral from referral_commissions table
+          const commissionLevel = level; // Level relative to the original user
           const { data: commissionData } = await supabase
-            .from('user_referrals')
-            .select('commission_earned')
-            .eq('referrer_id', nodeId)
-            .eq('referred_id', referralProfile.id);
+            .from('referral_commissions')
+            .select('commission_amount')
+            .eq('referrer_id', userId) // Always use the original userId as referrer
+            .eq('referred_id', referralProfile.id)
+            .eq('commission_level', commissionLevel);
           
-          childNode.commission_earned = commissionData?.reduce((sum, item) => sum + (item.commission_earned || 0), 0) || 0;
+          childNode.commission_earned = commissionData?.reduce((sum, item) => sum + (item.commission_amount || 0), 0) || 0;
           referrals.push(childNode);
         }
       }
