@@ -21,18 +21,83 @@ interface PaymentData {
   success: boolean;
   paymentId: string;
   qrCode: string;
+  qrCodeImage?: string;
   amount: number;
   expiresAt?: string;
-  paymentUrl?: string;
 }
 
 export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    cpf: ''
+  });
   const { toast } = useToast();
 
+  const formatCPF = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+    }
+    return value;
+  };
+
+  const formatPhone = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    }
+    return value;
+  };
+
   const createPayment = async () => {
+    // Validar campos obrigatórios
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim()) {
+      toast({
+        title: "Erro",
+        description: "Todos os campos são obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar formato do email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Erro",
+        description: "Email inválido",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar formato do CPF (básico)
+    const cpfNumbers = formData.cpf.replace(/\D/g, '');
+    if (cpfNumbers.length !== 11) {
+      toast({
+        title: "Erro",
+        description: "CPF deve ter 11 dígitos",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar formato do telefone
+    const phoneNumbers = formData.phone.replace(/\D/g, '');
+    if (phoneNumbers.length < 10) {
+      toast({
+        title: "Erro",
+        description: "Telefone inválido",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -45,29 +110,15 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (!profile) {
-        toast({
-          title: "Erro",
-          description: "Perfil do usuário não encontrado",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Call the AbacatePay edge function to create payment
       const { data, error } = await supabase.functions.invoke('create-abacatepay-payment', {
         body: {
           planName: plan.name,
           amount: parseFloat(plan.price.replace('R$ ', '').replace('.', '').replace(',', '.')),
           userId: user.id,
-          userEmail: user.email || profile.username + '@bulltec.com',
-          userName: profile.full_name || profile.username
+          userEmail: formData.email,
+          userName: formData.name,
+          userPhone: formData.phone.replace(/\D/g, ''),
+          userCpf: formData.cpf.replace(/\D/g, '')
         }
       });
 
@@ -112,6 +163,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   const handleClose = () => {
     setPaymentData(null);
+    setFormData({ name: '', phone: '', email: '', cpf: '' });
     setIsLoading(false);
     setIsCopied(false);
     onClose();
@@ -119,52 +171,108 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md bg-black/95 border border-purple-500/50 text-white">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto bg-black/95 border border-purple-500/50 text-white">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold">
+          <DialogTitle className="flex items-center gap-2">
             Finalizar Pagamento
           </DialogTitle>
-          <DialogDescription className="text-center text-white/70">
+          <DialogDescription className="text-white/70">
             Complete o pagamento via PIX para ativar seu plano
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Plan Summary */}
-          <div className={`p-4 rounded-lg bg-gradient-to-r ${plan.gradient} bg-opacity-20 border border-purple-500/30`}>
-            <h3 className="font-bold text-lg">{plan.name}</h3>
+          <motion.div 
+            className={`bg-gradient-to-r ${plan.gradient} text-white p-6 rounded-lg bg-opacity-20 border border-purple-500/30`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <h3 className="text-lg font-bold">{plan.name}</h3>
             <p className="text-2xl font-bold">{plan.price}</p>
-            <p className="text-sm text-white/70">Pagamento único • Acesso imediato</p>
-          </div>
+            <p className="text-sm opacity-90">Pagamento único • Acesso imediato</p>
+          </motion.div>
 
           {!paymentData ? (
-            /* Initial State */
-            <div className="text-center space-y-4">
-              <p className="text-white/80">
-                Clique em "Gerar PIX" para criar seu pagamento via PIX
+            <div className="space-y-4">
+              <h4 className="font-semibold text-sm text-white/80">
+                Dados para o pagamento PIX:
+              </h4>
+              
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-white">Nome Completo *</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                    placeholder="Digite seu nome completo"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white">Email *</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                    placeholder="seu@email.com"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white">Telefone *</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: formatPhone(e.target.value)})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                    placeholder="(11) 99999-9999"
+                    maxLength={15}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white">CPF *</label>
+                  <input
+                    type="text"
+                    value={formData.cpf}
+                    onChange={(e) => setFormData({...formData, cpf: formatCPF(e.target.value)})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                    placeholder="000.000.000-00"
+                    maxLength={14}
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-white/60">
+                * Campos obrigatórios para gerar o PIX
               </p>
-              <Button
-                onClick={createPayment}
+
+              <Button 
+                onClick={createPayment} 
                 disabled={isLoading}
-                className="w-full bg-purple-600 hover:bg-purple-700"
+                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700"
+                size="lg"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                     Gerando PIX...
                   </>
                 ) : (
                   <>
-                    <QrCode className="mr-2 h-4 w-4" />
+                    <QrCode className="w-4 h-4 mr-2" />
                     Gerar PIX
                   </>
                 )}
               </Button>
             </div>
           ) : (
-            /* Payment Created State */
             <div className="space-y-4">
-              {/* Payment URL and Amount */}
+              {/* Payment Created State */}
               <div className="text-center">
                 <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 mb-4">
                   <p className="text-lg font-bold text-white">Valor: R$ {paymentData.amount.toFixed(2).replace('.', ',')}</p>
@@ -174,31 +282,31 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                     </p>
                   )}
                 </div>
-                
-                {paymentData.paymentUrl && (
-                  <div className="mb-4">
-                    <Button 
-                      onClick={() => window.open(paymentData.paymentUrl, '_blank')}
-                      className="w-full bg-green-600 hover:bg-green-700"
-                    >
-                      Abrir Página de Pagamento
-                    </Button>
-                  </div>
-                )}
               </div>
+
+              {/* QR Code Image */}
+              {paymentData.qrCodeImage && (
+                <div className="text-center">
+                  <img 
+                    src={paymentData.qrCodeImage} 
+                    alt="QR Code PIX" 
+                    className="mx-auto max-w-[200px] h-auto border border-purple-500/30 rounded"
+                  />
+                </div>
+              )}
 
               {/* PIX Code */}
               <div className="space-y-2">
                 <p className="text-sm text-white/80">Código PIX:</p>
                 <div className="flex gap-2">
-                  <div className="flex-1 p-3 bg-black/50 rounded border border-purple-500/30 text-xs font-mono break-all">
+                  <div className="flex-1 p-3 bg-black/50 rounded border border-purple-500/30 text-xs font-mono break-all text-white">
                     {paymentData.qrCode}
                   </div>
                   <Button
                     onClick={copyPixCode}
                     size="sm"
                     variant="outline"
-                    className="border-purple-500/50 hover:bg-purple-500/20"
+                    className="border-purple-500/50 hover:bg-purple-500/20 text-white"
                   >
                     {isCopied ? (
                       <Check className="h-4 w-4" />
