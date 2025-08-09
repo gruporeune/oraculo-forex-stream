@@ -77,20 +77,63 @@ serve(async (req) => {
     const isPaid = abacatePayData.data.status === 'APPROVED' || abacatePayData.data.status === 'PAID';
     console.log('Payment status:', abacatePayData.data.status, 'isPaid:', isPaid);
 
-    // If payment is approved, update the transaction in our database
+    // If payment is approved, update the transaction and user plan
     if (isPaid) {
+      // Get transaction details to know which user and plan
+      const { data: transaction, error: transactionError } = await supabase
+        .from('payment_transactions')
+        .select('user_id, plan_name, amount')
+        .eq('external_id', paymentId)
+        .single();
+
+      if (transactionError || !transaction) {
+        console.error('Error fetching transaction:', transactionError);
+        throw new Error('Transaction not found');
+      }
+
+      console.log('Transaction found:', transaction);
+
+      // Update transaction status
       const { error: updateError } = await supabase
         .from('payment_transactions')
         .update({ 
           status: 'completed',
           paid_at: new Date().toISOString()
         })
-        .eq('payment_id', paymentId);
+        .eq('external_id', paymentId);
 
       if (updateError) {
         console.error('Error updating payment transaction:', updateError);
       } else {
         console.log('Payment transaction updated successfully');
+      }
+
+      // Update user plan in profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ plan: transaction.plan_name.toLowerCase() })
+        .eq('id', transaction.user_id);
+
+      if (profileError) {
+        console.error('Error updating user profile:', profileError);
+      } else {
+        console.log('User profile updated successfully');
+      }
+
+      // Insert into user_plans (this will trigger commission processing)
+      const { error: planError } = await supabase
+        .from('user_plans')
+        .insert({
+          user_id: transaction.user_id,
+          plan_name: transaction.plan_name.toLowerCase(),
+          purchase_date: new Date().toISOString(),
+          is_active: true
+        });
+
+      if (planError) {
+        console.error('Error inserting user plan:', planError);
+      } else {
+        console.log('User plan inserted successfully - commissions will be processed automatically');
       }
     }
 
