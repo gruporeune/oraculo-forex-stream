@@ -107,25 +107,25 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         <motion.div
           whileHover={{ scale: 1.05, rotateY: 5 }}
           whileTap={{ scale: 0.95 }}
-          className="relative group cursor-pointer max-w-md mx-auto"
+          className="relative group cursor-pointer max-w-xs mx-auto"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-          <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
-            <div className="flex items-center justify-center mb-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+          <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 hover:border-purple-400/50 transition-all duration-300">
+            <div className="flex items-center justify-center mb-3">
               <img 
                 src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
                 alt="BullTec" 
                 className="h-[576px] w-auto object-contain"
               />
             </div>
-            <div className="space-y-2">
-              <h4 className="text-xl font-bold text-white">BullTec</h4>
-              <p className="text-purple-200 text-sm">
+            <div className="space-y-1">
+              <h4 className="text-lg font-bold text-white">BullTec</h4>
+              <p className="text-purple-200 text-xs">
                 A corretora oficial recomendada pelo ORÁCULO
               </p>
             </div>
             <div className="absolute top-2 right-2">
-              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
             </div>
           </div>
         </motion.div>
