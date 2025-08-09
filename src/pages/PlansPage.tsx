@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { PaymentModal } from '@/components/PaymentModal';
 
 const plans = [
   {
@@ -91,33 +91,12 @@ const plans = [
 ];
 
 export default function PlansPage() {
-  const handlePurchase = async (planName: string, price: string) => {
-    try {
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        console.error('User not authenticated');
-        return;
-      }
+  const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
-      // Insert new plan purchase
-      const { error } = await supabase
-        .from('user_plans')
-        .insert({
-          user_id: user.id,
-          plan_name: planName.toLowerCase()
-        });
-
-      if (error) {
-        console.error('Error purchasing plan:', error);
-        return;
-      }
-
-      console.log(`Plano ${planName} comprado com sucesso!`);
-      // TODO: Integração com gateway de pagamento real
-    } catch (error) {
-      console.error('Error in handlePurchase:', error);
-    }
+  const handlePurchase = (plan: typeof plans[0]) => {
+    setSelectedPlan(plan);
+    setIsPaymentModalOpen(true);
   };
 
   return (
@@ -191,7 +170,7 @@ export default function PlansPage() {
                 
                 <Button
                   className={`w-full ${plan.buttonColor} text-white font-semibold py-3 text-base hover:scale-105 transition-all duration-300`}
-                  onClick={() => handlePurchase(plan.name, plan.price)}
+                  onClick={() => handlePurchase(plan)}
                 >
                   ASSINAR AGORA
                 </Button>
@@ -206,6 +185,18 @@ export default function PlansPage() {
           </motion.div>
         ))}
       </div>
+
+      {/* Payment Modal */}
+      {selectedPlan && (
+        <PaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setSelectedPlan(null);
+          }}
+          plan={selectedPlan}
+        />
+      )}
 
     </motion.div>
   );
