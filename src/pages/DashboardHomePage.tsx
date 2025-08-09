@@ -5,6 +5,8 @@ import { DashboardCards } from '@/components/DashboardCards';
 import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
 import { useToast } from '@/hooks/use-toast';
+import { Tilt } from '@/components/ui/tilt';
+import { Spotlight } from '@/components/ui/spotlight';
 
 interface DashboardHomePageProps {
   user: any;
@@ -94,43 +96,61 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-center mb-8"
       >
-        <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
-          {/* Logo Card - Reduzido 6x */}
-          <motion.div
-            whileHover={{ scale: 1.05, rotateY: 5 }}
-            whileTap={{ scale: 0.95 }}
-            className="relative group cursor-pointer flex-shrink-0"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-            <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300">
-              <div className="flex items-center justify-center mb-2">
-                <img 
-                  src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                  alt="BullTec" 
-                  className="h-24 w-auto object-contain"
-                />
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 max-w-4xl mx-auto px-4">
+          {/* Logo Card with Tilt Effect */}
+          <div className="flex-shrink-0">
+            <Tilt
+              rotationFactor={8}
+              isRevese
+              style={{
+                transformOrigin: 'center center',
+              }}
+              springOptions={{
+                stiffness: 26.7,
+                damping: 4.1,
+                mass: 0.2,
+              }}
+              className="group relative rounded-lg"
+            >
+              <Spotlight
+                className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
+                size={200}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+              />
+              <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                <div className="flex items-center justify-center mb-2">
+                  <img 
+                    src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
+                    alt="BullTec" 
+                    className="h-16 w-auto object-contain md:h-20"
+                  />
+                </div>
+                <div className="space-y-1 text-center">
+                  <h4 className="text-xs md:text-sm font-bold text-white">BullTec</h4>
+                  <p className="text-purple-200 text-[10px] md:text-xs max-w-[120px]">
+                    A corretora oficial recomendada pelo ORÁCULO
+                  </p>
+                </div>
+                <div className="absolute top-1 right-1">
+                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
               </div>
-              <div className="space-y-1 text-center">
-                <h4 className="text-sm font-bold text-white">BullTec</h4>
-                <p className="text-purple-200 text-xs">
-                  A corretora oficial recomendada pelo ORÁCULO
-                </p>
-              </div>
-              <div className="absolute top-1 right-1">
-                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-          </motion.div>
+            </Tilt>
+          </div>
 
           {/* Texto ao lado */}
-          <div className="flex-1 text-left">
-            <h3 className="text-4xl font-black text-white mb-2 tracking-tight">
+          <div className="flex-1 text-center md:text-left">
+            <h3 className="text-2xl md:text-4xl font-black text-white mb-2 tracking-tight leading-tight">
               Corretora indicada com mais de{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
                 93% de chances de acertos
               </span>
             </h3>
-            <p className="text-white/70 text-lg font-medium">
+            <p className="text-white/70 text-sm md:text-lg font-medium">
               Faça um cadastro na corretora oficial do ORÁCULO
             </p>
           </div>
