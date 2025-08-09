@@ -79,7 +79,8 @@ serve(async (req) => {
       amount,
       plan,
       externalId,
-      userEmail
+      userEmail,
+      payload: paylatamPayload
     })
 
     // Call PayLatam API
@@ -92,20 +93,30 @@ serve(async (req) => {
       body: JSON.stringify(paylatamPayload)
     })
 
+    console.log('PayLatam response status:', paylatamResponse.status)
+
     if (!paylatamResponse.ok) {
       const errorText = await paylatamResponse.text()
-      console.error('PayLatam API error:', errorText)
-      throw new Error(`PayLatam API error: ${paylatamResponse.status}`)
+      console.error('PayLatam API error:', {
+        status: paylatamResponse.status,
+        statusText: paylatamResponse.statusText,
+        errorText: errorText
+      })
+      throw new Error(`PayLatam API error: ${paylatamResponse.status} - ${errorText}`)
     }
 
     const paylatamData = await paylatamResponse.json()
-    console.log('PayLatam response:', paylatamData)
+    console.log('PayLatam response data:', paylatamData)
 
     // Store payment record in database for tracking
-    const { data: user } = await supabase.auth.admin.getUserByEmail(userEmail)
+    const { data: user, error: userError } = await supabase.auth.admin.getUserByEmail(userEmail)
+    
+    if (userError) {
+      console.error('Error getting user:', userError)
+    }
     
     if (user?.user) {
-      // Create a payment tracking record (we'll create this table)
+      // Create a payment tracking record
       const { error: insertError } = await supabase
         .from('payment_transactions')
         .insert({
@@ -114,23 +125,25 @@ serve(async (req) => {
           plan_name: plan,
           amount: amount,
           status: 'pending',
-          paylatam_transaction_id: paylatamData.data?.transaction_id || null,
-          qr_code: paylatamData.data?.qr_code || null,
-          qr_code_text: paylatamData.data?.qr_code_text || null
+          paylatam_transaction_id: paylatamData.transaction_id || paylatamData.data?.transaction_id || null,
+          qr_code: paylatamData.qr_code || paylatamData.data?.qr_code || null,
+          qr_code_text: paylatamData.qr_code_text || paylatamData.data?.qr_code_text || null
         })
 
       if (insertError) {
         console.error('Error storing payment record:', insertError)
       }
+    } else {
+      console.log('User not found for email:', userEmail)
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         data: {
-          qr_code: paylatamData.data?.qr_code,
-          qr_code_text: paylatamData.data?.qr_code_text,
-          transaction_id: paylatamData.data?.transaction_id,
+          qr_code: paylatamData.qr_code || paylatamData.data?.qr_code,
+          qr_code_text: paylatamData.qr_code_text || paylatamData.data?.qr_code_text,
+          transaction_id: paylatamData.transaction_id || paylatamData.data?.transaction_id,
           external_id: externalId,
           amount: amount,
           plan: plan

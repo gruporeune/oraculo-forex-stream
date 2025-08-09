@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Loader2, Copy, Check, QrCode } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -114,6 +114,9 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
           <DialogTitle className="text-center text-xl font-bold">
             Finalizar Pagamento
           </DialogTitle>
+          <DialogDescription className="text-center text-white/70">
+            Complete o pagamento via PIX para ativar seu plano
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
