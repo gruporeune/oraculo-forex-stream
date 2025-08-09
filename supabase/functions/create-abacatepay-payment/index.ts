@@ -145,6 +145,7 @@ serve(async (req) => {
         plan_name: paymentData.planName,
         amount: paymentData.amount,
         external_id: externalId,
+        abacate_payment_id: abacatePayResult.data.id, // Store AbacatePay ID
         qr_code: abacatePayResult.data.brCode,
         qr_code_text: abacatePayResult.data.brCode,
         status: 'pending'

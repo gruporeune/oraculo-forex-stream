@@ -83,7 +83,7 @@ serve(async (req) => {
       const { data: transaction, error: transactionError } = await supabase
         .from('payment_transactions')
         .select('user_id, plan_name, amount')
-        .eq('external_id', paymentId)
+        .eq('abacate_payment_id', paymentId)
         .single();
 
       if (transactionError || !transaction) {
@@ -100,7 +100,7 @@ serve(async (req) => {
           status: 'completed',
           paid_at: new Date().toISOString()
         })
-        .eq('external_id', paymentId);
+        .eq('abacate_payment_id', paymentId);
 
       if (updateError) {
         console.error('Error updating payment transaction:', updateError);
