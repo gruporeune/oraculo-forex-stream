@@ -490,7 +490,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       }));
     };
 
-    const interval = setInterval(updateSignals, 500); // Update every 500ms instead of 1000ms for faster progress
+    // Update progress every 500ms for smoother animation
+    const interval = setInterval(updateSignals, 500);
     return () => clearInterval(interval);
   }, [config.targetProfit, config.maxSignals, onEarningsGenerated, operationsState.started, operationsState.paused, totalProfitToday]);
 

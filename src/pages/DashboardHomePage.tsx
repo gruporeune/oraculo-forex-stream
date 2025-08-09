@@ -114,8 +114,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             <div className="flex items-center justify-center mb-4">
                <img 
                 src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                alt="BullTec"
-                className="h-32 w-auto object-contain"
+                alt="BullTec" 
+                className="h-48 w-auto object-contain"
               />
             </div>
             <div className="space-y-2">
