@@ -36,6 +36,12 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
+    console.log('Environment check:', {
+      hasPaylatamToken: !!paylatamToken,
+      tokenLength: paylatamToken ? paylatamToken.length : 0,
+      tokenPrefix: paylatamToken ? paylatamToken.substring(0, 10) + '...' : 'not found'
+    })
+
     if (!paylatamToken) {
       throw new Error('PayLatam API token not configured')
     }
