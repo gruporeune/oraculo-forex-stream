@@ -144,67 +144,101 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
   const loadIndirectReferrals = async () => {
     try {
-      // Get detailed commission data for levels 2 and 3
-      const { data: indirectCommissions } = await supabase
-        .from('referral_commissions')
-        .select(`
-          referred_id,
-          plan_name,
-          commission_amount,
-          created_at,
-          commission_level,
-          profiles!referral_commissions_referred_id_fkey(
-            id,
-            full_name,
-            username,
-            phone,
-            plan,
-            referred_by
-          )
-        `)
-        .eq('referrer_id', user.id)
-        .in('commission_level', [2, 3])
-        .order('created_at', { ascending: false });
+      // Get direct referrals first
+      const { data: directReferralData } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('referred_by', user.id);
+
+      const directIds = directReferralData?.map(d => d.id) || [];
+
+      if (directIds.length === 0) {
+        setIndirectReferrals([]);
+        return;
+      }
+
+      // Get level 2 referrals (people referred by my direct referrals)
+      const { data: level2Profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, plan, username, phone, referred_by, updated_at')
+        .in('referred_by', directIds);
 
       const formattedIndirectReferrals = [];
-      if (indirectCommissions) {
-        // Group by referred_id to combine multiple plan commissions for the same user
-        const groupedByUser = indirectCommissions.reduce((acc, comm) => {
-          const userId = comm.referred_id;
-          if (!acc[userId]) {
-            acc[userId] = {
-              profile: comm.profiles,
-              commissions: [],
-              totalCommission: 0
-            };
-          }
-          acc[userId].commissions.push(comm);
-          acc[userId].totalCommission += comm.commission_amount;
-          return acc;
-        }, {} as any);
-
-        for (const [userId, userData] of Object.entries(groupedByUser) as any) {
+      
+      if (level2Profiles) {
+        for (const profile of level2Profiles) {
           // Get referrer name
           const { data: referrerData } = await supabase
             .from('profiles')
             .select('full_name')
-            .eq('id', userData.profile.referred_by)
+            .eq('id', profile.referred_by)
             .maybeSingle();
 
-          const level = userData.commissions[0].commission_level;
-          
+          // Get commission data if it exists
+          const { data: commissionData } = await supabase
+            .from('referral_commissions')
+            .select('plan_name, commission_amount, created_at, commission_level')
+            .eq('referrer_id', user.id)
+            .eq('referred_id', profile.id)
+            .eq('commission_level', 2);
+
+          const totalCommission = commissionData?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
+
           formattedIndirectReferrals.push({
-            id: userId,
-            full_name: userData.profile.full_name || 'Usuário',
-            plan: userData.profile.plan || 'free',
-            created_at: userData.commissions[0].created_at,
-            commission_earned: userData.totalCommission,
-            username: userData.profile.username || '',
-            phone: userData.profile.phone || '',
-            level: level,
+            id: profile.id,
+            full_name: profile.full_name || 'Usuário',
+            plan: profile.plan || 'free',
+            created_at: commissionData?.[0]?.created_at || profile.updated_at,
+            commission_earned: totalCommission,
+            username: profile.username || '',
+            phone: profile.phone || '',
+            level: 2,
             referrer_name: referrerData?.full_name || 'Indicador',
-            commissions_by_plan: userData.commissions
+            commissions_by_plan: commissionData || []
           });
+        }
+      }
+
+      // Get level 3 referrals (people referred by level 2 referrals)
+      const level2Ids = level2Profiles?.map(p => p.id) || [];
+      if (level2Ids.length > 0) {
+        const { data: level3Profiles } = await supabase
+          .from('profiles')
+          .select('id, full_name, plan, username, phone, referred_by, updated_at')
+          .in('referred_by', level2Ids);
+
+        if (level3Profiles) {
+          for (const profile of level3Profiles) {
+            // Get referrer name
+            const { data: referrerData } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('id', profile.referred_by)
+              .maybeSingle();
+
+            // Get commission data if it exists
+            const { data: commissionData } = await supabase
+              .from('referral_commissions')
+              .select('plan_name, commission_amount, created_at, commission_level')
+              .eq('referrer_id', user.id)
+              .eq('referred_id', profile.id)
+              .eq('commission_level', 3);
+
+            const totalCommission = commissionData?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
+
+            formattedIndirectReferrals.push({
+              id: profile.id,
+              full_name: profile.full_name || 'Usuário',
+              plan: profile.plan || 'free',
+              created_at: commissionData?.[0]?.created_at || profile.updated_at,
+              commission_earned: totalCommission,
+              username: profile.username || '',
+              phone: profile.phone || '',
+              level: 3,
+              referrer_name: referrerData?.full_name || 'Indicador',
+              commissions_by_plan: commissionData || []
+            });
+          }
         }
       }
 
