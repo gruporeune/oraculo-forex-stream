@@ -339,7 +339,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
 
     // Generate first signal immediately if no active signals exist and target not reached
     const activeSignals = signals.filter(s => s.status === 'active');
-    if (activeSignals.length === 0 && !dailyTargetReached) {
+    if (activeSignals.length === 0 && !dailyTargetReached && operationsState.started && !operationsState.paused) {
+      console.log('Generating initial signal...');
       generateSignal();
     }
 
@@ -519,20 +520,29 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
   }
 
   const handleStartOperations = async () => {
+    console.log('Starting automatic operations...');
     const startTime = new Date();
     setCycleStartTime(startTime);
     setIsStarted(true);
+    setIsPaused(false);
     
     await updateOperationsState({ 
       started: true, 
+      paused: false,
       cycleStartTime: startTime.toISOString() 
     });
     
     // Also save cycle_start_time directly to database
     await supabase
       .from('profiles')
-      .update({ cycle_start_time: startTime.toISOString() })
+      .update({ 
+        cycle_start_time: startTime.toISOString(),
+        auto_operations_started: true,
+        auto_operations_paused: false
+      })
       .eq('id', userId);
+      
+    console.log('Operations started successfully!');
   };
 
   const isOperationActive = operationsState.started && !operationsState.paused && !dailyTargetReached;
@@ -554,24 +564,31 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
 
         {!operationsState.started && operationsState.completedToday === 0 && (
           <div className="text-center py-8">
-            <div className="mb-4">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-purple-600 to-purple-400 rounded-full flex items-center justify-center">
-                <Play className="w-8 h-8 text-white" />
+            <div className="mb-6">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-green-600 to-green-400 rounded-full flex items-center justify-center shadow-lg shadow-green-400/30">
+                <Play className="w-10 h-10 text-white" />
               </div>
-              <h3 className="text-white font-semibold mb-2">Pronto para começar!</h3>
-              <p className="text-white/70 text-sm mb-4">
-                Clique no botão abaixo para iniciar suas operações automáticas do dia
+              <h3 className="text-white font-bold text-xl mb-3">Operações Prontas!</h3>
+              <p className="text-white/70 text-base mb-6">
+                Clique no botão START para iniciar suas operações automáticas do dia
               </p>
+              
+              {/* Botão START grande e destacado */}
               <Button 
                 onClick={handleStartOperations}
-                className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-3 font-semibold"
+                size="lg"
+                className="bg-gradient-to-r from-green-600 to-green-500 hover:from-green-700 hover:to-green-600 text-white px-12 py-4 font-bold text-lg shadow-xl shadow-green-500/30 border-0 rounded-xl transform hover:scale-105 transition-all duration-300"
               >
-                <Play className="w-4 h-4 mr-2" />
-                Iniciar Operações Automáticas
+                <Play className="w-6 h-6 mr-3" />
+                START
               </Button>
-              <div className="mt-4 bg-blue-600/20 border border-blue-500/50 rounded-lg p-3">
+              
+              <div className="mt-6 bg-blue-600/20 border border-blue-500/50 rounded-lg p-4">
                 <p className="text-blue-300 text-sm font-medium text-center">
                   ⚡ As operações são feitas na categoria de BLITZ/5s
+                </p>
+                <p className="text-blue-200 text-xs text-center mt-1">
+                  Meta: R$ {config.targetProfit.toFixed(2)} por dia
                 </p>
               </div>
             </div>
