@@ -202,6 +202,51 @@ export type Database = {
           },
         ]
       }
+      referral_commissions: {
+        Row: {
+          commission_amount: number
+          commission_level: number
+          created_at: string | null
+          id: string
+          plan_name: string
+          referred_id: string
+          referrer_id: string
+        }
+        Insert: {
+          commission_amount?: number
+          commission_level: number
+          created_at?: string | null
+          id?: string
+          plan_name: string
+          referred_id: string
+          referrer_id: string
+        }
+        Update: {
+          commission_amount?: number
+          commission_level?: number
+          created_at?: string | null
+          id?: string
+          plan_name?: string
+          referred_id?: string
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_commissions_referred_id_fkey"
+            columns: ["referred_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_commissions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       signals: {
         Row: {
           analysis: string | null

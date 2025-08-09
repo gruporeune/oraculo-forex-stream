@@ -15,6 +15,13 @@ interface NetworkPageProps {
   profile: any;
 }
 
+interface CommissionByPlan {
+  plan_name: string;
+  commission_amount: number;
+  created_at: string;
+  commission_level: number;
+}
+
 interface Referral {
   id: string;
   full_name: string;
@@ -25,6 +32,7 @@ interface Referral {
   phone?: string;
   level?: number;
   referrer_name?: string;
+  commissions_by_plan?: CommissionByPlan[];
 }
 
 export default function NetworkPage({ user, profile }: NetworkPageProps) {
@@ -62,6 +70,20 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       }, () => {
         loadData();
       })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'referral_commissions'
+      }, () => {
+        loadData();
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'user_plans'
+      }, () => {
+        loadData();
+      })
       .subscribe();
 
     return () => {
@@ -88,24 +110,29 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
         return;
       }
 
-      // Get commission data for each referral
+      // Get detailed commission data for each referral
       const formattedReferrals = [];
       for (const profile of directReferralsData) {
-        const { data: commissionData } = await supabase
-          .from('user_referrals')
-          .select('commission_earned, created_at')
+        // Get detailed commission history by plan
+        const { data: detailedCommissions } = await supabase
+          .from('referral_commissions')
+          .select('plan_name, commission_amount, created_at, commission_level')
           .eq('referrer_id', user.id)
           .eq('referred_id', profile.id)
-          .maybeSingle();
+          .eq('commission_level', 1); // Level 1 for direct referrals
+
+        const totalCommission = detailedCommissions?.reduce((sum, comm) => sum + comm.commission_amount, 0) || 0;
+        const latestCommissionDate = detailedCommissions?.[0]?.created_at || profile.updated_at;
 
         formattedReferrals.push({
           id: profile.id,
           full_name: profile.full_name || 'Usuário',
           plan: profile.plan || 'free',
-          created_at: commissionData?.created_at || profile.updated_at,
-          commission_earned: commissionData?.commission_earned || 0,
+          created_at: latestCommissionDate,
+          commission_earned: totalCommission,
           username: profile.username || '',
-          phone: profile.phone || ''
+          phone: profile.phone || '',
+          commissions_by_plan: detailedCommissions || []
         });
       }
 
@@ -117,113 +144,71 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
   const loadIndirectReferrals = async () => {
     try {
-      // Get direct referrals IDs first using referred_by
-      const { data: directReferralData } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('referred_by', user.id);
+      // Get detailed commission data for levels 2 and 3
+      const { data: indirectCommissions } = await supabase
+        .from('referral_commissions')
+        .select(`
+          referred_id,
+          plan_name,
+          commission_amount,
+          created_at,
+          commission_level,
+          profiles!referral_commissions_referred_id_fkey(
+            id,
+            full_name,
+            username,
+            phone,
+            plan,
+            referred_by
+          )
+        `)
+        .eq('referrer_id', user.id)
+        .in('commission_level', [2, 3])
+        .order('created_at', { ascending: false });
 
-      const directIds = directReferralData?.map(d => d.id) || [];
+      const formattedIndirectReferrals = [];
+      if (indirectCommissions) {
+        // Group by referred_id to combine multiple plan commissions for the same user
+        const groupedByUser = indirectCommissions.reduce((acc, comm) => {
+          const userId = comm.referred_id;
+          if (!acc[userId]) {
+            acc[userId] = {
+              profile: comm.profiles,
+              commissions: [],
+              totalCommission: 0
+            };
+          }
+          acc[userId].commissions.push(comm);
+          acc[userId].totalCommission += comm.commission_amount;
+          return acc;
+        }, {} as any);
 
-      if (directIds.length === 0) {
-        setIndirectReferrals([]);
-        return;
-      }
-
-      // Buscar indicados de 2º nível (pessoas que foram indicadas pelos meus indicados diretos)
-      const { data: level2Profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, plan, username, phone, referred_by, updated_at')
-        .in('referred_by', directIds);
-
-      // Get commission data for level 2 referrals
-      const level2WithCommissions = [];
-      if (level2Profiles) {
-        for (const profile of level2Profiles) {
-          const { data: commissionData } = await supabase
-            .from('user_referrals')
-            .select('commission_earned, created_at')
-            .eq('referrer_id', profile.referred_by)
-            .eq('referred_id', profile.id)
-            .maybeSingle();
-
+        for (const [userId, userData] of Object.entries(groupedByUser) as any) {
           // Get referrer name
           const { data: referrerData } = await supabase
             .from('profiles')
             .select('full_name')
-            .eq('id', profile.referred_by)
+            .eq('id', userData.profile.referred_by)
             .maybeSingle();
 
-          // Calculate level 2 commission for me (current user gets 3% of level 2 referrals)
-          const level2Commission = profile.plan !== 'free' ? 
-            (profile.plan === 'partner' ? 6.0 :
-             profile.plan === 'master' ? 18.0 :
-             profile.plan === 'premium' ? 82.5 :
-             profile.plan === 'platinum' ? 150.0 : 0) : 0;
-
-          level2WithCommissions.push({
-            id: profile.id,
-            full_name: profile.full_name || 'Usuário',
-            plan: profile.plan || 'free',
-            created_at: commissionData?.created_at || profile.updated_at,
-            commission_earned: level2Commission,
-            username: profile.username || '',
-            phone: profile.phone || '',
-            level: 2,
-            referrer_name: referrerData?.full_name || 'Indicador'
+          const level = userData.commissions[0].commission_level;
+          
+          formattedIndirectReferrals.push({
+            id: userId,
+            full_name: userData.profile.full_name || 'Usuário',
+            plan: userData.profile.plan || 'free',
+            created_at: userData.commissions[0].created_at,
+            commission_earned: userData.totalCommission,
+            username: userData.profile.username || '',
+            phone: userData.profile.phone || '',
+            level: level,
+            referrer_name: referrerData?.full_name || 'Indicador',
+            commissions_by_plan: userData.commissions
           });
         }
       }
 
-      // Buscar indicados de 3º nível (pessoas indicadas pelos de 2º nível)
-      const level2Ids = level2Profiles?.map(p => p.id) || [];
-      const { data: level3Profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, plan, username, phone, referred_by, updated_at')
-        .in('referred_by', level2Ids);
-
-      // Get commission data for level 3 referrals
-      const level3WithCommissions = [];
-      if (level3Profiles) {
-        for (const profile of level3Profiles) {
-          const { data: commissionData } = await supabase
-            .from('user_referrals')
-            .select('commission_earned, created_at')
-            .eq('referrer_id', profile.referred_by)
-            .eq('referred_id', profile.id)
-            .maybeSingle();
-
-          // Get referrer name
-          const { data: referrerData } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('id', profile.referred_by)
-            .maybeSingle();
-
-          // Calculate level 3 commission for me (current user gets 2% of level 3 referrals)
-          const level3Commission = profile.plan !== 'free' ? 
-            (profile.plan === 'partner' ? 4.0 :
-             profile.plan === 'master' ? 12.0 :
-             profile.plan === 'premium' ? 55.0 :
-             profile.plan === 'platinum' ? 100.0 : 0) : 0;
-
-          level3WithCommissions.push({
-            id: profile.id,
-            full_name: profile.full_name || 'Usuário',
-            plan: profile.plan || 'free',
-            created_at: commissionData?.created_at || profile.updated_at,
-            commission_earned: level3Commission,
-            username: profile.username || '',
-            phone: profile.phone || '',
-            level: 3,
-            referrer_name: referrerData?.full_name || 'Indicador'
-          });
-        }
-      }
-
-      // Combine level 2 and 3 referrals
-      const allIndirectReferrals = [...level2WithCommissions, ...level3WithCommissions];
-      setIndirectReferrals(allIndirectReferrals);
+      setIndirectReferrals(formattedIndirectReferrals);
     } catch (error) {
       console.error('Error loading indirect referrals:', error);
     }
@@ -397,10 +382,34 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         <p className="text-green-400 font-medium">
                           {formatCurrency(referral.commission_earned)}
                         </p>
-                        <p className="text-white/60 text-xs">Comissão</p>
+                        <p className="text-white/60 text-xs">Comissão Total</p>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Commission History by Plan */}
+                  {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <p className="text-white/70 text-xs mb-2">Histórico de Comissões por Plano:</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {referral.commissions_by_plan.map((commission, index) => (
+                          <div key={index} className="bg-white/5 rounded p-2 flex justify-between items-center">
+                            <div>
+                              <Badge className={`${getPlanColor(commission.plan_name)} text-white uppercase text-xs`}>
+                                {commission.plan_name}
+                              </Badge>
+                              <p className="text-white/50 text-xs mt-1">
+                                {new Date(commission.created_at).toLocaleDateString('pt-BR')}
+                              </p>
+                            </div>
+                            <p className="text-green-400 font-medium text-sm">
+                              {formatCurrency(commission.commission_amount)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -470,10 +479,34 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         <p className="text-green-400 font-medium">
                           {formatCurrency(referral.commission_earned)}
                         </p>
-                        <p className="text-white/60 text-xs">Comissão</p>
+                        <p className="text-white/60 text-xs">Comissão Total</p>
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Commission History by Plan */}
+                  {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <p className="text-white/70 text-xs mb-2">Histórico de Comissões por Plano:</p>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {referral.commissions_by_plan.map((commission, index) => (
+                          <div key={index} className="bg-white/5 rounded p-2 flex justify-between items-center">
+                            <div>
+                              <Badge className={`${getPlanColor(commission.plan_name)} text-white uppercase text-xs`}>
+                                {commission.plan_name}
+                              </Badge>
+                              <p className="text-white/50 text-xs mt-1">
+                                {new Date(commission.created_at).toLocaleDateString('pt-BR')}
+                              </p>
+                            </div>
+                            <p className="text-green-400 font-medium text-sm">
+                              {formatCurrency(commission.commission_amount)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
