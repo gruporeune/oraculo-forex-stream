@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, BarChart3, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { Play, Pause, BarChart3, TrendingUp, Clock, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -18,6 +18,15 @@ interface PlanOperation {
   daily_signals_used: number;
 }
 
+interface RecentOperation {
+  id: string;
+  pair: string;
+  direction: 'CALL' | 'PUT';
+  result: 'WIN' | 'LOSS';
+  profit: number;
+  timestamp: number;
+}
+
 interface MultiPlanAutomaticSignalsProps {
   user: any;
   userPlans: PlanOperation[];
@@ -28,6 +37,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({});
   const [countdowns, setCountdowns] = useState<{[key: string]: string}>({});
   const [lastOperationTimes, setLastOperationTimes] = useState<{[key: string]: number}>({});
+  const [recentOperations, setRecentOperations] = useState<{[key: string]: RecentOperation[]}>({});
   const { toast } = useToast();
 
   const planLimits = {
@@ -97,30 +107,56 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
   const generateOperation = async (plan: PlanOperation) => {
     const limits = planLimits[plan.plan_name as keyof typeof planLimits];
-    if (!limits || hasReachedTarget(plan)) return;
+    if (!limits) return;
+
+    // Check if target is already reached - stop operations immediately
+    if (plan.daily_earnings >= limits.dailyTarget) {
+      console.log(`[${plan.plan_name.toUpperCase()}] Meta já atingida: ${plan.daily_earnings}/${limits.dailyTarget}`);
+      return;
+    }
+
+    // Check if max operations reached
+    if (plan.auto_operations_completed_today >= limits.maxOperations) {
+      console.log(`[${plan.plan_name.toUpperCase()}] Máximo de operações atingido: ${plan.auto_operations_completed_today}/${limits.maxOperations}`);
+      return;
+    }
 
     // Calculate earning per operation to reach daily target
     const remainingTarget = limits.dailyTarget - plan.daily_earnings;
     const remainingOperations = limits.maxOperations - plan.auto_operations_completed_today;
-    
-    if (remainingOperations <= 0) return;
 
     // Generate random profit between 80% and 95% success rate
     const successRate = Math.random() * 0.15 + 0.80; // 80-95%
     const isWin = Math.random() < successRate;
     
-    // Calculate higher profit to reach target in 5-7 operations
-    const baseProfit = remainingTarget / Math.max(remainingOperations, 1); // Distribute equally over remaining operations
-    const profitMultiplier = isWin ? (0.9 + Math.random() * 0.2) : 0; // 90-110% of base or 0
-    const operationProfit = Math.max(baseProfit * profitMultiplier, 0);
+    // Calculate higher profit to reach target in remaining operations
+    const baseProfit = remainingTarget / Math.max(remainingOperations, 1);
+    const profitMultiplier = isWin ? (0.9 + Math.random() * 0.2) : -(0.1 + Math.random() * 0.1); // Win: 90-110% of base, Loss: -10% to -20%
+    const operationProfit = isWin ? Math.max(baseProfit * profitMultiplier, 0) : Math.max(baseProfit * profitMultiplier, -remainingTarget * 0.1);
 
-    // Generate random currency pairs
+    // Generate random currency pairs and direction
     const currencyPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'EUR/GBP'];
     const selectedPair = currencyPairs[Math.floor(Math.random() * currencyPairs.length)];
+    const direction = Math.random() > 0.5 ? 'CALL' : 'PUT';
+
+    // Add to recent operations for display
+    const newOperation: RecentOperation = {
+      id: `${plan.id}-${Date.now()}`,
+      pair: selectedPair,
+      direction,
+      result: isWin ? 'WIN' : 'LOSS',
+      profit: operationProfit,
+      timestamp: Date.now()
+    };
+
+    setRecentOperations(prev => ({
+      ...prev,
+      [plan.id]: [newOperation, ...(prev[plan.id] || [])].slice(0, 3) // Keep only last 3 operations
+    }));
 
     console.log(`[${plan.plan_name.toUpperCase()}] Nova operação:`, {
       pair: selectedPair,
-      direction: isWin ? 'CALL' : 'PUT',
+      direction,
       result: isWin ? 'WIN' : 'LOSS',
       profit: operationProfit,
       remaining: remainingTarget,
@@ -128,10 +164,13 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     });
 
     try {
+      // Calculate new earnings, ensuring we don't exceed the target
+      const newEarnings = Math.min(Math.max(plan.daily_earnings + operationProfit, 0), limits.dailyTarget);
+      
       const { error } = await supabase
         .from('user_plans')
         .update({
-          daily_earnings: Math.min(plan.daily_earnings + operationProfit, limits.dailyTarget),
+          daily_earnings: newEarnings,
           auto_operations_completed_today: plan.auto_operations_completed_today + 1,
           updated_at: new Date().toISOString()
         })
@@ -151,8 +190,8 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          daily_earnings: (currentProfile.daily_earnings || 0) + operationProfit,
-          available_balance: (currentProfile.available_balance || 0) + operationProfit,
+          daily_earnings: Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
+          available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
@@ -338,6 +377,36 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                   <span className="text-white/50 text-xs">100%</span>
                 </div>
               </div>
+
+              {/* Recent Operations */}
+              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && recentOperations[plan.id] && recentOperations[plan.id].length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-white/80 text-sm font-medium">Operações Recentes:</h4>
+                  {recentOperations[plan.id].slice(0, 2).map((operation) => (
+                    <div key={operation.id} className="p-3 bg-white/5 rounded-lg border border-white/10">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-white font-medium text-sm">{operation.pair}</span>
+                          {operation.direction === 'CALL' ? (
+                            <ArrowUp className="w-4 h-4 text-green-400" />
+                          ) : (
+                            <ArrowDown className="w-4 h-4 text-red-400" />
+                          )}
+                          <span className="text-white/70 text-xs">{operation.direction}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={operation.result === 'WIN' ? 'bg-green-600/20 text-green-400' : 'bg-red-600/20 text-red-400'}>
+                            {operation.result}
+                          </Badge>
+                          <span className={`text-sm font-bold ${operation.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {formatCurrency(operation.profit)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {/* Status and Controls */}
               <div className="space-y-4">
