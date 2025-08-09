@@ -76,6 +76,7 @@ serve(async (req) => {
 
     // Prepare PayLatam payload
     const paylatamPayload = {
+      client_id: paylatamClientId,  // Include client_id in body
       amount: amount,
       external_id: externalId,
       payerQuestion: `Pagamento do plano ${plan.toUpperCase()} - BullTec`,
@@ -87,21 +88,20 @@ serve(async (req) => {
       postbackUrl: `${supabaseUrl}/functions/v1/payment-webhook`
     }
 
-    console.log('Creating PayLatam payment:', {
+    console.log('Creating PayLatam payment with client_id in body:', {
       amount,
       plan,
       externalId,
       userEmail,
-      payload: paylatamPayload
+      hasClientId: !!paylatamClientId
     })
 
-    // Call PayLatam API
+    // Call PayLatam API - Simplified headers, client_id in body
     const paylatamResponse = await fetch('https://api.paylatambr.com/v2/pix/qrcode', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${paylatamToken}`,
-        'Content-Type': 'application/json',
-        'Client-Id': paylatamClientId
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(paylatamPayload)
     })
