@@ -48,7 +48,7 @@ serve(async (req) => {
     }
 
     // Check payment status with AbacatePay
-    const checkUrl = `https://api.abacatepay.com/v1/pixQrCode/${paymentId}`;
+    const checkUrl = `https://api.abacatepay.com/v1/pixQrCode/check?id=${paymentId}`;
     console.log('Checking AbacatePay URL:', checkUrl);
 
     const checkResponse = await fetch(checkUrl, {
