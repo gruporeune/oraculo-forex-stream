@@ -41,10 +41,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const { toast } = useToast();
 
   const planLimits = {
-    partner: { dailyTarget: 1.00, maxOperations: 5 },
-    master: { dailyTarget: 6.00, maxOperations: 7 },
-    premium: { dailyTarget: 41.25, maxOperations: 6 },
-    platinum: { dailyTarget: 100.00, maxOperations: 5 }
+    partner: { dailyTarget: 1.00 },
+    master: { dailyTarget: 6.00 },
+    premium: { dailyTarget: 41.25 },
+    platinum: { dailyTarget: 100.00 }
   };
 
   // Automatic operations effect
@@ -109,30 +109,42 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     const limits = planLimits[plan.plan_name as keyof typeof planLimits];
     if (!limits) return;
 
-    // Check if target is already reached - stop operations immediately
+    // Check if target is already reached - stop operations immediately and trigger countdown
     if (plan.daily_earnings >= limits.dailyTarget) {
-      console.log(`[${plan.plan_name.toUpperCase()}] Meta já atingida: ${plan.daily_earnings}/${limits.dailyTarget}`);
+      console.log(`[${plan.plan_name.toUpperCase()}] Meta atingida exatamente: ${plan.daily_earnings}/${limits.dailyTarget}`);
+      
+      // Set cycle start time if not already set to trigger countdown
+      if (!plan.cycle_start_time) {
+        await supabase
+          .from('user_plans')
+          .update({
+            cycle_start_time: new Date().toISOString(),
+            auto_operations_started: false,
+            auto_operations_paused: false
+          })
+          .eq('id', plan.id);
+        onPlansUpdate();
+      }
       return;
     }
 
-    // Check if max operations reached
-    if (plan.auto_operations_completed_today >= limits.maxOperations) {
-      console.log(`[${plan.plan_name.toUpperCase()}] Máximo de operações atingido: ${plan.auto_operations_completed_today}/${limits.maxOperations}`);
-      return;
-    }
-
-    // Calculate earning per operation to reach daily target
+    // Calculate remaining target
     const remainingTarget = limits.dailyTarget - plan.daily_earnings;
-    const remainingOperations = limits.maxOperations - plan.auto_operations_completed_today;
 
     // Generate random profit between 80% and 95% success rate
     const successRate = Math.random() * 0.15 + 0.80; // 80-95%
     const isWin = Math.random() < successRate;
     
-    // Calculate higher profit to reach target in remaining operations
-    const baseProfit = remainingTarget / Math.max(remainingOperations, 1);
-    const profitMultiplier = isWin ? (0.9 + Math.random() * 0.2) : -(0.1 + Math.random() * 0.1); // Win: 90-110% of base, Loss: -10% to -20%
-    const operationProfit = isWin ? Math.max(baseProfit * profitMultiplier, 0) : Math.max(baseProfit * profitMultiplier, -remainingTarget * 0.1);
+    // Calculate operation profit - if close to target, make sure we hit it exactly
+    let operationProfit;
+    if (remainingTarget <= 2.0) {
+      // Close to target - make sure we hit it exactly or get close
+      operationProfit = isWin ? remainingTarget : Math.max(remainingTarget * -0.1, -1.0);
+    } else {
+      // Normal operation - reasonable profit amounts
+      const baseProfit = Math.min(remainingTarget * (0.2 + Math.random() * 0.3), remainingTarget);
+      operationProfit = isWin ? baseProfit : Math.max(baseProfit * -0.2, -remainingTarget * 0.1);
+    }
 
     // Generate random currency pairs and direction
     const currencyPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'EUR/GBP'];
@@ -159,26 +171,37 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       direction,
       result: isWin ? 'WIN' : 'LOSS',
       profit: operationProfit,
-      remaining: remainingTarget,
-      operations: remainingOperations
+      remaining: remainingTarget
     });
 
     try {
       // Calculate new earnings, ensuring we don't exceed the target
       const newEarnings = Math.min(Math.max(plan.daily_earnings + operationProfit, 0), limits.dailyTarget);
       
+      // Check if target will be reached with this operation
+      const willReachTarget = newEarnings >= limits.dailyTarget;
+      
+      const updateData: any = {
+        daily_earnings: newEarnings,
+        auto_operations_completed_today: plan.auto_operations_completed_today + 1,
+        updated_at: new Date().toISOString()
+      };
+
+      // If target reached, stop operations and set cycle start time
+      if (willReachTarget) {
+        updateData.auto_operations_started = false;
+        updateData.auto_operations_paused = false;
+        updateData.cycle_start_time = new Date().toISOString();
+      }
+
       const { error } = await supabase
         .from('user_plans')
-        .update({
-          daily_earnings: newEarnings,
-          auto_operations_completed_today: plan.auto_operations_completed_today + 1,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', plan.id);
 
       if (error) throw error;
 
-      // Also update user's total earnings and balance
+      // Also update user's total earnings and balance instantly
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('daily_earnings, available_balance')
@@ -198,6 +221,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (profileError) throw profileError;
 
+      // Update state immediately for instant UI feedback
       onPlansUpdate();
     } catch (error) {
       console.error('Error generating operation:', error);
