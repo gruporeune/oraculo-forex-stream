@@ -31,10 +31,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const { toast } = useToast();
 
   const planLimits = {
-    partner: { dailyTarget: 1.00, maxOperations: 50 },
-    master: { dailyTarget: 6.00, maxOperations: 100 },
-    premium: { dailyTarget: 41.25, maxOperations: 250 },
-    platinum: { dailyTarget: 100.00, maxOperations: 500 }
+    partner: { dailyTarget: 1.00, maxOperations: 5 },
+    master: { dailyTarget: 6.00, maxOperations: 7 },
+    premium: { dailyTarget: 41.25, maxOperations: 6 },
+    platinum: { dailyTarget: 100.00, maxOperations: 5 }
   };
 
   // Automatic operations effect
@@ -53,12 +53,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
         const now = Date.now();
         const lastOperation = lastOperationTimes[plan.id] || 0;
         
-        // Generate operation every 30-60 seconds
-        const minInterval = 30000; // 30 seconds
-        const maxInterval = 60000; // 60 seconds
-        const randomInterval = Math.random() * (maxInterval - minInterval) + minInterval;
+        // Generate operation every 5 seconds
+        const operationInterval = 5000; // 5 seconds
 
-        if (now - lastOperation >= randomInterval) {
+        if (now - lastOperation >= operationInterval) {
           await generateOperation(plan);
           setLastOperationTimes(prev => ({ ...prev, [plan.id]: now }));
         }
@@ -111,13 +109,19 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     const successRate = Math.random() * 0.15 + 0.80; // 80-95%
     const isWin = Math.random() < successRate;
     
-    // Calculate profit amount - more realistic distribution
-    const baseProfit = remainingTarget / Math.max(remainingOperations, 20); // Distribute over remaining operations
-    const profitMultiplier = isWin ? (0.8 + Math.random() * 0.4) : 0; // 80-120% of base or 0
+    // Calculate higher profit to reach target in 5-7 operations
+    const baseProfit = remainingTarget / Math.max(remainingOperations, 1); // Distribute equally over remaining operations
+    const profitMultiplier = isWin ? (0.9 + Math.random() * 0.2) : 0; // 90-110% of base or 0
     const operationProfit = Math.max(baseProfit * profitMultiplier, 0);
 
-    console.log(`[${plan.plan_name.toUpperCase()}] Operação automática:`, {
-      isWin,
+    // Generate random currency pairs
+    const currencyPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF', 'NZD/USD', 'EUR/GBP'];
+    const selectedPair = currencyPairs[Math.floor(Math.random() * currencyPairs.length)];
+
+    console.log(`[${plan.plan_name.toUpperCase()}] Nova operação:`, {
+      pair: selectedPair,
+      direction: isWin ? 'CALL' : 'PUT',
+      result: isWin ? 'WIN' : 'LOSS',
       profit: operationProfit,
       remaining: remainingTarget,
       operations: remainingOperations
@@ -136,11 +140,19 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       if (error) throw error;
 
       // Also update user's total earnings and balance
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('daily_earnings, available_balance')
+        .eq('id', user.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          daily_earnings: (user.daily_earnings || 0) + operationProfit,
-          available_balance: (user.available_balance || 0) + operationProfit,
+          daily_earnings: (currentProfile.daily_earnings || 0) + operationProfit,
+          available_balance: (currentProfile.available_balance || 0) + operationProfit,
           updated_at: new Date().toISOString()
         })
         .eq('id', user.id);
