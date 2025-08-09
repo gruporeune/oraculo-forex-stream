@@ -56,19 +56,41 @@ serve(async (req) => {
       throw new Error('PayLatam Client Secret not configured')
     }
 
-    // Create Basic Auth header as per PayLatam documentation
-    const credentials = `${paylatamClientId}:${paylatamClientSecret}`
-    const encodedCredentials = btoa(credentials)
-    const authHeader = `Basic ${encodedCredentials}`
-    
-    console.log('Auth header created:', {
-      credentialsLength: credentials.length,
-      encodedLength: encodedCredentials.length,
-      authHeaderPrefix: authHeader.substring(0, 15) + '...'
-    })
-
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+    // First, generate access token with Basic Auth
+    const credentials = `${paylatamClientId}:${paylatamClientSecret}`
+    const encodedCredentials = btoa(credentials)
+    
+    console.log('Step 1: Generating access token...')
+    const tokenResponse = await fetch('https://api.paylatambr.com/oauth/token', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${encodedCredentials}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: 'grant_type=client_credentials'
+    })
+    
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text()
+      console.error('Token generation failed:', {
+        status: tokenResponse.status,
+        statusText: tokenResponse.statusText,
+        errorText: errorText
+      })
+      throw new Error(`Token generation failed: ${tokenResponse.status} - ${errorText}`)
+    }
+    
+    const tokenData = await tokenResponse.json()
+    const accessToken = tokenData.access_token
+    
+    console.log('Access token generated successfully:', {
+      hasToken: !!accessToken,
+      tokenType: tokenData.token_type,
+      expiresIn: tokenData.expires_in
+    })
 
     // Get request data
     const { plan, userEmail, userName, userDocument }: PaymentRequest = await req.json()
@@ -89,9 +111,8 @@ serve(async (req) => {
     // Generate unique external ID
     const externalId = `${plan}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    // Prepare PayLatam payload
+    // Prepare PayLatam payload (without client_id in body)
     const paylatamPayload = {
-      client_id: paylatamClientId,  // Include client_id in body
       amount: amount,
       external_id: externalId,
       payerQuestion: `Pagamento do plano ${plan.toUpperCase()} - BullTec`,
@@ -103,22 +124,19 @@ serve(async (req) => {
       postbackUrl: `${supabaseUrl}/functions/v1/payment-webhook`
     }
 
-    console.log('Creating PayLatam payment with detailed debug:', {
+    console.log('Step 2: Creating PayLatam PIX QR Code...', {
       amount,
       plan,
       externalId,
       userEmail,
-      hasClientId: !!paylatamClientId,
-      payloadKeys: Object.keys(paylatamPayload),
-      url: 'https://api.paylatambr.com/v2/pix/qrcode'
+      payloadKeys: Object.keys(paylatamPayload)
     })
 
-    // Call PayLatam API with Basic Auth
-    console.log('About to call PayLatam API with Basic Auth...')
+    // Call PayLatam API with Bearer token
     const paylatamResponse = await fetch('https://api.paylatambr.com/v2/pix/qrcode', {
       method: 'POST',
       headers: {
-        'Authorization': authHeader,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(paylatamPayload)
