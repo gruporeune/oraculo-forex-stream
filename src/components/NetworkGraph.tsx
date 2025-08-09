@@ -66,14 +66,32 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
   const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
     if (level > 4) return null; // Increase to 4 levels to properly show 3 levels under root
 
-    // Get user profile
+    // Get user profile 
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, username, full_name, plan')
       .eq('id', nodeId)
       .maybeSingle();
-
+      
     if (!profile) return null;
+
+    // Get the highest plan from active plans to display correct plan status
+    const { data: allPlans } = await supabase
+      .from('user_plans')
+      .select('plan_name')
+      .eq('user_id', nodeId)
+      .eq('is_active', true);
+    
+    let displayPlan = profile.plan || 'free';
+    if (allPlans && allPlans.length > 0) {
+      const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+      const highestPlan = allPlans.reduce((highest, current) => {
+        const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
+        const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
+        return currentPriority > highestPriority ? current : highest;
+      });
+      displayPlan = highestPlan.plan_name;
+    }
 
     // Get direct referrals using referred_by column
     const { data: directReferrals } = await supabase
@@ -87,15 +105,14 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
       for (const referralProfile of directReferrals) {
         const childNode = await buildNetworkTree(referralProfile.id, level + 1);
         if (childNode) {
-          // Get commission for this referral
+          // Get total commission for all plans of this referral
           const { data: commissionData } = await supabase
             .from('user_referrals')
             .select('commission_earned')
             .eq('referrer_id', nodeId)
-            .eq('referred_id', referralProfile.id)
-            .maybeSingle();
+            .eq('referred_id', referralProfile.id);
           
-          childNode.commission_earned = commissionData?.commission_earned || 0;
+          childNode.commission_earned = commissionData?.reduce((sum, item) => sum + (item.commission_earned || 0), 0) || 0;
           referrals.push(childNode);
         }
       }
@@ -105,7 +122,7 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
       id: profile.id,
       username: profile.username || 'User',
       full_name: profile.full_name || 'Usuário',
-      plan: profile.plan || 'free',
+      plan: displayPlan,
       level,
       referrals
     };

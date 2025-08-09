@@ -8,6 +8,7 @@ import { Users, Link, Copy, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import NetworkGraph from '@/components/NetworkGraph';
+import ReferralsList from '@/components/ReferralsList';
 
 interface NetworkPageProps {
   user: any;
