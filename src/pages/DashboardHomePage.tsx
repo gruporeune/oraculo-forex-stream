@@ -94,41 +94,47 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         transition={{ duration: 0.8, delay: 0.2 }}
         className="text-center mb-8"
       >
-        <h3 className="text-2xl font-bold text-white mb-2">
-          Corretora indicada com mais de{" "}
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600">
-            93% de chances de acertos
-          </span>
-        </h3>
-        <p className="text-white/70 text-lg mb-6">
-          Faça um cadastro na:
-        </p>
-        
-        <motion.div
-          whileHover={{ scale: 1.05, rotateY: 5 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative group cursor-pointer max-w-xs mx-auto"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
-          <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-4 hover:border-purple-400/50 transition-all duration-300">
-            <div className="flex items-center justify-center mb-3">
-              <img 
-                src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                alt="BullTec" 
-                className="h-[576px] w-auto object-contain"
-              />
+        <div className="flex items-center justify-center gap-8 max-w-4xl mx-auto">
+          {/* Logo Card - Reduzido 6x */}
+          <motion.div
+            whileHover={{ scale: 1.05, rotateY: 5 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative group cursor-pointer flex-shrink-0"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-purple-400 to-purple-600 rounded-xl blur-lg opacity-50 group-hover:opacity-75 transition-opacity duration-300"></div>
+            <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300">
+              <div className="flex items-center justify-center mb-2">
+                <img 
+                  src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
+                  alt="BullTec" 
+                  className="h-24 w-auto object-contain"
+                />
+              </div>
+              <div className="space-y-1 text-center">
+                <h4 className="text-sm font-bold text-white">BullTec</h4>
+                <p className="text-purple-200 text-xs">
+                  A corretora oficial recomendada pelo ORÁCULO
+                </p>
+              </div>
+              <div className="absolute top-1 right-1">
+                <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h4 className="text-lg font-bold text-white">BullTec</h4>
-              <p className="text-purple-200 text-xs">
-                A corretora oficial recomendada pelo ORÁCULO
-              </p>
-            </div>
-            <div className="absolute top-2 right-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            </div>
+          </motion.div>
+
+          {/* Texto ao lado */}
+          <div className="flex-1 text-left">
+            <h3 className="text-4xl font-black text-white mb-2 tracking-tight">
+              Corretora indicada com mais de{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+                93% de chances de acertos
+              </span>
+            </h3>
+            <p className="text-white/70 text-lg font-medium">
+              Faça um cadastro na corretora oficial do ORÁCULO
+            </p>
           </div>
-        </motion.div>
+        </div>
       </motion.div>
 
       <MultiPlanAutomaticSignals 
