@@ -64,7 +64,7 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
   };
 
   const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
-    if (level > 3) return null; // Limit to 3 levels
+    if (level > 4) return null; // Increase to 4 levels to properly show 3 levels under root
 
     // Get user profile
     const { data: profile } = await supabase

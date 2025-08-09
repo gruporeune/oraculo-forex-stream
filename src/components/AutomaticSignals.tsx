@@ -359,8 +359,8 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
       setSignals(prev => prev.map(signal => {
         if (signal.status === 'completed') return signal;
 
-        // Increase progress speed - range from 8 to 15 instead of 0 to 5
-        const newProgress = Math.min(signal.progress + Math.random() * 7 + 8, 100);
+        // Increase progress speed - range from 3 to 8 for more consistent progress
+        const newProgress = Math.min(signal.progress + Math.random() * 5 + 3, 100);
         const priceChange = (Math.random() - 0.5) * 0.001;
         const newPrice = signal.currentPrice + priceChange;
         

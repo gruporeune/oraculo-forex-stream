@@ -113,8 +113,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center justify-center mb-4">
                <img 
-                src="/lovable-uploads/defa97d4-c459-4dab-aa39-796036f5f5fe.png" 
-                alt="BullTec" 
+                src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
+                alt="BullTec"
                 className="h-32 w-auto object-contain"
               />
             </div>
