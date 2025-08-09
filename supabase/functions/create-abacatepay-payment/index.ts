@@ -78,6 +78,7 @@ serve(async (req) => {
     };
 
     console.log('Sending to AbacatePay:', abacatePayPayload);
+    console.log('API Key being used:', abacatePayApiKey ? `${abacatePayApiKey.substring(0, 10)}...` : 'NOT SET');
 
     const abacatePayResponse = await fetch('https://api.abacatepay.com/v1/pixQrCode/create', {
       method: 'POST',
@@ -87,6 +88,9 @@ serve(async (req) => {
       },
       body: JSON.stringify(abacatePayPayload),
     });
+
+    console.log('AbacatePay response status:', abacatePayResponse.status);
+    console.log('AbacatePay response headers:', Object.fromEntries(abacatePayResponse.headers.entries()));
 
     const responseText = await abacatePayResponse.text();
     console.log('AbacatePay raw response:', responseText);
