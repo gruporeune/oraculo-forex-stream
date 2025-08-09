@@ -33,17 +33,23 @@ serve(async (req) => {
   try {
     // Get environment variables
     const paylatamToken = Deno.env.get('PAYLATAM_API_TOKEN')
+    const paylatamClientId = Deno.env.get('PAYLATAM_CLIENT_ID')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
     console.log('Environment check:', {
       hasPaylatamToken: !!paylatamToken,
+      hasPaylatamClientId: !!paylatamClientId,
       tokenLength: paylatamToken ? paylatamToken.length : 0,
-      tokenPrefix: paylatamToken ? paylatamToken.substring(0, 10) + '...' : 'not found'
+      clientIdLength: paylatamClientId ? paylatamClientId.length : 0
     })
 
     if (!paylatamToken) {
       throw new Error('PayLatam API token not configured')
+    }
+
+    if (!paylatamClientId) {
+      throw new Error('PayLatam Client ID not configured')
     }
 
     // Initialize Supabase client
@@ -94,7 +100,8 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${paylatamToken}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Client-Id': paylatamClientId
       },
       body: JSON.stringify(paylatamPayload)
     })
