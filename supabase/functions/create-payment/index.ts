@@ -32,29 +32,40 @@ serve(async (req) => {
 
   try {
     // Get environment variables
-    const paylatamToken = Deno.env.get('PAYLATAM_API_TOKEN')
     const paylatamClientId = Deno.env.get('PAYLATAM_CLIENT_ID')
+    const paylatamClientSecret = Deno.env.get('PAYLATAM_CLIENT_SECRET')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
     console.log('Environment check:', {
-      hasPaylatamToken: !!paylatamToken,
       hasPaylatamClientId: !!paylatamClientId,
-      tokenLength: paylatamToken ? paylatamToken.length : 0,
+      hasPaylatamClientSecret: !!paylatamClientSecret,
       clientIdLength: paylatamClientId ? paylatamClientId.length : 0,
-      tokenPrefix: paylatamToken ? paylatamToken.substring(0, 8) + '...' : 'not found',
-      clientIdPrefix: paylatamClientId ? paylatamClientId.substring(0, 8) + '...' : 'not found'
+      clientSecretLength: paylatamClientSecret ? paylatamClientSecret.length : 0,
+      clientIdPrefix: paylatamClientId ? paylatamClientId.substring(0, 8) + '...' : 'not found',
+      clientSecretPrefix: paylatamClientSecret ? paylatamClientSecret.substring(0, 4) + '...' : 'not found'
     })
-
-    if (!paylatamToken) {
-      console.error('PayLatam API token not configured')
-      throw new Error('PayLatam API token not configured')
-    }
 
     if (!paylatamClientId) {
       console.error('PayLatam Client ID not configured')
       throw new Error('PayLatam Client ID not configured')
     }
+
+    if (!paylatamClientSecret) {
+      console.error('PayLatam Client Secret not configured')
+      throw new Error('PayLatam Client Secret not configured')
+    }
+
+    // Create Basic Auth header as per PayLatam documentation
+    const credentials = `${paylatamClientId}:${paylatamClientSecret}`
+    const encodedCredentials = btoa(credentials)
+    const authHeader = `Basic ${encodedCredentials}`
+    
+    console.log('Auth header created:', {
+      credentialsLength: credentials.length,
+      encodedLength: encodedCredentials.length,
+      authHeaderPrefix: authHeader.substring(0, 15) + '...'
+    })
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
@@ -102,12 +113,12 @@ serve(async (req) => {
       url: 'https://api.paylatambr.com/v2/pix/qrcode'
     })
 
-    // Call PayLatam API with detailed logging
-    console.log('About to call PayLatam API...')
+    // Call PayLatam API with Basic Auth
+    console.log('About to call PayLatam API with Basic Auth...')
     const paylatamResponse = await fetch('https://api.paylatambr.com/v2/pix/qrcode', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${paylatamToken}`,
+        'Authorization': authHeader,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(paylatamPayload)
