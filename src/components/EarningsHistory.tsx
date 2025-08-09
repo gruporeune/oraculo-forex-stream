@@ -104,9 +104,11 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
           <Calendar className="w-5 h-5" />
           Histórico dos Ganhos
         </CardTitle>
-        <p className="text-white/70 text-sm">
-          Total acumulado: R$ {getTotalEarnings().toFixed(2)} | Últimos 30 dias
-        </p>
+        {earningsHistory.length > 0 && (
+          <p className="text-white/70 text-sm">
+            Total acumulado: R$ {getTotalEarnings().toFixed(2)} | Últimos 30 dias
+          </p>
+        )}
       </CardHeader>
       <CardContent>
         {earningsHistory.length === 0 ? (
@@ -185,14 +187,16 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                   )}
                 </div>
                 
-                <div className="mt-2 pt-2 border-t border-white/10">
-                  <div className="flex items-center justify-between">
-                    <span className="text-white/70 text-sm font-medium">Total do Dia:</span>
-                    <span className="text-white font-bold">
-                      R$ {(record.total_earnings + record.total_commissions).toFixed(2)}
-                    </span>
+                {(record.total_earnings > 0 || record.total_commissions > 0) && (
+                  <div className="mt-2 pt-2 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/70 text-sm font-medium">Total do Dia:</span>
+                      <span className="text-white font-bold">
+                        R$ {(record.total_earnings + record.total_commissions).toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             ))}
           </div>

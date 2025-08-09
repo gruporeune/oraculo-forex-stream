@@ -60,7 +60,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6 mb-8">
       {/* SEUS PLANOS */}
       <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
@@ -110,7 +110,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-4 h-4" />
-            COMISSÕES DO DIA
+            COMISSÕES HOJE
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -118,6 +118,22 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
             {formatCurrency(profile?.daily_referral_commissions || 0)}
           </div>
           <p className="text-xs text-white/70">Indicações do dia</p>
+        </CardContent>
+      </Card>
+
+      {/* COMISSÕES TOTAIS */}
+      <Card className="bg-gradient-to-br from-indigo-600/20 to-indigo-400/20 border-indigo-500/50">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4" />
+            COMISSÕES TOTAIS
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-white">
+            {formatCurrency(profile?.total_referral_commissions || 0)}
+          </div>
+          <p className="text-xs text-white/70">Total acumulado</p>
         </CardContent>
       </Card>
 
