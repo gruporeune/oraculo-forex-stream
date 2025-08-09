@@ -11,6 +11,7 @@ interface EarningsRecord {
   total_commissions: number;
   operations_count: number;
   created_at: string;
+  plan_earnings?: Record<string, number>;
 }
 
 interface EarningsHistoryProps {
@@ -37,7 +38,12 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
         if (error) {
           console.error('Error loading earnings history:', error);
         } else {
-          setEarningsHistory(data || []);
+          const mappedData = (data || []).map(record => ({
+            ...record,
+            plan_earnings: record.plan_earnings && typeof record.plan_earnings === 'object' ? 
+              record.plan_earnings as Record<string, number> : {}
+          }));
+          setEarningsHistory(mappedData);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -133,10 +139,27 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                   </div>
                 </div>
                 
+                {/* Ganhos por plano */}
+                {record.plan_earnings && Object.keys(record.plan_earnings).length > 0 && (
+                  <div className="mb-3">
+                    <span className="text-white/70 text-sm font-medium mb-2 block">Ganhos por Plano:</span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {Object.entries(record.plan_earnings).map(([planName, earnings]) => (
+                        <div key={planName} className="bg-white/5 rounded p-2 text-center">
+                          <div className="text-xs text-white/60 uppercase">{planName}</div>
+                          <div className="text-green-400 font-medium text-sm">
+                            +R$ {Number(earnings).toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-2 gap-4">
                   {record.total_earnings > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70 text-sm">Lucro Operações:</span>
+                      <span className="text-white/70 text-sm">Lucro Total:</span>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3 text-green-400" />
                         <span className="text-green-400 font-medium">

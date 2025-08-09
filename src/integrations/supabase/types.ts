@@ -38,6 +38,7 @@ export type Database = {
           date: string
           id: string
           operations_count: number
+          plan_earnings: Json | null
           total_commissions: number
           total_earnings: number
           user_id: string
@@ -47,6 +48,7 @@ export type Database = {
           date?: string
           id?: string
           operations_count?: number
+          plan_earnings?: Json | null
           total_commissions?: number
           total_earnings?: number
           user_id: string
@@ -56,6 +58,7 @@ export type Database = {
           date?: string
           id?: string
           operations_count?: number
+          plan_earnings?: Json | null
           total_commissions?: number
           total_earnings?: number
           user_id?: string
