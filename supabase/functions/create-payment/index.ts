@@ -41,14 +41,18 @@ serve(async (req) => {
       hasPaylatamToken: !!paylatamToken,
       hasPaylatamClientId: !!paylatamClientId,
       tokenLength: paylatamToken ? paylatamToken.length : 0,
-      clientIdLength: paylatamClientId ? paylatamClientId.length : 0
+      clientIdLength: paylatamClientId ? paylatamClientId.length : 0,
+      tokenPrefix: paylatamToken ? paylatamToken.substring(0, 8) + '...' : 'not found',
+      clientIdPrefix: paylatamClientId ? paylatamClientId.substring(0, 8) + '...' : 'not found'
     })
 
     if (!paylatamToken) {
+      console.error('PayLatam API token not configured')
       throw new Error('PayLatam API token not configured')
     }
 
     if (!paylatamClientId) {
+      console.error('PayLatam Client ID not configured')
       throw new Error('PayLatam Client ID not configured')
     }
 
@@ -88,15 +92,18 @@ serve(async (req) => {
       postbackUrl: `${supabaseUrl}/functions/v1/payment-webhook`
     }
 
-    console.log('Creating PayLatam payment with client_id in body:', {
+    console.log('Creating PayLatam payment with detailed debug:', {
       amount,
       plan,
       externalId,
       userEmail,
-      hasClientId: !!paylatamClientId
+      hasClientId: !!paylatamClientId,
+      payloadKeys: Object.keys(paylatamPayload),
+      url: 'https://api.paylatambr.com/v2/pix/qrcode'
     })
 
-    // Call PayLatam API - Simplified headers, client_id in body
+    // Call PayLatam API with detailed logging
+    console.log('About to call PayLatam API...')
     const paylatamResponse = await fetch('https://api.paylatambr.com/v2/pix/qrcode', {
       method: 'POST',
       headers: {
@@ -104,6 +111,12 @@ serve(async (req) => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(paylatamPayload)
+    })
+
+    console.log('PayLatam API call completed:', {
+      status: paylatamResponse.status,
+      statusText: paylatamResponse.statusText,
+      ok: paylatamResponse.ok
     })
 
     console.log('PayLatam response status:', paylatamResponse.status)
