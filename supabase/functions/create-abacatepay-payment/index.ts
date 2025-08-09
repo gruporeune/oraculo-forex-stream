@@ -17,21 +17,17 @@ interface PaymentRequest {
 interface AbacatePayResponse {
   data?: {
     id: string;
-    url: string;
     amount: number;
     status: string;
+    devMode: boolean;
     brCode: string;
-    qrCode: string;
+    brCodeBase64: string;
+    platformFee: number;
+    createdAt: string;
+    updatedAt: string;
     expiresAt: string;
-    customer: {
-      id: string;
-      metadata: {
-        email: string;
-        name: string;
-      };
-    };
   };
-  error?: string;
+  error: string | null;
 }
 
 serve(async (req) => {
@@ -63,22 +59,21 @@ serve(async (req) => {
 
     // Create payment with AbacatePay
     const abacatePayPayload = {
-      frequency: "ONE_TIME",
-      methods: ["PIX"],
       amount: Math.round(paymentData.amount * 100), // Convert to cents
-      externalId: externalId,
+      expiresIn: 3600, // 1 hour expiration
       description: `Plano ${paymentData.planName} - BullTec`,
       customer: {
-        metadata: {
-          email: paymentData.userEmail,
-          name: paymentData.userName,
-        }
+        name: paymentData.userName,
+        email: paymentData.userEmail
+      },
+      metadata: {
+        externalId: externalId
       }
     };
 
     console.log('Sending to AbacatePay:', abacatePayPayload);
 
-    const abacatePayResponse = await fetch('https://api.abacatepay.com/billing/create', {
+    const abacatePayResponse = await fetch('https://api.abacatepay.com/v1/pixQrCode/create', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -140,7 +135,7 @@ serve(async (req) => {
         amount: paymentData.amount,
         external_id: externalId,
         payment_id: abacatePayResult.data.id,
-        qr_code: abacatePayResult.data.brCode || abacatePayResult.data.qrCode,
+        qr_code: abacatePayResult.data.brCode,
         status: 'pending',
         gateway: 'abacatepay',
         gateway_response: abacatePayResult
@@ -159,10 +154,10 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         paymentId: abacatePayResult.data.id,
-        qrCode: abacatePayResult.data.brCode || abacatePayResult.data.qrCode,
+        qrCode: abacatePayResult.data.brCode,
+        qrCodeImage: abacatePayResult.data.brCodeBase64,
         amount: paymentData.amount,
-        expiresAt: abacatePayResult.data.expiresAt,
-        paymentUrl: abacatePayResult.data.url
+        expiresAt: abacatePayResult.data.expiresAt
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
