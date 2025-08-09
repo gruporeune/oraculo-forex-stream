@@ -30,10 +30,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const { toast } = useToast();
 
   const planLimits = {
-    partner: { dailyTarget: 0.10, maxOperations: 50 },
-    master: { dailyTarget: 1.00, maxOperations: 100 },
-    premium: { dailyTarget: 7.50, maxOperations: 250 },
-    platinum: { dailyTarget: 20.00, maxOperations: 500 }
+    partner: { dailyTarget: 1.00, maxOperations: 50 },
+    master: { dailyTarget: 6.00, maxOperations: 100 },
+    premium: { dailyTarget: 41.25, maxOperations: 250 },
+    platinum: { dailyTarget: 100.00, maxOperations: 500 }
   };
 
   useEffect(() => {

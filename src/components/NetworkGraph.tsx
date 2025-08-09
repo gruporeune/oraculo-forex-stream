@@ -278,7 +278,10 @@ export default function NetworkGraph({ userId, userProfile }: NetworkGraphProps)
           <div className="overflow-x-auto">
             <div className="min-w-full pb-8">
               <div className="flex justify-center">
-                {renderNode(networkData, true)}
+                {/* Only render referrals, not the root user */}
+                <div className="flex gap-8">
+                  {networkData.referrals.map(child => renderNode(child))}
+                </div>
               </div>
             </div>
           </div>

@@ -113,13 +113,13 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-8 hover:border-purple-400/50 transition-all duration-300">
             <div className="flex items-center justify-center mb-4">
                <img 
-                src="/lovable-uploads/819c852d-f577-4e95-b31a-c385b16a271e.png" 
-                alt="Mimos Broker" 
+                src="/lovable-uploads/defa97d4-c459-4dab-aa39-796036f5f5fe.png" 
+                alt="BullTec" 
                 className="h-32 w-auto object-contain"
               />
             </div>
             <div className="space-y-2">
-              <h4 className="text-xl font-bold text-white">Mimos Broker</h4>
+              <h4 className="text-xl font-bold text-white">BullTec</h4>
               <p className="text-purple-200 text-sm">
                 A corretora oficial recomendada pelo ORÁCULO
               </p>
