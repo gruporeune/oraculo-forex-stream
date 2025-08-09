@@ -30,6 +30,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -161,11 +163,55 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     }
   };
 
+  const checkPaymentStatus = async () => {
+    if (!paymentData?.paymentId) return;
+
+    setIsCheckingPayment(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-abacatepay-payment', {
+        body: {
+          paymentId: paymentData.paymentId
+        }
+      });
+
+      if (error) {
+        console.error('Error checking payment:', error);
+        throw new Error('Falha ao verificar pagamento');
+      }
+
+      if (data?.isPaid) {
+        setIsPaymentConfirmed(true);
+        toast({
+          title: "Pagamento confirmado!",
+          description: "Seu plano foi ativado com sucesso!",
+        });
+      } else {
+        toast({
+          title: "Pagamento pendente",
+          description: "O pagamento ainda não foi confirmado. Tente novamente em alguns instantes.",
+          variant: "destructive"
+        });
+      }
+
+    } catch (error) {
+      console.error('Payment check error:', error);
+      toast({
+        title: "Erro",
+        description: error instanceof Error ? error.message : 'Erro ao verificar pagamento',
+        variant: "destructive"
+      });
+    } finally {
+      setIsCheckingPayment(false);
+    }
+  };
+
   const handleClose = () => {
     setPaymentData(null);
     setFormData({ name: '', phone: '', email: '', cpf: '' });
     setIsLoading(false);
     setIsCopied(false);
+    setIsCheckingPayment(false);
+    setIsPaymentConfirmed(false);
     onClose();
   };
 
@@ -270,6 +316,25 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                 )}
               </Button>
             </div>
+          ) : isPaymentConfirmed ? (
+            <div className="text-center space-y-6">
+              {/* Success State */}
+              <div className="bg-green-500/20 border border-green-500/30 rounded-lg p-6">
+                <div className="text-green-400 text-6xl mb-4">✓</div>
+                <h3 className="text-2xl font-bold text-white mb-2">Seu plano foi ativado com sucesso!</h3>
+                <p className="text-white/70">
+                  O pagamento foi confirmado e seu plano {plan.name} está ativo.
+                </p>
+              </div>
+              
+              <Button 
+                onClick={handleClose}
+                className="w-full bg-green-600 hover:bg-green-700"
+                size="lg"
+              >
+                Continuar
+              </Button>
+            </div>
           ) : (
             <div className="space-y-4">
               {/* Payment Created State */}
@@ -317,6 +382,23 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                 </div>
               </div>
 
+              {/* Payment Check Button */}
+              <Button 
+                onClick={checkPaymentStatus}
+                disabled={isCheckingPayment}
+                className="w-full bg-green-600 hover:bg-green-700"
+                size="lg"
+              >
+                {isCheckingPayment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Verificando pagamento...
+                  </>
+                ) : (
+                  'Já efetuei o pagamento!'
+                )}
+              </Button>
+
               {/* Payment Info */}
               <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-3 text-sm">
                 <p className="font-semibold text-blue-300">Instruções:</p>
@@ -325,9 +407,10 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                   <li>Escolha a opção PIX</li>
                   <li>Escaneie o QR Code ou cole o código</li>
                   <li>Confirme o pagamento</li>
+                  <li>Clique em "Já efetuei o pagamento!" após pagar</li>
                 </ul>
                 <p className="text-blue-300 mt-2 font-medium">
-                  ⚡ Ativação automática em até 5 minutos
+                  ⚡ Ativação automática após confirmação
                 </p>
               </div>
             </div>
