@@ -12,6 +12,8 @@ interface PaymentRequest {
   userId: string;
   userEmail: string;
   userName: string;
+  userPhone?: string;
+  userCpf?: string;
 }
 
 interface AbacatePayResponse {
@@ -63,15 +65,36 @@ serve(async (req) => {
     // Create external ID
     const externalId = `payment_${Date.now()}_${paymentData.userId}`;
 
+    // Initialize Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Get user profile data including phone
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('phone, full_name')
+      .eq('id', paymentData.userId)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+    }
+
+    // Use profile data or fallback to provided data
+    const customerData = {
+      name: profile?.full_name || paymentData.userName,
+      cellphone: profile?.phone || paymentData.userPhone || "11999999999", // Fallback phone
+      email: paymentData.userEmail,
+      taxId: paymentData.userCpf || "000.000.000-00" // Fallback CPF - should be provided by user
+    };
+
+    console.log('Customer data for AbacatePay:', customerData);
+
     // Create payment with AbacatePay
     const abacatePayPayload = {
       amount: Math.round(paymentData.amount * 100), // Convert to cents
       expiresIn: 3600, // 1 hour expiration
       description: `Plano ${paymentData.planName} - BullTec`,
-      customer: {
-        name: paymentData.userName,
-        email: paymentData.userEmail
-      },
+      customer: customerData,
       metadata: {
         externalId: externalId
       }
@@ -114,33 +137,11 @@ serve(async (req) => {
       );
     }
 
-    // Initialize Supabase client
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // Get user ID from the user email
-    const { data: authUser, error: authError } = await supabase.auth.admin.listUsers();
-    if (authError) {
-      console.error('Error fetching users:', authError);
-      return new Response(
-        JSON.stringify({ error: 'Erro ao buscar usuário' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const user = authUser.users.find(u => u.email === paymentData.userEmail);
-    if (!user) {
-      console.error('User not found with email:', paymentData.userEmail);
-      return new Response(
-        JSON.stringify({ error: 'Usuário não encontrado' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     // Store payment transaction in database
     const { error: insertError } = await supabase
       .from('payment_transactions')
       .insert({
-        user_id: user.id,
+        user_id: paymentData.userId,
         plan_name: paymentData.planName,
         amount: paymentData.amount,
         external_id: externalId,
