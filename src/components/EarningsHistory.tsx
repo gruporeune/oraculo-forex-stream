@@ -56,11 +56,13 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
   }, [userId]);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Convert to Brazil timezone (UTC-3)
+    const date = new Date(dateString + 'T00:00:00-03:00');
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
-      year: 'numeric'
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo'
     });
   };
 
@@ -68,7 +70,8 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
     const date = new Date(dateTimeString);
     return date.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      timeZone: 'America/Sao_Paulo'
     });
   };
 
