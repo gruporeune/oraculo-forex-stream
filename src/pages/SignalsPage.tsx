@@ -43,6 +43,8 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
     { value: '15', label: '15 Minutos' }
   ];
 
+  const [userPlans, setUserPlans] = useState<any[]>([]);
+
   const planLimits = {
     free: 5,
     partner: 20,
@@ -51,9 +53,37 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
     platinum: 1000
   };
 
-  const currentPlan = profile?.plan || 'free';
-  const usedSignals = profile?.daily_signals_used || 0;
-  const maxSignals = planLimits[currentPlan as keyof typeof planLimits];
+  // Calculate totals from all active plans
+  const calculateTotals = () => {
+    if (!userPlans || userPlans.length === 0) {
+      return {
+        maxSignals: 5,
+        usedSignals: profile?.daily_signals_used || 0,
+        planNames: 'FREE'
+      };
+    }
+
+    const maxSignals = userPlans.reduce((total, plan) => {
+      const planSignals = planLimits[plan.plan_name as keyof typeof planLimits] || 0;
+      return total + planSignals;
+    }, 0);
+
+    const usedSignals = userPlans.reduce((total, plan) => total + (plan.daily_signals_used || 0), 0);
+    
+    const planCounts: { [key: string]: number } = {};
+    userPlans.forEach(plan => {
+      const planName = plan.plan_name;
+      planCounts[planName] = (planCounts[planName] || 0) + 1;
+    });
+    
+    const planNames = Object.entries(planCounts)
+      .map(([plan, count]) => `${count} ${plan.toUpperCase()}`)
+      .join(', ');
+
+    return { maxSignals, usedSignals, planNames };
+  };
+
+  const { maxSignals, usedSignals, planNames } = calculateTotals();
   const remainingSignals = maxSignals - usedSignals;
 
   useEffect(() => {
@@ -62,7 +92,23 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
 
   useEffect(() => {
     loadRecentSignals();
+    loadUserPlans();
   }, [user.id]);
+
+  const loadUserPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_plans')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+      setUserPlans(data || []);
+    } catch (error) {
+      console.error('Error loading user plans:', error);
+    }
+  };
 
   const loadRecentSignals = async () => {
     try {
@@ -137,16 +183,35 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
 
       if (signalError) throw signalError;
 
-      // Update user's daily signals count
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          daily_signals_used: usedSignals + 1,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      // Update daily signals count for all plans proportionally
+      if (userPlans.length > 0) {
+        // Update the plan with the least used signals
+        const planToUpdate = userPlans.reduce((min, plan) => 
+          plan.daily_signals_used < min.daily_signals_used ? plan : min
+        );
 
-      if (updateError) throw updateError;
+        const { error: updateError } = await supabase
+          .from('user_plans')
+          .update({
+            daily_signals_used: planToUpdate.daily_signals_used + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', planToUpdate.id);
+
+        if (updateError) throw updateError;
+        loadUserPlans(); // Reload plans to get updated counts
+      } else {
+        // Fallback to profile update for free users
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            daily_signals_used: usedSignals + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (updateError) throw updateError;
+      }
 
       onProfileUpdate();
       loadRecentSignals();
@@ -199,7 +264,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
               Gerar Novo Sinal
             </CardTitle>
             <p className="text-white/70 text-sm">
-              Sinais restantes: {remainingSignals}/{maxSignals} (Plano {currentPlan.toUpperCase()})
+              Sinais restantes: {remainingSignals}/{maxSignals} ({planNames})
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -279,8 +344,8 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
                 <span className="text-green-400 font-medium">{remainingSignals}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-white/70 text-sm">Plano Atual</span>
-                <Badge className="bg-purple-600 uppercase">{currentPlan}</Badge>
+                <span className="text-white/70 text-sm">Planos Ativos</span>
+                <Badge className="bg-purple-600 text-xs">{planNames}</Badge>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-white/70 text-sm">Taxa de Sucesso</span>

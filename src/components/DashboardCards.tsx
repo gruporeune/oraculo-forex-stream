@@ -26,8 +26,20 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
   const totalUsedSignals = userPlans?.reduce((total, plan) => total + (plan.daily_signals_used || 0), 0) || 0;
   const remainingSignals = totalSignals - totalUsedSignals;
 
-  // Get plan names for display
-  const planNames = userPlans?.length > 0 ? userPlans.map(p => p.plan_name.toUpperCase()).join(', ') : 'FREE';
+  // Get plan counts for display
+  const getPlanCounts = () => {
+    if (!userPlans || userPlans.length === 0) return 'FREE';
+    
+    const planCounts: { [key: string]: number } = {};
+    userPlans.forEach(plan => {
+      const planName = plan.plan_name;
+      planCounts[planName] = (planCounts[planName] || 0) + 1;
+    });
+    
+    return Object.entries(planCounts)
+      .map(([plan, count]) => `${count} ${plan}`)
+      .join(', ');
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -58,7 +70,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-white">{planNames}</div>
+          <div className="text-lg font-bold text-white">{getPlanCounts()}</div>
           <p className="text-xs text-white/70">{totalSignals} sinais/dia</p>
         </CardContent>
       </Card>
