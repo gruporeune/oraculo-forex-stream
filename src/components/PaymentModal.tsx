@@ -18,12 +18,12 @@ interface PaymentModalProps {
 }
 
 interface PaymentData {
-  qr_code: string;
-  qr_code_text: string;
-  transaction_id: string;
-  external_id: string;
+  success: boolean;
+  paymentId: string;
+  qrCode: string;
   amount: number;
-  plan: string;
+  expiresAt?: string;
+  paymentUrl?: string;
 }
 
 export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
@@ -35,7 +35,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const createPayment = async () => {
     setIsLoading(true);
     try {
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
@@ -46,41 +45,52 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
-      // Get user profile for additional data
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, phone')
+        .select('*')
         .eq('id', user.id)
         .single();
 
-      // Call payment creation function
-      const { data, error } = await supabase.functions.invoke('create-payment', {
+      if (!profile) {
+        toast({
+          title: "Erro",
+          description: "Perfil do usuário não encontrado",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Call the AbacatePay edge function to create payment
+      const { data, error } = await supabase.functions.invoke('create-abacatepay-payment', {
         body: {
-          plan: plan.name.toLowerCase(),
-          userEmail: user.email,
-          userName: profile?.full_name || user.email,
-          userDocument: profile?.phone || '00000000000' // Fallback document
+          planName: plan.name,
+          amount: parseFloat(plan.price.replace('R$ ', '').replace('.', '').replace(',', '.')),
+          userId: user.id,
+          userEmail: user.email || profile.username + '@bulltec.com',
+          userName: profile.full_name || profile.username
         }
       });
 
       if (error) {
-        throw error;
+        console.error('Error creating payment:', error);
+        throw new Error('Falha ao criar pagamento. Tente novamente.');
       }
 
-      if (data.success) {
-        setPaymentData(data.data);
-        toast({
-          title: "Pagamento criado!",
-          description: "Escaneie o QR Code para pagar via PIX",
-        });
-      } else {
-        throw new Error(data.error || 'Erro ao criar pagamento');
+      if (!data?.success) {
+        throw new Error('Falha ao criar pagamento. Tente novamente.');
       }
+
+      setPaymentData(data);
+      toast({
+        title: "Pagamento criado!",
+        description: "Escaneie o QR Code para pagar via PIX",
+      });
+
     } catch (error) {
-      console.error('Error creating payment:', error);
+      console.error('Payment creation error:', error);
       toast({
         title: "Erro",
-        description: "Falha ao criar pagamento. Tente novamente.",
+        description: error instanceof Error ? error.message : 'Erro desconhecido',
         variant: "destructive"
       });
     } finally {
@@ -89,8 +99,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   };
 
   const copyPixCode = async () => {
-    if (paymentData?.qr_code_text) {
-      await navigator.clipboard.writeText(paymentData.qr_code_text);
+    if (paymentData?.qrCode) {
+      await navigator.clipboard.writeText(paymentData.qrCode);
       setIsCopied(true);
       toast({
         title: "Copiado!",
@@ -154,26 +164,35 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
           ) : (
             /* Payment Created State */
             <div className="space-y-4">
-              {/* QR Code */}
+              {/* Payment URL and Amount */}
               <div className="text-center">
-                <div className="bg-white p-4 rounded-lg inline-block">
-                  <img 
-                    src={`data:image/png;base64,${paymentData.qr_code}`}
-                    alt="QR Code PIX"
-                    className="w-48 h-48 mx-auto"
-                  />
+                <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 mb-4">
+                  <p className="text-lg font-bold text-white">Valor: R$ {paymentData.amount.toFixed(2).replace('.', ',')}</p>
+                  {paymentData.expiresAt && (
+                    <p className="text-sm text-white/70">
+                      Expira em: {new Date(paymentData.expiresAt).toLocaleString('pt-BR')}
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm text-white/70 mt-2">
-                  Escaneie o QR Code com seu banco
-                </p>
+                
+                {paymentData.paymentUrl && (
+                  <div className="mb-4">
+                    <Button 
+                      onClick={() => window.open(paymentData.paymentUrl, '_blank')}
+                      className="w-full bg-green-600 hover:bg-green-700"
+                    >
+                      Abrir Página de Pagamento
+                    </Button>
+                  </div>
+                )}
               </div>
 
               {/* PIX Code */}
               <div className="space-y-2">
-                <p className="text-sm text-white/80">Ou copie o código PIX:</p>
+                <p className="text-sm text-white/80">Código PIX:</p>
                 <div className="flex gap-2">
                   <div className="flex-1 p-3 bg-black/50 rounded border border-purple-500/30 text-xs font-mono break-all">
-                    {paymentData.qr_code_text}
+                    {paymentData.qrCode}
                   </div>
                   <Button
                     onClick={copyPixCode}
