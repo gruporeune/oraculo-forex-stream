@@ -42,6 +42,12 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+    console.log('Environment check:', {
+      hasApiKey: !!abacatePayApiKey,
+      hasSupabaseUrl: !!supabaseUrl,
+      hasServiceKey: !!supabaseServiceKey
+    });
+
     if (!abacatePayApiKey || !supabaseUrl || !supabaseServiceKey) {
       console.error('Missing environment variables');
       return new Response(
@@ -134,11 +140,9 @@ serve(async (req) => {
         plan_name: paymentData.planName,
         amount: paymentData.amount,
         external_id: externalId,
-        payment_id: abacatePayResult.data.id,
         qr_code: abacatePayResult.data.brCode,
-        status: 'pending',
-        gateway: 'abacatepay',
-        gateway_response: abacatePayResult
+        qr_code_text: abacatePayResult.data.brCode,
+        status: 'pending'
       });
 
     if (insertError) {
