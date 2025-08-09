@@ -27,6 +27,7 @@ interface MultiPlanAutomaticSignalsProps {
 export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpdate }: MultiPlanAutomaticSignalsProps) {
   const [isLoading, setIsLoading] = useState<{[key: string]: boolean}>({});
   const [countdowns, setCountdowns] = useState<{[key: string]: string}>({});
+  const [lastOperationTimes, setLastOperationTimes] = useState<{[key: string]: number}>({});
   const { toast } = useToast();
 
   const planLimits = {
@@ -36,6 +37,38 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     platinum: { dailyTarget: 100.00, maxOperations: 500 }
   };
 
+  // Automatic operations effect
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      const activePlans = userPlans.filter(plan => 
+        plan.auto_operations_started && 
+        !plan.auto_operations_paused && 
+        !hasReachedTarget(plan)
+      );
+
+      for (const plan of activePlans) {
+        const limits = planLimits[plan.plan_name as keyof typeof planLimits];
+        if (!limits) continue;
+
+        const now = Date.now();
+        const lastOperation = lastOperationTimes[plan.id] || 0;
+        
+        // Generate operation every 30-60 seconds
+        const minInterval = 30000; // 30 seconds
+        const maxInterval = 60000; // 60 seconds
+        const randomInterval = Math.random() * (maxInterval - minInterval) + minInterval;
+
+        if (now - lastOperation >= randomInterval) {
+          await generateOperation(plan);
+          setLastOperationTimes(prev => ({ ...prev, [plan.id]: now }));
+        }
+      }
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [userPlans, lastOperationTimes]);
+
+  // Countdown timer effect
   useEffect(() => {
     const interval = setInterval(() => {
       const newCountdowns: {[key: string]: string} = {};
@@ -63,6 +96,62 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
     return () => clearInterval(interval);
   }, [userPlans]);
+
+  const generateOperation = async (plan: PlanOperation) => {
+    const limits = planLimits[plan.plan_name as keyof typeof planLimits];
+    if (!limits || hasReachedTarget(plan)) return;
+
+    // Calculate earning per operation to reach daily target
+    const remainingTarget = limits.dailyTarget - plan.daily_earnings;
+    const remainingOperations = limits.maxOperations - plan.auto_operations_completed_today;
+    
+    if (remainingOperations <= 0) return;
+
+    // Generate random profit between 80% and 95% success rate
+    const successRate = Math.random() * 0.15 + 0.80; // 80-95%
+    const isWin = Math.random() < successRate;
+    
+    // Calculate profit amount - more realistic distribution
+    const baseProfit = remainingTarget / Math.max(remainingOperations, 20); // Distribute over remaining operations
+    const profitMultiplier = isWin ? (0.8 + Math.random() * 0.4) : 0; // 80-120% of base or 0
+    const operationProfit = Math.max(baseProfit * profitMultiplier, 0);
+
+    console.log(`[${plan.plan_name.toUpperCase()}] Operação automática:`, {
+      isWin,
+      profit: operationProfit,
+      remaining: remainingTarget,
+      operations: remainingOperations
+    });
+
+    try {
+      const { error } = await supabase
+        .from('user_plans')
+        .update({
+          daily_earnings: Math.min(plan.daily_earnings + operationProfit, limits.dailyTarget),
+          auto_operations_completed_today: plan.auto_operations_completed_today + 1,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', plan.id);
+
+      if (error) throw error;
+
+      // Also update user's total earnings and balance
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          daily_earnings: (user.daily_earnings || 0) + operationProfit,
+          available_balance: (user.available_balance || 0) + operationProfit,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (profileError) throw profileError;
+
+      onPlansUpdate();
+    } catch (error) {
+      console.error('Error generating operation:', error);
+    }
+  };
 
   const hasReachedTarget = (plan: PlanOperation) => {
     const target = planLimits[plan.plan_name as keyof typeof planLimits]?.dailyTarget || 0;
