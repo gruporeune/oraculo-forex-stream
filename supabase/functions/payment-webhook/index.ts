@@ -76,18 +76,33 @@ serve(async (req) => {
         console.error('Error updating user profile:', profileError)
       }
 
-      // Create user_plans record to trigger commission system
-      const { error: planError } = await supabase
+      // Check if user plan already exists to prevent duplicate commissions
+      const { data: existingPlan } = await supabase
         .from('user_plans')
-        .insert({
-          user_id: transaction.user_id,
-          plan_name: transaction.plan_name,
-          purchase_date: new Date().toISOString(),
-          is_active: true
-        })
+        .select('id')
+        .eq('user_id', transaction.user_id)
+        .eq('plan_name', transaction.plan_name)
+        .eq('is_active', true)
+        .single();
 
-      if (planError) {
-        console.error('Error creating user plan record:', planError)
+      // Only insert user plan if it doesn't exist (prevents duplicate commission processing)
+      if (!existingPlan) {
+        const { error: planError } = await supabase
+          .from('user_plans')
+          .insert({
+            user_id: transaction.user_id,
+            plan_name: transaction.plan_name,
+            purchase_date: new Date().toISOString(),
+            is_active: true
+          })
+
+        if (planError) {
+          console.error('Error creating user plan record:', planError)
+        } else {
+          console.log('User plan inserted successfully - commissions will be processed automatically')
+        }
+      } else {
+        console.log('User plan already exists - skipping commission processing to prevent duplicates')
       }
 
       console.log('Plan activated successfully for user:', transaction.user_id)
