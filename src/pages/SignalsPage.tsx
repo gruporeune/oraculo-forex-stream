@@ -147,9 +147,9 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       const signalType = Math.random() > 0.5 ? 'CALL' : 'PUT';
       const confidence = Math.floor(Math.random() * 15) + 85; // 85-99%
       
-      // Calculate entry time for next candle based on expiration time
+      // Calculate entry time for next candle based on expiration time - using Brazil timezone
       const now = new Date();
-      const brasilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // UTC-3 (Brasília)
+      const brasilTime = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
       const expirationMinutes = parseInt(selectedExpiration);
       
       let entryTime: Date;

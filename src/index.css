@@ -135,13 +135,28 @@ All colors MUST be HSL.
     display: none !important;
   }
 
-  /* Hide Spline watermark */
+  /* Hide Spline watermark - more aggressive hiding */
   .spline-watermark,
-  [aria-label="Built with Spline"],
-  a[href*="spline.design"] {
+  [aria-label*="Built with"],
+  [aria-label*="Spline"],
+  a[href*="spline.design"],
+  a[href*="spline"],
+  *[data-spline-watermark],
+  iframe + div[style*="pointer-events"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+  
+  /* Hide any overlay or watermark elements */
+  canvas + div,
+  canvas ~ div[style*="position: absolute"] {
+    display: none !important;
   }
 }
 
