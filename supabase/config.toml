@@ -6,5 +6,11 @@ verify_jwt = true
 [functions.create-abacatepay-payment]
 verify_jwt = true
 
+[functions.create-suitpay-payment]
+verify_jwt = true
+
 [functions.payment-webhook]
+verify_jwt = false
+
+[functions.suitpay-webhook]
 verify_jwt = false
