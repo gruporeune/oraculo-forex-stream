@@ -112,15 +112,15 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('create-abacatepay-payment', {
+      const { data, error } = await supabase.functions.invoke('create-suitpay-payment', {
         body: {
-          planName: plan.name,
+          user_id: user.id,
+          plan_name: plan.name,
           amount: parseFloat(plan.price.replace('R$ ', '').replace('.', '').replace(',', '.')),
-          userId: user.id,
-          userEmail: formData.email,
-          userName: formData.name,
-          userPhone: formData.phone.replace(/\D/g, ''),
-          userCpf: formData.cpf.replace(/\D/g, '')
+          customer_name: formData.name,
+          customer_email: formData.email,
+          customer_document: formData.cpf.replace(/\D/g, ''),
+          customer_phone: formData.phone.replace(/\D/g, '')
         }
       });
 
@@ -133,7 +133,17 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         throw new Error('Falha ao criar pagamento. Tente novamente.');
       }
 
-      setPaymentData(data);
+      // Adapt response structure for SuitPay
+      const adaptedData = {
+        success: data.success,
+        paymentId: data.transaction_id,
+        qrCode: data.qr_code,
+        qrCodeImage: data.qr_code_base64 ? `data:image/png;base64,${data.qr_code_base64}` : undefined,
+        amount: data.amount,
+        expiresAt: data.expires_at
+      };
+
+      setPaymentData(adaptedData);
       toast({
         title: "Pagamento criado!",
         description: "Escaneie o QR Code para pagar via PIX",
@@ -168,22 +178,35 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
     setIsCheckingPayment(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-abacatepay-payment', {
-        body: {
-          paymentId: paymentData.paymentId
-        }
-      });
+      // For SuitPay, check payment status via database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-      if (error) {
-        console.error('Error checking payment:', error);
+      const { data: transaction, error: dbError } = await supabase
+        .from('payment_transactions')
+        .select('status')
+        .eq('user_id', user.id)
+        .eq('transaction_data->>idTransaction', paymentData.paymentId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (dbError) {
+        console.error('Error checking payment:', dbError);
         throw new Error('Falha ao verificar pagamento');
       }
 
-      if (data?.isPaid) {
+      if (transaction?.status === 'paid') {
         setIsPaymentConfirmed(true);
         toast({
           title: "Pagamento confirmado!",
           description: "Seu plano foi ativado com sucesso!",
+        });
+      } else if (transaction?.status === 'failed') {
+        toast({
+          title: "Pagamento falhou",
+          description: "O pagamento não foi processado. Tente novamente.",
+          variant: "destructive"
         });
       } else {
         toast({
