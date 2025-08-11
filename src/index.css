@@ -134,6 +134,15 @@ All colors MUST be HSL.
   a[href*="lovable"] {
     display: none !important;
   }
+
+  /* Hide Spline watermark */
+  .spline-watermark,
+  [aria-label="Built with Spline"],
+  a[href*="spline.design"] {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
 }
 
 /* Responsive improvements for the landing page */

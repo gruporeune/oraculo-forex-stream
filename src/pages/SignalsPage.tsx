@@ -146,8 +146,39 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
     try {
       const signalType = Math.random() > 0.5 ? 'CALL' : 'PUT';
       const confidence = Math.floor(Math.random() * 15) + 85; // 85-99%
-      const entryTime = new Date();
+      
+      // Calculate entry time for next candle based on expiration time
+      const now = new Date();
+      const brasilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000)); // UTC-3 (Brasília)
       const expirationMinutes = parseInt(selectedExpiration);
+      
+      let entryTime: Date;
+      
+      if (expirationMinutes === 1) {
+        // For 1 minute: entry at next minute (seconds = 0)
+        entryTime = new Date(brasilTime);
+        entryTime.setMinutes(entryTime.getMinutes() + 1);
+        entryTime.setSeconds(0);
+        entryTime.setMilliseconds(0);
+      } else if (expirationMinutes === 5) {
+        // For 5 minutes: entry at next 5-minute mark (5, 10, 15, 20, etc.)
+        entryTime = new Date(brasilTime);
+        const currentMinutes = entryTime.getMinutes();
+        const nextFiveMinuteMark = Math.ceil(currentMinutes / 5) * 5;
+        entryTime.setMinutes(nextFiveMinuteMark);
+        entryTime.setSeconds(0);
+        entryTime.setMilliseconds(0);
+      } else if (expirationMinutes === 15) {
+        // For 15 minutes: entry at next 15-minute mark (0, 15, 30, 45)
+        entryTime = new Date(brasilTime);
+        const currentMinutes = entryTime.getMinutes();
+        const nextFifteenMinuteMark = Math.ceil(currentMinutes / 15) * 15;
+        entryTime.setMinutes(nextFifteenMinuteMark);
+        entryTime.setSeconds(0);
+        entryTime.setMilliseconds(0);
+      } else {
+        entryTime = new Date(brasilTime);
+      }
       
       // Generate analysis based on signal type and timeframe
       const analyses = {
@@ -400,16 +431,26 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                    <div className="flex items-center gap-2 text-sm text-white/70">
-                      <Clock className="w-4 h-4" />
-                      <span>Entrada: {signal.entry_time.toLocaleTimeString('pt-BR')}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-white/70">
-                      <Target className="w-4 h-4" />
-                      <span>Expiração: {signal.expiration_time} min</span>
-                    </div>
-                  </div>
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                     <div className="flex items-center gap-2 text-sm text-white/70">
+                       <Clock className="w-4 h-4" />
+                       <span>Entrada: {signal.entry_time.toLocaleTimeString('pt-BR', { 
+                         timeZone: 'America/Sao_Paulo',
+                         hour: '2-digit',
+                         minute: '2-digit',
+                         second: '2-digit'
+                       })}</span>
+                     </div>
+                     <div className="flex items-center gap-2 text-sm text-white/70">
+                       <Target className="w-4 h-4" />
+                       <span>Finalização: {new Date(signal.entry_time.getTime() + signal.expiration_time * 60000).toLocaleTimeString('pt-BR', { 
+                         timeZone: 'America/Sao_Paulo',
+                         hour: '2-digit',
+                         minute: '2-digit',
+                         second: '2-digit'
+                       })}</span>
+                     </div>
+                   </div>
                   
                   <div className="bg-black/20 rounded-lg p-3">
                     <h4 className="text-white font-medium text-sm mb-2">Análise Técnica:</h4>
