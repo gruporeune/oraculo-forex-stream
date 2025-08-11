@@ -78,10 +78,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
   // Countdown timer effect
   useEffect(() => {
-    const interval = setInterval(() => {
+    const interval = setInterval(async () => {
       const newCountdowns: {[key: string]: string} = {};
       
-      userPlans.forEach(plan => {
+      for (const plan of userPlans) {
         if (plan.cycle_start_time && hasReachedTarget(plan)) {
           const cycleStart = new Date(plan.cycle_start_time);
           const nextCycle = new Date(cycleStart.getTime() + 24 * 60 * 60 * 1000);
@@ -94,16 +94,62 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
             newCountdowns[plan.id] = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
           } else {
+            // Countdown finished - reset the cycle automatically
             newCountdowns[plan.id] = '00:00:00';
+            
+            // Reset the plan for a new cycle
+            try {
+              await supabase
+                .from('user_plans')
+                .update({
+                  daily_earnings: 0,
+                  auto_operations_completed_today: 0,
+                  auto_operations_started: false,
+                  auto_operations_paused: false,
+                  cycle_start_time: null,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', plan.id);
+              
+              // Also reset user's daily earnings to allow new cycle
+              const { data: currentProfile } = await supabase
+                .from('profiles')
+                .select('daily_earnings')
+                .eq('id', user.id)
+                .single();
+              
+              if (currentProfile) {
+                const limits = planLimits[plan.plan_name as keyof typeof planLimits];
+                const planEarnings = limits?.dailyTarget || 0;
+                
+                await supabase
+                  .from('profiles')
+                  .update({
+                    daily_earnings: Math.max((currentProfile.daily_earnings || 0) - planEarnings, 0),
+                    updated_at: new Date().toISOString()
+                  })
+                  .eq('id', user.id);
+              }
+
+              // Trigger plans update to refresh UI
+              onPlansUpdate();
+              
+              toast({
+                title: "Novo ciclo disponível!",
+                description: `O plano ${plan.plan_name.toUpperCase()} está pronto para novas operações.`
+              });
+            } catch (error) {
+              console.error('Error resetting cycle:', error);
+            }
           }
         }
-      });
+      }
       
       setCountdowns(newCountdowns);
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [userPlans]);
+  }, [userPlans, user.id, onPlansUpdate, toast]);
 
   const generateOperation = async (plan: PlanOperation) => {
     const limits = planLimits[plan.plan_name as keyof typeof planLimits];
