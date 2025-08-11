@@ -29,7 +29,6 @@ interface Referral {
   created_at: string;
   commission_earned: number;
   username?: string;
-  phone?: string;
   level?: number;
   referrer_name?: string;
   commissions_by_plan?: CommissionByPlan[];
@@ -96,7 +95,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       // Get direct referrals using referred_by column
       const { data: directReferralsData, error: referralError } = await supabase
         .from('profiles')
-        .select('id, full_name, plan, updated_at, username, phone')
+        .select('id, full_name, plan, updated_at, username')
         .eq('referred_by', user.id)
         .order('updated_at', { ascending: false });
 
@@ -150,7 +149,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           created_at: latestCommissionDate,
           commission_earned: totalCommission,
           username: profile.username || '',
-          phone: profile.phone || '',
           commissions_by_plan: detailedCommissions || []
         });
       }
@@ -179,7 +177,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       // Get level 2 referrals (people referred by my direct referrals)
       const { data: level2Profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, plan, username, phone, referred_by, updated_at')
+        .select('id, full_name, plan, username, referred_by, updated_at')
         .in('referred_by', directIds);
 
       const formattedIndirectReferrals = [];
@@ -229,7 +227,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             created_at: commissionData?.[0]?.created_at || profile.updated_at,
             commission_earned: totalCommission,
             username: profile.username || '',
-            phone: profile.phone || '',
             level: 2,
             referrer_name: referrerData?.full_name || 'Indicador',
             commissions_by_plan: commissionData || []
@@ -242,7 +239,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       if (level2Ids.length > 0) {
         const { data: level3Profiles } = await supabase
           .from('profiles')
-          .select('id, full_name, plan, username, phone, referred_by, updated_at')
+          .select('id, full_name, plan, username, referred_by, updated_at')
           .in('referred_by', level2Ids);
 
         if (level3Profiles) {
@@ -290,7 +287,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
               created_at: commissionData?.[0]?.created_at || profile.updated_at,
               commission_earned: totalCommission,
               username: profile.username || '',
-              phone: profile.phone || '',
               level: 3,
               referrer_name: referrerData?.full_name || 'Indicador',
               commissions_by_plan: commissionData || []
@@ -454,9 +450,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         {referral.username && (
                           <p className="text-white/50 text-xs">@{referral.username}</p>
                         )}
-                        {referral.phone && (
-                          <p className="text-white/50 text-xs">{referral.phone}</p>
-                        )}
                        <p className="text-white/60 text-sm">
                          {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 ? 
                            `Primeira comissão: ${new Date(referral.commissions_by_plan[referral.commissions_by_plan.length - 1].created_at).toLocaleDateString('pt-BR')}` :
@@ -549,9 +542,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
                         <p className="text-white font-medium">{referral.full_name}</p>
                         {referral.username && (
                           <p className="text-white/50 text-xs">@{referral.username}</p>
-                        )}
-                        {referral.phone && (
-                          <p className="text-white/50 text-xs">{referral.phone}</p>
                         )}
                          <p className="text-white/60 text-sm">
                            Indicado por: {referral.referrer_name} {referral.commissions_by_plan && referral.commissions_by_plan.length > 0 ? 
