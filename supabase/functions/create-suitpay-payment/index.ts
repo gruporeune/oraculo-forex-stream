@@ -34,7 +34,7 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const suitpayClientId = Deno.env.get('SUITPAY_CLIENT_ID')!
     const suitpayClientSecret = Deno.env.get('SUITPAY_CLIENT_SECRET')!
-    const suitpayApiUrl = Deno.env.get('SUITPAY_API_URL') || 'https://ws.suitpay.app'
+    const suitpayApiUrl = (Deno.env.get('SUITPAY_API_URL') || 'https://ws.suitpay.app').replace(/\/$/, '') // Remove trailing slash
 
     // Initialize Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
