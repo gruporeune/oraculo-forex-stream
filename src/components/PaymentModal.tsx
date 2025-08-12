@@ -178,37 +178,29 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
     setIsCheckingPayment(true);
     try {
-      // For SuitPay, check payment status via database
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // For SuitPay, first try to find by payment_provider and check recent transactions
-      const { data: transactions, error: dbError } = await supabase
-        .from('payment_transactions')
-        .select('status, external_id, transaction_data')
-        .eq('user_id', user.id)
-        .eq('payment_provider', 'suitpay')
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Call our edge function to check payment status via SuitPay API
+      const { data, error } = await supabase.functions.invoke('check-suitpay-payment', {
+        body: {
+          payment_id: paymentData.paymentId,
+          user_id: user.id
+        }
+      });
 
-      if (dbError) {
-        console.error('Error checking payment:', dbError);
+      if (error) {
+        console.error('Error checking payment:', error);
         throw new Error('Falha ao verificar pagamento');
       }
 
-      // Find transaction matching our payment ID
-      const transaction = transactions?.find(t => 
-        t.external_id === paymentData.paymentId || 
-        (t.transaction_data as any)?.idTransaction === paymentData.paymentId
-      );
-
-      if (transaction?.status === 'paid') {
+      if (data?.status === 'paid') {
         setIsPaymentConfirmed(true);
         toast({
           title: "Pagamento confirmado!",
           description: "Seu plano foi ativado com sucesso!",
         });
-      } else if (transaction?.status === 'failed') {
+      } else if (data?.status === 'failed') {
         toast({
           title: "Pagamento falhou",
           description: "O pagamento não foi processado. Tente novamente.",
@@ -217,7 +209,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       } else {
         toast({
           title: "Pagamento pendente",
-          description: "O pagamento ainda não foi confirmado. Tente novamente em alguns instantes.",
+          description: "O pagamento ainda não foi confirmado. Aguarde ou tente novamente em alguns instantes.",
           variant: "destructive"
         });
       }
