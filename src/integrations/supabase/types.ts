@@ -131,10 +131,12 @@ export type Database = {
           id: string
           paid_at: string | null
           paylatam_transaction_id: string | null
+          payment_provider: string | null
           plan_name: string
           qr_code: string | null
           qr_code_text: string | null
           status: string
+          transaction_data: Json | null
           updated_at: string
           user_id: string
         }
@@ -146,10 +148,12 @@ export type Database = {
           id?: string
           paid_at?: string | null
           paylatam_transaction_id?: string | null
+          payment_provider?: string | null
           plan_name: string
           qr_code?: string | null
           qr_code_text?: string | null
           status?: string
+          transaction_data?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -161,10 +165,12 @@ export type Database = {
           id?: string
           paid_at?: string | null
           paylatam_transaction_id?: string | null
+          payment_provider?: string | null
           plan_name?: string
           qr_code?: string | null
           qr_code_text?: string | null
           status?: string
+          transaction_data?: Json | null
           updated_at?: string
           user_id?: string
         }

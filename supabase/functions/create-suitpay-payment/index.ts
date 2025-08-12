@@ -100,6 +100,7 @@ serve(async (req) => {
     }
 
     console.log('SuitPay payload:', JSON.stringify(suitpayPayload, null, 2))
+    console.log('Calling SuitPay URL:', `${suitpayApiUrl}/api/v1/gateway/request-qrcode`)
 
     // Call SuitPay API
     const suitpayResponse = await fetch(`${suitpayApiUrl}/api/v1/gateway/request-qrcode`, {
