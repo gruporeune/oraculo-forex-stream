@@ -38,10 +38,7 @@ serve(async (req) => {
     
     console.log('SuitPay webhook received:', webhookData)
 
-    // Validate webhook hash for security - temporarily disabled for debugging
-    console.log('Hash validation temporarily disabled for webhook processing')
-    
-    // Log hash details for debugging
+    // Validate webhook hash for security
     const fieldsToHash = [
       webhookData.idTransaction,
       webhookData.typeTransaction,
@@ -70,11 +67,10 @@ serve(async (req) => {
       matches: calculatedHash === webhookData.hash
     })
 
-    // Temporarily skip hash validation to allow webhook processing
-    // if (calculatedHash !== webhookData.hash) {
-    //   console.error('Invalid webhook hash - possible security breach')
-    //   return new Response('Invalid hash', { status: 401 })
-    // }
+    if (calculatedHash !== webhookData.hash) {
+      console.error('Invalid webhook hash - possible security breach')
+      return new Response('Invalid hash', { status: 401 })
+    }
 
     // Find the payment transaction
     const { data: transaction, error: fetchError } = await supabase

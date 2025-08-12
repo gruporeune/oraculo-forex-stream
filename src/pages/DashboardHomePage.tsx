@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DashboardCards } from '@/components/DashboardCards';
 import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
-import { PendingPaymentsChecker } from '@/components/PendingPaymentsChecker';
+
 import { useToast } from '@/hooks/use-toast';
 import { Tilt } from '@/components/ui/tilt';
 import { Spotlight } from '@/components/ui/spotlight';
@@ -84,10 +84,6 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         </p>
       </div>
 
-      {/* Only show for users with pending payments or on free plan */}
-      {(profile?.plan === 'free' || profile?.plan === 'FREE') && (
-        <PendingPaymentsChecker />
-      )}
 
       <DashboardCards 
         profile={profile} 
