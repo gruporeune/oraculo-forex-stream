@@ -63,24 +63,47 @@ serve(async (req) => {
 
     // Try to query SuitPay API to check payment status
     try {
-      const suitpayResponse = await fetch(`${suitpayApiUrl}/api/v1/gateway/consult-qrcode`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ci': suitpayClientId,
-          'cs': suitpayClientSecret,
-        },
-        body: JSON.stringify({
-          requestNumber: payment_id
-        })
-      })
+      // Use multiple endpoints to try to find the transaction
+      const consultEndpoints = [
+        `${suitpayApiUrl}/api/v1/gateway/consult-qrcode`,
+        `${suitpayApiUrl}/api/v1/gateway/consult-pix`,
+        `${suitpayApiUrl}/api/v1/gateway/get-transaction-status`
+      ];
 
-      if (suitpayResponse.ok) {
-        const suitpayData = await suitpayResponse.json()
-        console.log('SuitPay API response:', suitpayData)
+      let suitpayData = null;
+      
+      for (const endpoint of consultEndpoints) {
+        try {
+          console.log(`Trying endpoint: ${endpoint}`)
+          const suitpayResponse = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'ci': suitpayClientId,
+              'cs': suitpayClientSecret,
+            },
+            body: JSON.stringify({
+              requestNumber: payment_id,
+              idTransaction: payment_id
+            })
+          });
 
+          if (suitpayResponse.ok) {
+            suitpayData = await suitpayResponse.json();
+            console.log(`Success with endpoint: ${endpoint}`, suitpayData);
+            break;
+          } else {
+            console.log(`Failed with endpoint: ${endpoint}`, suitpayResponse.status);
+          }
+        } catch (endpointError) {
+          console.log(`Error with endpoint: ${endpoint}`, endpointError);
+          continue;
+        }
+      }
+
+      if (suitpayData) {
         // If SuitPay says it's paid, update our database
-        if (suitpayData.statusTransaction === 'PAID_OUT') {
+        if (suitpayData.statusTransaction === 'PAID_OUT' || suitpayData.status === 'PAID_OUT') {
           console.log('Payment confirmed by SuitPay API, updating database')
 
           // Update transaction status
@@ -146,9 +169,11 @@ serve(async (req) => {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             status: 200
           })
+        } else {
+          console.log('Payment not yet confirmed by SuitPay:', suitpayData)
         }
       } else {
-        console.log('SuitPay API request failed:', suitpayResponse.status, await suitpayResponse.text())
+        console.log('No valid response from any SuitPay endpoint')
       }
     } catch (apiError) {
       console.error('Error checking SuitPay API:', apiError)
