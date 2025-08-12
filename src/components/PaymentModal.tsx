@@ -182,19 +182,25 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: transaction, error: dbError } = await supabase
+      // For SuitPay, first try to find by payment_provider and check recent transactions
+      const { data: transactions, error: dbError } = await supabase
         .from('payment_transactions')
-        .select('status')
+        .select('status, external_id, transaction_data')
         .eq('user_id', user.id)
-        .eq('transaction_data->>idTransaction', paymentData.paymentId)
+        .eq('payment_provider', 'suitpay')
         .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(5);
 
       if (dbError) {
         console.error('Error checking payment:', dbError);
         throw new Error('Falha ao verificar pagamento');
       }
+
+      // Find transaction matching our payment ID
+      const transaction = transactions?.find(t => 
+        t.external_id === paymentData.paymentId || 
+        (t.transaction_data as any)?.idTransaction === paymentData.paymentId
+      );
 
       if (transaction?.status === 'paid') {
         setIsPaymentConfirmed(true);
