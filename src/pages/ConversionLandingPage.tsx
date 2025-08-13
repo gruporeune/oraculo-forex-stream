@@ -81,28 +81,28 @@ export default function ConversionLandingPage() {
               </div>
             </div>
             
-            <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black mb-8 leading-tight px-4">
               <span className="text-red-400">CANSADO DE PERDER</span>
               <br />
               <span className="text-white">DINHEIRO NO TRADE?</span>
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-6">
-                <div className="text-red-400 text-5xl font-bold mb-4">87%</div>
-                <p className="text-gray-300">dos traders iniciantes perdem todo o dinheiro em 6 meses</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-12 px-4">
+              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-4 md:p-6">
+                <div className="text-red-400 text-3xl md:text-5xl font-bold mb-4">87%</div>
+                <p className="text-gray-300 text-sm md:text-base">dos traders iniciantes perdem todo o dinheiro em 6 meses</p>
               </div>
-              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-6">
-                <div className="text-red-400 text-5xl font-bold mb-4">R$ 0</div>
-                <p className="text-gray-300">é o que sobra na conta depois de operações emocionais</p>
+              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-4 md:p-6">
+                <div className="text-red-400 text-3xl md:text-5xl font-bold mb-4">R$ 0</div>
+                <p className="text-gray-300 text-sm md:text-base">é o que sobra na conta depois de operações emocionais</p>
               </div>
-              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-6">
-                <div className="text-red-400 text-5xl font-bold mb-4">24/7</div>
-                <p className="text-gray-300">você fica grudado no gráfico tentando recuperar perdas</p>
+              <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-4 md:p-6">
+                <div className="text-red-400 text-3xl md:text-5xl font-bold mb-4">24/7</div>
+                <p className="text-gray-300 text-sm md:text-base">você fica grudado no gráfico tentando recuperar perdas</p>
               </div>
             </div>
 
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-lg md:text-xl text-gray-300 mb-8 px-4">
               <span className="text-red-400 font-bold">A solução?</span> Deixe nossa IA fazer o trabalho pesado enquanto você vive sua vida.
             </p>
           </div>
@@ -120,7 +120,7 @@ export default function ConversionLandingPage() {
                 </div>
               </div>
               
-              <h2 className="text-4xl md:text-6xl font-black mb-8 leading-tight">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black mb-8 leading-tight px-4">
                 <span className="bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
                   OPERAÇÕES 100%
                 </span>
@@ -128,7 +128,7 @@ export default function ConversionLandingPage() {
                 <span className="text-white">AUTOMÁTICAS</span>
               </h2>
               
-              <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+              <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto px-4">
                 Nossa IA analisa milhares de dados em tempo real e executa operações com 
                 <span className="text-green-400 font-bold"> 80% de precisão</span>, 
                 24 horas por dia, sem emoções ou erros humanos.
@@ -136,13 +136,13 @@ export default function ConversionLandingPage() {
             </div>
 
             {/* Demo Section */}
-            <Card className="bg-slate-900/80 border-purple-500/30 backdrop-blur-sm mb-16">
-              <CardContent className="p-8">
+            <Card className="bg-slate-900/80 border-purple-500/30 backdrop-blur-sm mb-16 mx-4">
+              <CardContent className="p-4 md:p-8">
                 <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-white mb-4">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
                     🎯 DEMONSTRAÇÃO: Veja o ORÁCULO em Ação
                   </h3>
-                  <p className="text-gray-300">
+                  <p className="text-gray-300 text-sm md:text-base">
                     Assista nossa IA gerando lucros automaticamente (Simulação realística)
                   </p>
                 </div>
@@ -151,51 +151,53 @@ export default function ConversionLandingPage() {
                   <Button
                     onClick={startSimulation}
                     disabled={isSimulating}
-                    className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg transform transition-all hover:scale-105"
+                    className="bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 text-white px-4 md:px-8 py-3 md:py-4 text-sm md:text-lg font-semibold rounded-xl shadow-lg transform transition-all hover:scale-105"
                   >
                     {isSimulating ? (
                       <>
-                        <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                        IA OPERANDO...
+                        <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white mr-2"></div>
+                        <span className="hidden sm:inline">IA OPERANDO...</span>
+                        <span className="sm:hidden">OPERANDO...</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-5 h-5 mr-2" />
-                        ATIVAR ORÁCULO IA AGORA
+                        <Play className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                        <span className="hidden sm:inline">ATIVAR ORÁCULO IA AGORA</span>
+                        <span className="sm:hidden">ATIVAR ORÁCULO</span>
                       </>
                     )}
                   </Button>
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-3 gap-2 md:gap-4 mb-8">
                   <Card className="bg-gradient-to-br from-green-900/40 to-green-800/20 border-green-500/30">
-                    <CardContent className="p-4 text-center">
-                      <DollarSign className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-green-400">
+                    <CardContent className="p-2 md:p-4 text-center">
+                      <DollarSign className="w-4 h-4 md:w-8 md:h-8 text-green-400 mx-auto mb-1 md:mb-2" />
+                      <div className="text-sm md:text-2xl font-bold text-green-400">
                         R$ {totalProfit.toFixed(2)}
                       </div>
-                      <div className="text-sm text-green-300">Lucro Gerado</div>
+                      <div className="text-xs md:text-sm text-green-300">Lucro Gerado</div>
                     </CardContent>
                   </Card>
 
                   <Card className="bg-gradient-to-br from-purple-900/40 to-purple-800/20 border-purple-500/30">
-                    <CardContent className="p-4 text-center">
-                      <TrendingUp className="w-8 h-8 text-purple-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-purple-400">
+                    <CardContent className="p-2 md:p-4 text-center">
+                      <TrendingUp className="w-4 h-4 md:w-8 md:h-8 text-purple-400 mx-auto mb-1 md:mb-2" />
+                      <div className="text-sm md:text-2xl font-bold text-purple-400">
                         R$ {balance.toFixed(2)}
                       </div>
-                      <div className="text-sm text-purple-300">Saldo Total</div>
+                      <div className="text-xs md:text-sm text-purple-300">Saldo Total</div>
                     </CardContent>
                   </Card>
 
                   <Card className="bg-gradient-to-br from-cyan-900/40 to-cyan-800/20 border-cyan-500/30">
-                    <CardContent className="p-4 text-center">
-                      <Target className="w-8 h-8 text-cyan-400 mx-auto mb-2" />
-                      <div className="text-2xl font-bold text-cyan-400">
+                    <CardContent className="p-2 md:p-4 text-center">
+                      <Target className="w-4 h-4 md:w-8 md:h-8 text-cyan-400 mx-auto mb-1 md:mb-2" />
+                      <div className="text-sm md:text-2xl font-bold text-cyan-400">
                         {operations.length}
                       </div>
-                      <div className="text-sm text-cyan-300">Operações IA</div>
+                      <div className="text-xs md:text-sm text-cyan-300">Operações IA</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -215,10 +217,10 @@ export default function ConversionLandingPage() {
                             : "bg-red-900/30 border-red-500/30"
                         }`}
                       >
-                        <div className="flex justify-between items-center">
-                          <div className="flex items-center gap-3">
+                        <div className="flex justify-between items-center flex-wrap sm:flex-nowrap gap-2">
+                          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                             <Badge 
-                              className={`${
+                              className={`text-xs ${
                                 operation.result === "WIN" 
                                   ? "bg-green-500/20 text-green-300 border-green-500/30" 
                                   : "bg-red-500/20 text-red-300 border-red-500/30"
@@ -226,13 +228,13 @@ export default function ConversionLandingPage() {
                             >
                               {operation.result}
                             </Badge>
-                            <span className="font-semibold text-white">{operation.asset}</span>
+                            <span className="font-semibold text-white text-sm md:text-base">{operation.asset}</span>
                             <Badge variant="outline" className="text-xs border-cyan-500/30 text-cyan-300">
                               {operation.direction}
                             </Badge>
                           </div>
                           <div className="text-right">
-                            <div className={`font-bold text-lg ${
+                            <div className={`font-bold text-sm md:text-lg ${
                               operation.result === "WIN" ? "text-green-400" : "text-red-400"
                             }`}>
                               {operation.profit > 0 ? "+" : ""}R$ {operation.profit.toFixed(2)}
@@ -246,8 +248,8 @@ export default function ConversionLandingPage() {
                 </div>
 
                 {operations.length > 0 && (
-                  <div className="mt-6 p-4 bg-green-900/20 border border-green-500/30 rounded-lg text-center">
-                    <p className="text-green-400 font-semibold">
+                  <div className="mt-6 p-3 md:p-4 bg-green-900/20 border border-green-500/30 rounded-lg text-center">
+                    <p className="text-green-400 font-semibold text-sm md:text-base">
                       🤖 IA operando automaticamente • {Math.round((operations.filter(op => op.result === "WIN").length / operations.length) * 100)}% taxa de acerto
                     </p>
                   </div>
@@ -262,7 +264,7 @@ export default function ConversionLandingPage() {
       <section className="relative z-10 bg-gradient-to-b from-black via-slate-950 to-purple-950/20 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 px-4">
               🎥 <span className="text-purple-400">Resultados Reais</span> dos Nossos Usuários
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -298,7 +300,7 @@ export default function ConversionLandingPage() {
           <div className="max-w-4xl mx-auto text-center">
             <Card className="bg-gradient-to-br from-purple-900/60 to-cyan-900/60 border-purple-500/30 backdrop-blur-sm">
               <CardContent className="p-8">
-                <h2 className="text-3xl md:text-5xl font-black mb-6">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-6 px-4">
                   <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
                     PARE DE PERDER
                   </span>
@@ -306,18 +308,19 @@ export default function ConversionLandingPage() {
                   <span className="text-white">COMECE A GANHAR</span>
                 </h2>
                 
-                <p className="text-xl text-gray-300 mb-8">
+                <p className="text-lg md:text-xl text-gray-300 mb-8 px-4">
                   Junte-se a mais de <span className="text-cyan-400 font-bold">800 usuários</span> que transformaram suas vidas financeiras com o ORÁCULO
                 </p>
                 
                 <div className="space-y-6">
                   <Button 
                     asChild
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-6 text-xl font-bold rounded-xl shadow-2xl transform transition-all hover:scale-105"
+                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 md:py-6 text-lg md:text-xl font-bold rounded-xl shadow-2xl transform transition-all hover:scale-105"
                   >
-                    <a href="/register">
-                      <Users className="w-6 h-6 mr-3" />
-                      QUERO ACESSO IMEDIATO - GRÁTIS
+                    <a href="/register" className="flex items-center justify-center">
+                      <Users className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
+                      <span className="hidden sm:inline">QUERO ACESSO IMEDIATO - GRÁTIS</span>
+                      <span className="sm:hidden">ACESSO GRÁTIS</span>
                     </a>
                   </Button>
                   

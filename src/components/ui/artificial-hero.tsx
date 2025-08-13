@@ -346,17 +346,17 @@ export const OracleHero = () => {
   return (
     <div ref={containerRef} className="w-full h-full bg-black">
       {/* Navigation*/}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-black/20">
+      <nav className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-black/20">
         <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-            <div className="w-4 h-4 rounded-full bg-black" />
+          <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+            <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-black" />
           </div>
-          <span className="text-2xl font-bold font-mono tracking-wider text-white">
+          <span className="text-lg md:text-2xl font-bold font-mono tracking-wider text-white">
             ORÁCULO
           </span>
         </div>
         
-        <div className="flex gap-8 font-mono text-xs font-medium tracking-wider uppercase">
+        <div className="hidden md:flex gap-8 font-mono text-xs font-medium tracking-wider uppercase">
           <a href="#" className="text-white/90 hover:text-white transition-opacity">
             Sinais IA
           </a>
@@ -374,9 +374,9 @@ export const OracleHero = () => {
       </nav>
 
 
-      {/* Left side text */}
+      {/* Left side text - Hidden on mobile */}
       <div 
-        className="fixed left-8 top-[40%] z-40"
+        className="hidden md:block fixed left-8 top-[40%] z-40"
         style={{
           transform: `translateX(${-scrollProgressRef.current * 200}px)`,
           opacity: Math.max(0, 1 - scrollProgressRef.current * 2),
@@ -391,9 +391,9 @@ export const OracleHero = () => {
         </div>
       </div>
 
-      {/* Right side text */}
+      {/* Right side text - Hidden on mobile */}
       <div 
-        className="fixed right-8 top-[40%] z-40"
+        className="hidden md:block fixed right-8 top-[40%] z-40"
         style={{
           transform: `translateX(${scrollProgressRef.current * 200}px)`,
           opacity: Math.max(0, 1 - scrollProgressRef.current * 2),
@@ -408,16 +408,16 @@ export const OracleHero = () => {
         </div>
       </div>
 
-      {/* Bottom text*/}
+      {/* Bottom text - Responsive positioning */}
       <div 
-        className="fixed bottom-[8%] left-8 z-40"
+        className="fixed bottom-4 md:bottom-[8%] left-4 md:left-8 z-40"
         style={{
           transform: `translateY(${scrollProgressRef.current * 50}px)`,
           opacity: Math.max(0, 1 - scrollProgressRef.current * 1.5),
           transition: 'transform 0.1s ease-out'
         }}
       >
-        <div className="font-mono text-[10px] text-white tracking-widest uppercase opacity-70">
+        <div className="font-mono text-[8px] md:text-[10px] text-white tracking-widest uppercase opacity-70">
           Inteligência Artificial • ORÁCULO
         </div>
       </div>
