@@ -161,7 +161,7 @@ export default function ConversionLandingPage() {
                     ) : (
                       <>
                         <Play className="w-5 h-5 mr-2" />
-                        ATIVAR ORÁCULO IA
+                        ATIVAR ORÁCULO IA AGORA
                       </>
                     )}
                   </Button>
@@ -307,7 +307,7 @@ export default function ConversionLandingPage() {
                 </h2>
                 
                 <p className="text-xl text-gray-300 mb-8">
-                  Junte-se a mais de <span className="text-cyan-400 font-bold">15.000 usuários</span> que transformaram suas vidas financeiras com o ORÁCULO
+                  Junte-se a mais de <span className="text-cyan-400 font-bold">800 usuários</span> que transformaram suas vidas financeiras com o ORÁCULO
                 </p>
                 
                 <div className="space-y-6">
@@ -323,7 +323,6 @@ export default function ConversionLandingPage() {
                   
                   <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-400">
                     <span className="flex items-center gap-1">✅ Sem mensalidade</span>
-                    <span className="flex items-center gap-1">✅ Cancele quando quiser</span>
                     <span className="flex items-center gap-1">✅ Suporte 24/7</span>
                   </div>
                 </div>

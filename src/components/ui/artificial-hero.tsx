@@ -347,8 +347,13 @@ export const OracleHero = () => {
     <div ref={containerRef} className="w-full h-full bg-black">
       {/* Navigation*/}
       <nav className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center bg-black/20">
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
-          <div className="w-4 h-4 rounded-full bg-black" />
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 flex items-center justify-center">
+            <div className="w-4 h-4 rounded-full bg-black" />
+          </div>
+          <span className="text-2xl font-bold font-mono tracking-wider text-white">
+            ORÁCULO
+          </span>
         </div>
         
         <div className="flex gap-8 font-mono text-xs font-medium tracking-wider uppercase">
@@ -368,20 +373,6 @@ export const OracleHero = () => {
         </div>
       </nav>
 
-      {/* Large text*/}
-      <div 
-        className="fixed bottom-[15%] left-0 right-0 z-40 pointer-events-none"
-        style={{
-          transform: `translateY(${scrollProgressRef.current * 100}px)`,
-          opacity: Math.max(0, 1 - scrollProgressRef.current * 1.5),
-          transition: 'transform 0.1s ease-out',
-        }}
-      >
-        <div className="font-black text-center leading-[0.8] tracking-tight text-white drop-shadow-[0_0_50px_rgba(255,255,255,0.3)] contrast-[1.2]"
-             style={{ fontSize: 'clamp(4rem, 15vw, 12rem)' }}>
-          O ORÁCULO
-        </div>
-      </div>
 
       {/* Left side text */}
       <div 
