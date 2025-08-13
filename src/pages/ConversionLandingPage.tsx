@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, TrendingUp, DollarSign, Zap, Target, Users, Star, AlertTriangle, Bot } from "lucide-react";
+import { Play, TrendingUp, DollarSign, Zap, Target, Users, Star, AlertTriangle, Bot, Signal, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OracleHero } from "@/components/ui/artificial-hero";
 
@@ -16,13 +16,42 @@ interface TradeOperation {
   time: string;
 }
 
+interface Signal {
+  id: string;
+  asset: string;
+  direction: "CALL" | "PUT";
+  time: string;
+  expirationTime: string;
+  confidence: number;
+}
+
 export default function ConversionLandingPage() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [operations, setOperations] = useState<TradeOperation[]>([]);
   const [totalProfit, setTotalProfit] = useState(0);
   const [balance, setBalance] = useState(100);
+  const [showRegisterCTA, setShowRegisterCTA] = useState(false);
+  const [isGeneratingSignal, setIsGeneratingSignal] = useState(false);
+  const [currentSignal, setCurrentSignal] = useState<Signal | null>(null);
 
   const assets = ["EUR/USD", "GBP/USD", "USD/JPY", "AUD/USD", "USD/CAD"];
+  
+  const generateSignal = (): Signal => {
+    const asset = assets[Math.floor(Math.random() * assets.length)];
+    const direction: "CALL" | "PUT" = Math.random() > 0.5 ? "CALL" : "PUT";
+    const confidence = Math.floor(Math.random() * 15) + 80; // 80-95% confidence
+    const now = new Date();
+    const expiration = new Date(now.getTime() + 5 * 60000); // 5 minutes
+    
+    return {
+      id: Date.now().toString(),
+      asset,
+      direction,
+      time: now.toLocaleTimeString(),
+      expirationTime: expiration.toLocaleTimeString(),
+      confidence
+    };
+  };
   
   const generateOperation = (): TradeOperation => {
     const asset = assets[Math.floor(Math.random() * assets.length)];
@@ -47,12 +76,14 @@ export default function ConversionLandingPage() {
     setOperations([]);
     setTotalProfit(0);
     setBalance(100);
+    setShowRegisterCTA(false);
 
     let operationCount = 0;
     const interval = setInterval(() => {
       if (operationCount >= 15) {
         clearInterval(interval);
         setIsSimulating(false);
+        setShowRegisterCTA(true);
         return;
       }
 
@@ -62,6 +93,17 @@ export default function ConversionLandingPage() {
       setBalance(prev => prev + operation.profit);
       operationCount++;
     }, 1500);
+  };
+
+  const generateNewSignal = () => {
+    setIsGeneratingSignal(true);
+    setCurrentSignal(null);
+    
+    setTimeout(() => {
+      const signal = generateSignal();
+      setCurrentSignal(signal);
+      setIsGeneratingSignal(false);
+    }, 2000);
   };
 
   return (
@@ -254,6 +296,182 @@ export default function ConversionLandingPage() {
                     </p>
                   </div>
                 )}
+
+                {/* Register CTA after simulation */}
+                <AnimatePresence>
+                  {showRegisterCTA && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="mt-8 p-6 bg-gradient-to-r from-green-900/40 to-emerald-900/40 border border-green-500/50 rounded-2xl text-center"
+                    >
+                      <div className="mb-4">
+                        <h4 className="text-xl md:text-2xl font-bold text-white mb-2">
+                          🎉 IMPRESSIONANTE! Viu Como Funciona?
+                        </h4>
+                        <p className="text-green-300 text-sm md:text-base">
+                          Agora imagine isso funcionando 24/7 na sua conta real!
+                        </p>
+                      </div>
+                      
+                      <Button 
+                        asChild
+                        className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white py-4 md:py-6 text-lg md:text-xl font-bold rounded-xl shadow-2xl transform transition-all hover:scale-105 animate-pulse"
+                      >
+                        <a href="/register" className="flex items-center justify-center">
+                          <Zap className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
+                          <span className="hidden sm:inline">CADASTRAR GRÁTIS NO PLANO FREE AGORA</span>
+                          <span className="sm:hidden">CADASTRAR GRÁTIS</span>
+                        </a>
+                      </Button>
+                      
+                      <p className="text-xs md:text-sm text-green-200 mt-3 opacity-80">
+                        ✅ Sem cartão de crédito • ✅ Ativação imediata • ✅ Comece a operar hoje
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Signals Generation Section */}
+      <section className="relative z-10 bg-gradient-to-b from-black via-slate-950 to-cyan-950/20 py-20">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <div className="flex justify-center mb-8">
+                <div className="bg-gradient-to-br from-cyan-600 to-blue-600 rounded-full p-4">
+                  <Signal className="w-12 h-12 text-white" />
+                </div>
+              </div>
+              
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-black mb-8 leading-tight px-4">
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
+                  SINAIS EM
+                </span>
+                <br />
+                <span className="text-white">TEMPO REAL</span>
+              </h2>
+              
+              <p className="text-lg md:text-xl text-gray-300 mb-12 max-w-3xl mx-auto px-4">
+                Além das operações automáticas, você também recebe 
+                <span className="text-cyan-400 font-bold"> sinais precisos</span> 
+                para operar manualmente quando quiser.
+              </p>
+            </div>
+
+            {/* Signal Generator Demo */}
+            <Card className="bg-slate-900/80 border-cyan-500/30 backdrop-blur-sm mb-16 mx-4">
+              <CardContent className="p-4 md:p-8">
+                <div className="text-center mb-8">
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
+                    📡 GERADOR DE SINAIS: Teste Agora
+                  </h3>
+                  <p className="text-gray-300 text-sm md:text-base">
+                    Gere um sinal igual aos que você receberá dentro da plataforma
+                  </p>
+                </div>
+
+                <div className="flex justify-center mb-8">
+                  <Button
+                    onClick={generateNewSignal}
+                    disabled={isGeneratingSignal}
+                    className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-700 hover:to-blue-700 text-white px-4 md:px-8 py-3 md:py-4 text-sm md:text-lg font-semibold rounded-xl shadow-lg transform transition-all hover:scale-105"
+                  >
+                    {isGeneratingSignal ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 md:h-5 md:w-5 border-b-2 border-white mr-2"></div>
+                        <span className="hidden sm:inline">ANALISANDO MERCADO...</span>
+                        <span className="sm:hidden">ANALISANDO...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Signal className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+                        <span className="hidden sm:inline">GERAR NOVO SINAL AGORA</span>
+                        <span className="sm:hidden">GERAR SINAL</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
+
+                {/* Signal Display */}
+                <AnimatePresence>
+                  {currentSignal && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 50 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -50 }}
+                      className="max-w-md mx-auto"
+                    >
+                      <Card className="bg-gradient-to-br from-cyan-900/40 to-blue-900/40 border-cyan-500/30">
+                        <CardContent className="p-6">
+                          <div className="text-center mb-4">
+                            <div className="flex items-center justify-center gap-2 mb-2">
+                              <div className={`w-3 h-3 rounded-full ${
+                                currentSignal.direction === "CALL" ? "bg-green-500" : "bg-red-500"
+                              } animate-pulse`}></div>
+                              <Badge 
+                                className={`text-sm font-bold ${
+                                  currentSignal.direction === "CALL" 
+                                    ? "bg-green-500/20 text-green-300 border-green-500/30" 
+                                    : "bg-red-500/20 text-red-300 border-red-500/30"
+                                }`}
+                              >
+                                {currentSignal.direction === "CALL" ? (
+                                  <><ArrowUp className="w-4 h-4 mr-1" /> CALL</>
+                                ) : (
+                                  <><ArrowDown className="w-4 h-4 mr-1" /> PUT</>
+                                )}
+                              </Badge>
+                            </div>
+                            
+                            <h4 className="text-2xl font-bold text-white mb-1">
+                              {currentSignal.asset}
+                            </h4>
+                            
+                            <div className="text-cyan-400 text-lg font-semibold mb-3">
+                              {currentSignal.confidence}% de Confiança
+                            </div>
+                          </div>
+                          
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Horário:</span>
+                              <span className="text-white">{currentSignal.time}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Expiração:</span>
+                              <span className="text-white">{currentSignal.expirationTime}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Duração:</span>
+                              <span className="text-cyan-300">5 minutos</span>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4 p-3 bg-cyan-900/20 border border-cyan-500/30 rounded-lg text-center">
+                            <p className="text-cyan-300 text-xs font-semibold">
+                              📊 Sinal gerado pela IA ORÁCULO
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {!currentSignal && !isGeneratingSignal && (
+                  <div className="text-center p-8 border-2 border-dashed border-cyan-500/30 rounded-lg">
+                    <Signal className="w-16 h-16 text-cyan-400 mx-auto mb-4 opacity-50" />
+                    <p className="text-gray-400 text-sm md:text-base">
+                      Clique no botão acima para gerar seu primeiro sinal
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -261,7 +479,7 @@ export default function ConversionLandingPage() {
       </section>
 
       {/* Social Proof */}
-      <section className="relative z-10 bg-gradient-to-b from-black via-slate-950 to-purple-950/20 py-20">
+      <section className="relative z-10 bg-gradient-to-b from-cyan-950/20 via-slate-950 to-purple-950/20 py-20">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 px-4">
