@@ -10,6 +10,7 @@ import RegisterPageOld from "./pages/register/RegisterPage";
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
+import ConversionLandingPage from "./pages/ConversionLandingPage";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +22,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/comece-aqui" element={<ConversionLandingPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
