@@ -41,7 +41,6 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const { toast } = useToast();
 
   const planLimits = {
-    free: { dailyTarget: 0.50 },
     partner: { dailyTarget: 1.00 },
     master: { dailyTarget: 6.00 },
     premium: { dailyTarget: 41.25 },
@@ -51,20 +50,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   // Automatic operations effect
   useEffect(() => {
     const interval = setInterval(async () => {
-      const effectivePlans = userPlans && userPlans.length > 0 ? userPlans : [
-        {
-          id: 'free-plan',
-          plan_name: 'free',
-          daily_earnings: user?.daily_earnings || 0,
-          auto_operations_completed_today: user?.auto_operations_completed_today || 0,
-          auto_operations_started: user?.auto_operations_started || false,
-          auto_operations_paused: user?.auto_operations_paused || false,
-          cycle_start_time: user?.cycle_start_time || null,
-          daily_signals_used: user?.daily_signals_used || 0
-        }
-      ];
-      
-      const activePlans = effectivePlans.filter(plan => 
+      const activePlans = userPlans.filter(plan => 
         plan.auto_operations_started && 
         !plan.auto_operations_paused && 
         !hasReachedTarget(plan)
@@ -95,20 +81,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     const interval = setInterval(async () => {
       const newCountdowns: {[key: string]: string} = {};
       
-      const effectivePlans = userPlans && userPlans.length > 0 ? userPlans : [
-        {
-          id: 'free-plan',
-          plan_name: 'free',
-          daily_earnings: user?.daily_earnings || 0,
-          auto_operations_completed_today: user?.auto_operations_completed_today || 0,
-          auto_operations_started: user?.auto_operations_started || false,
-          auto_operations_paused: user?.auto_operations_paused || false,
-          cycle_start_time: user?.cycle_start_time || null,
-          daily_signals_used: user?.daily_signals_used || 0
-        }
-      ];
-      
-      for (const plan of effectivePlans) {
+      for (const plan of userPlans) {
         if (plan.cycle_start_time && hasReachedTarget(plan)) {
           const cycleStart = new Date(plan.cycle_start_time);
           const nextCycle = new Date(cycleStart.getTime() + 24 * 60 * 60 * 1000);
@@ -126,52 +99,36 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
             
             // Reset the plan for a new cycle
             try {
-              if (plan.id === 'free-plan') {
-                // Reset profile for free plan
+              await supabase
+                .from('user_plans')
+                .update({
+                  daily_earnings: 0,
+                  auto_operations_completed_today: 0,
+                  auto_operations_started: false,
+                  auto_operations_paused: false,
+                  cycle_start_time: null,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', plan.id);
+              
+              // Also reset user's daily earnings to allow new cycle
+              const { data: currentProfile } = await supabase
+                .from('profiles')
+                .select('daily_earnings')
+                .eq('id', user.id)
+                .single();
+              
+              if (currentProfile) {
+                const limits = planLimits[plan.plan_name as keyof typeof planLimits];
+                const planEarnings = limits?.dailyTarget || 0;
+                
                 await supabase
                   .from('profiles')
                   .update({
-                    daily_earnings: 0,
-                    auto_operations_completed_today: 0,
-                    auto_operations_started: false,
-                    auto_operations_paused: false,
-                    cycle_start_time: null,
+                    daily_earnings: Math.max((currentProfile.daily_earnings || 0) - planEarnings, 0),
                     updated_at: new Date().toISOString()
                   })
                   .eq('id', user.id);
-              } else {
-                // Reset user_plans for paid plans
-                await supabase
-                  .from('user_plans')
-                  .update({
-                    daily_earnings: 0,
-                    auto_operations_completed_today: 0,
-                    auto_operations_started: false,
-                    auto_operations_paused: false,
-                    cycle_start_time: null,
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('id', plan.id);
-                
-                // Also reset user's daily earnings to allow new cycle for paid plans
-                const { data: currentProfile } = await supabase
-                  .from('profiles')
-                  .select('daily_earnings')
-                  .eq('id', user.id)
-                  .single();
-                
-                if (currentProfile) {
-                  const limits = planLimits[plan.plan_name as keyof typeof planLimits];
-                  const planEarnings = limits?.dailyTarget || 0;
-                  
-                  await supabase
-                    .from('profiles')
-                    .update({
-                      daily_earnings: Math.max((currentProfile.daily_earnings || 0) - planEarnings, 0),
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('id', user.id);
-                }
               }
 
               // Trigger plans update to refresh UI
@@ -204,27 +161,14 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       
       // Set cycle start time if not already set to trigger countdown
       if (!plan.cycle_start_time) {
-        if (plan.id === 'free-plan') {
-          // Update profile for free plan
-          await supabase
-            .from('profiles')
-            .update({
-              cycle_start_time: new Date().toISOString(),
-              auto_operations_started: false,
-              auto_operations_paused: false
-            })
-            .eq('id', user.id);
-        } else {
-          // Update user_plans for paid plans
-          await supabase
-            .from('user_plans')
-            .update({
-              cycle_start_time: new Date().toISOString(),
-              auto_operations_started: false,
-              auto_operations_paused: false
-            })
-            .eq('id', plan.id);
-        }
+        await supabase
+          .from('user_plans')
+          .update({
+            cycle_start_time: new Date().toISOString(),
+            auto_operations_started: false,
+            auto_operations_paused: false
+          })
+          .eq('id', plan.id);
         onPlansUpdate();
       }
       return;
@@ -296,74 +240,32 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
         updateData.cycle_start_time = new Date().toISOString();
       }
 
-      if (plan.id === 'free-plan') {
-        // Update profile for free plan
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            daily_earnings: newEarnings,
-            auto_operations_completed_today: plan.auto_operations_completed_today + 1,
-            ...(willReachTarget && {
-              auto_operations_started: false,
-              auto_operations_paused: false,
-              cycle_start_time: new Date().toISOString()
-            }),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-          
-        if (error) throw error;
-      } else {
-        // Update user_plans for paid plans
-        const { error } = await supabase
-          .from('user_plans')
-          .update(updateData)
-          .eq('id', plan.id);
+      const { error } = await supabase
+        .from('user_plans')
+        .update(updateData)
+        .eq('id', plan.id);
 
-        if (error) throw error;
-      }
+      if (error) throw error;
 
-      // Also update user's total earnings and balance for paid plans only
-      // (Free plan already updated above)
-      if (plan.id !== 'free-plan') {
-        const { data: currentProfile, error: fetchError } = await supabase
-          .from('profiles')
-          .select('daily_earnings, available_balance')
-          .eq('id', user.id)
-          .single();
+      // Also update user's total earnings and balance instantly
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('daily_earnings, available_balance')
+        .eq('id', user.id)
+        .single();
 
-        if (fetchError) throw fetchError;
+      if (fetchError) throw fetchError;
 
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            daily_earnings: Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
-            available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          daily_earnings: Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
+          available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
 
-        if (profileError) throw profileError;
-      } else {
-        // For free plan, also update the balance
-        const { data: currentProfile, error: fetchError } = await supabase
-          .from('profiles')
-          .select('available_balance')
-          .eq('id', user.id)
-          .single();
-
-        if (fetchError) throw fetchError;
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-
-        if (profileError) throw profileError;
-      }
+      if (profileError) throw profileError;
 
       // Update state immediately for instant UI feedback
       onPlansUpdate();
@@ -381,31 +283,16 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     setIsLoading(prev => ({ ...prev, [planId]: true }));
     
     try {
-      if (planId === 'free-plan') {
-        // Update profile for free plan
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            auto_operations_started: true,
-            auto_operations_paused: false,
-            cycle_start_time: new Date().toISOString()
-          })
-          .eq('id', user.id);
+      const { error } = await supabase
+        .from('user_plans')
+        .update({
+          auto_operations_started: true,
+          auto_operations_paused: false,
+          cycle_start_time: new Date().toISOString()
+        })
+        .eq('id', planId);
 
-        if (error) throw error;
-      } else {
-        // Update user_plans for paid plans
-        const { error } = await supabase
-          .from('user_plans')
-          .update({
-            auto_operations_started: true,
-            auto_operations_paused: false,
-            cycle_start_time: new Date().toISOString()
-          })
-          .eq('id', planId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Operações iniciadas!",
@@ -429,27 +316,14 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     setIsLoading(prev => ({ ...prev, [planId]: true }));
     
     try {
-      if (planId === 'free-plan') {
-        // Update profile for free plan
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            auto_operations_paused: true
-          })
-          .eq('id', user.id);
+      const { error } = await supabase
+        .from('user_plans')
+        .update({
+          auto_operations_paused: true
+        })
+        .eq('id', planId);
 
-        if (error) throw error;
-      } else {
-        // Update user_plans for paid plans
-        const { error } = await supabase
-          .from('user_plans')
-          .update({
-            auto_operations_paused: true
-          })
-          .eq('id', planId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Operações pausadas",
@@ -473,27 +347,14 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     setIsLoading(prev => ({ ...prev, [planId]: true }));
     
     try {
-      if (planId === 'free-plan') {
-        // Update profile for free plan
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            auto_operations_paused: false
-          })
-          .eq('id', user.id);
+      const { error } = await supabase
+        .from('user_plans')
+        .update({
+          auto_operations_paused: false
+        })
+        .eq('id', planId);
 
-        if (error) throw error;
-      } else {
-        // Update user_plans for paid plans
-        const { error } = await supabase
-          .from('user_plans')
-          .update({
-            auto_operations_paused: false
-          })
-          .eq('id', planId);
-
-        if (error) throw error;
-      }
+      if (error) throw error;
 
       toast({
         title: "Operações retomadas",
@@ -522,32 +383,37 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
   const getPlanColor = (planName: string) => {
     const colors = {
-      free: 'from-gray-600/20 to-gray-400/20 border-gray-500/50',
       partner: 'from-blue-600/20 to-blue-400/20 border-blue-500/50',
       master: 'from-purple-600/20 to-purple-400/20 border-purple-500/50',
       premium: 'from-yellow-600/20 to-yellow-400/20 border-yellow-500/50',
       platinum: 'from-orange-600/20 to-orange-400/20 border-orange-500/50'
     };
-    return colors[planName as keyof typeof colors] || colors.free;
+    return colors[planName as keyof typeof colors] || colors.partner;
   };
 
-  // If no user plans, create a virtual free plan for the user
-  const effectivePlans = userPlans && userPlans.length > 0 ? userPlans : [
-    {
-      id: 'free-plan',
-      plan_name: 'free',
-      daily_earnings: user?.daily_earnings || 0,
-      auto_operations_completed_today: user?.auto_operations_completed_today || 0,
-      auto_operations_started: user?.auto_operations_started || false,
-      auto_operations_paused: user?.auto_operations_paused || false,
-      cycle_start_time: user?.cycle_start_time || null,
-      daily_signals_used: user?.daily_signals_used || 0
-    }
-  ];
+  if (!userPlans || userPlans.length === 0) {
+    return (
+      <Card className="bg-black/40 border-white/10">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" />
+            Operações Automáticas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <AlertCircle className="w-12 h-12 text-white/20 mx-auto mb-4" />
+            <p className="text-white/70 mb-2">Nenhum plano ativo</p>
+            <p className="text-white/50 text-sm">Compre um plano para começar as operações automáticas</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {effectivePlans.map((plan) => {
+      {userPlans.map((plan) => {
         const limits = planLimits[plan.plan_name as keyof typeof planLimits];
         const progress = limits ? (plan.daily_earnings / limits.dailyTarget) * 100 : 0;
         const targetReached = hasReachedTarget(plan);
