@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -30,9 +31,9 @@ serve(async (req) => {
       })
     }
 
-    console.log('Checking SecretPay payment status:', payment_id, 'for user:', user_id)
+    console.log('Checking SecretPay payment status for payment_id:', payment_id, 'user_id:', user_id)
 
-    // First, find the transaction in our database
+    // First, find the transaction in our database using external_id (request_number)
     const { data: transaction, error: fetchError } = await supabase
       .from('payment_transactions')
       .select('*')
@@ -49,6 +50,8 @@ serve(async (req) => {
       })
     }
 
+    console.log('Found transaction in database:', transaction)
+
     // Check current status in database first
     if (transaction.status === 'paid') {
       return new Response(JSON.stringify({ 
@@ -64,13 +67,12 @@ serve(async (req) => {
     const transactionData = transaction.transaction_data as any;
     const secretpayTransactionId = transactionData?.id;
     
-    console.log('Transaction data:', transactionData);
-    console.log('SecretPay transaction ID for verification:', secretpayTransactionId);
+    console.log('SecretPay transaction ID for API verification:', secretpayTransactionId);
 
     // Try to query SecretPay API to check payment status
     if (secretpayTransactionId) {
       try {
-        console.log('Checking payment with SecretPay API')
+        console.log('Checking payment status with SecretPay API')
         
         const credentials = btoa(`${secretpayPublicKey}:${secretpayPrivateKey}`)
         
@@ -82,11 +84,11 @@ serve(async (req) => {
           }
         });
 
-        console.log('SecretPay response status:', secretpayResponse.status);
+        console.log('SecretPay API response status:', secretpayResponse.status);
         
         if (secretpayResponse.ok) {
           const secretpayData = await secretpayResponse.json();
-          console.log('SecretPay response data:', secretpayData);
+          console.log('SecretPay API response data:', secretpayData);
 
           // Check if payment was confirmed
           if (secretpayData.status === 'paid' || secretpayData.status === 'approved') {
@@ -156,7 +158,7 @@ serve(async (req) => {
               status: 200
             })
           } else {
-            console.log('Payment not yet confirmed by SecretPay:', secretpayData)
+            console.log('Payment not yet confirmed by SecretPay:', secretpayData.status)
           }
         } else {
           console.log('Error from SecretPay API:', secretpayResponse.status)

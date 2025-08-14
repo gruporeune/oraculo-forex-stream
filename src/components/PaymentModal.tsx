@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,11 +20,12 @@ interface PaymentModalProps {
 
 interface PaymentData {
   success: boolean;
-  paymentId: string;
-  qrCode: string;
-  qrCodeImage?: string;
+  transaction_id: string;
+  qr_code: string;
+  qr_code_image?: string;
   amount: number;
-  expiresAt?: string;
+  expires_at?: string;
+  request_number: string;
 }
 
 export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
@@ -133,14 +135,17 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         throw new Error('Falha ao criar pagamento. Tente novamente.');
       }
 
-      // Adapt response structure for SuitPay
+      console.log('Payment created successfully:', data);
+
+      // Use the data directly from SecretPay
       const adaptedData = {
         success: data.success,
-        paymentId: data.transaction_id,
-        qrCode: data.qr_code,
-        qrCodeImage: data.qr_code_base64 ? `data:image/png;base64,${data.qr_code_base64}` : undefined,
+        transaction_id: data.transaction_id,
+        qr_code: data.qr_code,
+        qr_code_image: data.qr_code_image,
         amount: data.amount,
-        expiresAt: data.expires_at
+        expires_at: data.expires_at,
+        request_number: data.request_number
       };
 
       setPaymentData(adaptedData);
@@ -162,8 +167,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   };
 
   const copyPixCode = async () => {
-    if (paymentData?.qrCode) {
-      await navigator.clipboard.writeText(paymentData.qrCode);
+    if (paymentData?.qr_code) {
+      await navigator.clipboard.writeText(paymentData.qr_code);
       setIsCopied(true);
       toast({
         title: "Copiado!",
@@ -174,7 +179,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   };
 
   const checkPaymentStatus = async () => {
-    if (!paymentData?.paymentId) return;
+    if (!paymentData?.request_number) return;
 
     setIsCheckingPayment(true);
     try {
@@ -184,7 +189,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       // Call our edge function to check payment status via SecretPay API
       const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
         body: {
-          payment_id: paymentData.paymentId,
+          payment_id: paymentData.request_number, // Use request_number as payment_id
           user_id: user.id
         }
       });
@@ -193,6 +198,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         console.error('Error checking payment:', error);
         throw new Error('Falha ao verificar pagamento');
       }
+
+      console.log('Payment status check result:', data);
 
       if (data?.status === 'paid') {
         setIsPaymentConfirmed(true);
@@ -362,19 +369,19 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
               <div className="text-center">
                 <div className="bg-purple-500/20 border border-purple-500/30 rounded-lg p-4 mb-4">
                   <p className="text-lg font-bold text-white">Valor: R$ {paymentData.amount.toFixed(2).replace('.', ',')}</p>
-                  {paymentData.expiresAt && (
+                  {paymentData.expires_at && (
                     <p className="text-sm text-white/70">
-                      Expira em: {new Date(paymentData.expiresAt).toLocaleString('pt-BR')}
+                      Expira em: {new Date(paymentData.expires_at).toLocaleString('pt-BR')}
                     </p>
                   )}
                 </div>
               </div>
 
               {/* QR Code Image */}
-              {paymentData.qrCodeImage && (
+              {paymentData.qr_code_image && (
                 <div className="text-center">
                   <img 
-                    src={paymentData.qrCodeImage} 
+                    src={paymentData.qr_code_image} 
                     alt="QR Code PIX" 
                     className="mx-auto max-w-[200px] h-auto border border-purple-500/30 rounded"
                   />
@@ -382,26 +389,28 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
               )}
 
               {/* PIX Code */}
-              <div className="space-y-2">
-                <p className="text-sm text-white/80">Código PIX:</p>
-                <div className="flex gap-2">
-                  <div className="flex-1 p-3 bg-black/50 rounded border border-purple-500/30 text-xs font-mono break-all text-white">
-                    {paymentData.qrCode}
+              {paymentData.qr_code && (
+                <div className="space-y-2">
+                  <p className="text-sm text-white/80">Código PIX:</p>
+                  <div className="flex gap-2">
+                    <div className="flex-1 p-3 bg-black/50 rounded border border-purple-500/30 text-xs font-mono break-all text-white max-h-20 overflow-y-auto">
+                      {paymentData.qr_code}
+                    </div>
+                    <Button
+                      onClick={copyPixCode}
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-500/50 hover:bg-purple-500/20 text-white"
+                    >
+                      {isCopied ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                  <Button
-                    onClick={copyPixCode}
-                    size="sm"
-                    variant="outline"
-                    className="border-purple-500/50 hover:bg-purple-500/20 text-white"
-                  >
-                    {isCopied ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
-              </div>
+              )}
 
               {/* Payment Check Button */}
               <Button 

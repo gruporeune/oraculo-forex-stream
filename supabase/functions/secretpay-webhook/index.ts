@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -6,19 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface SecretPayWebhook {
-  id: string
+interface SecretPayWebhookData {
+  id: number
   status: string
   amount: number
   externalRef: string
   customer: {
     name: string
     email: string
-    document: string
+    document: {
+      type: string
+      number: string
+    }
   }
   paymentMethod: string
   paidAt?: string
   createdAt: string
+}
+
+interface SecretPayWebhook {
+  id: string
+  type: string
+  url: string
+  objectId: string
+  data: SecretPayWebhookData
 }
 
 serve(async (req) => {
@@ -39,39 +51,51 @@ serve(async (req) => {
     
     console.log('SecretPay webhook received:', webhookData)
 
-    // Find the payment transaction
+    // Extract transaction data from webhook
+    const transactionData = webhookData.data
+    const externalRef = transactionData.externalRef
+
+    // Find the payment transaction using external_id
     const { data: transaction, error: fetchError } = await supabase
       .from('payment_transactions')
       .select('*')
-      .eq('external_id', webhookData.externalRef)
+      .eq('external_id', externalRef)
       .single()
 
     if (fetchError || !transaction) {
-      console.error('Transaction not found:', webhookData.externalRef, fetchError)
-      return new Response('Transaction not found', { status: 404 })
+      console.error('Transaction not found:', externalRef, fetchError)
+      return new Response('Transaction not found', { 
+        status: 404,
+        headers: corsHeaders 
+      })
     }
 
     // Map SecretPay status to our internal status
     let internalStatus = 'pending'
-    if (webhookData.status === 'paid' || webhookData.status === 'approved') {
+    if (transactionData.status === 'paid' || transactionData.status === 'approved') {
       internalStatus = 'paid'
-    } else if (webhookData.status === 'failed' || webhookData.status === 'cancelled' || webhookData.status === 'refunded') {
+    } else if (transactionData.status === 'failed' || transactionData.status === 'cancelled' || transactionData.status === 'refunded') {
       internalStatus = 'failed'
     }
+
+    console.log(`Updating transaction ${externalRef} status from ${transaction.status} to ${internalStatus}`)
 
     // Update transaction status
     const { error: updateError } = await supabase
       .from('payment_transactions')
       .update({
         status: internalStatus,
-        paid_at: internalStatus === 'paid' ? (webhookData.paidAt || new Date().toISOString()) : null,
+        paid_at: internalStatus === 'paid' ? (transactionData.paidAt || new Date().toISOString()) : null,
         updated_at: new Date().toISOString()
       })
-      .eq('external_id', webhookData.externalRef)
+      .eq('external_id', externalRef)
 
     if (updateError) {
       console.error('Error updating transaction:', updateError)
-      return new Response('Error updating transaction', { status: 500 })
+      return new Response('Error updating transaction', { 
+        status: 500,
+        headers: corsHeaders 
+      })
     }
 
     // If payment is approved, activate the plan
@@ -82,7 +106,7 @@ serve(async (req) => {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          plan: transaction.plan_name,
+          plan: transaction.plan_name.toLowerCase(),
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.user_id)
@@ -96,7 +120,7 @@ serve(async (req) => {
         .from('user_plans')
         .select('id')
         .eq('user_id', transaction.user_id)
-        .eq('plan_name', transaction.plan_name)
+        .eq('plan_name', transaction.plan_name.toLowerCase())
         .eq('is_active', true)
         .single();
 
@@ -106,7 +130,7 @@ serve(async (req) => {
           .from('user_plans')
           .insert({
             user_id: transaction.user_id,
-            plan_name: transaction.plan_name,
+            plan_name: transaction.plan_name.toLowerCase(),
             purchase_date: new Date().toISOString(),
             is_active: true
           })

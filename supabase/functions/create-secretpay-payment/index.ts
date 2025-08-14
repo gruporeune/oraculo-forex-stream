@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -20,9 +21,21 @@ interface SecretPayResponse {
   id: string
   status: string
   amount: number
-  qrCode?: string
-  qrCodeImage?: string
-  checkoutUrl?: string
+  pix?: {
+    qrcode: string
+    end2EndId?: string
+    receiptUrl?: string
+    expirationDate: string
+  }
+  customer: {
+    name: string
+    email: string
+    document: {
+      type: string
+      number: string
+    }
+  }
+  externalRef: string
 }
 
 serve(async (req) => {
@@ -121,7 +134,7 @@ serve(async (req) => {
     const secretpayData: SecretPayResponse = await secretpayResponse.json()
     console.log('SecretPay response:', secretpayData)
 
-    // Store payment transaction in Supabase
+    // Store payment transaction in Supabase using the actual transaction ID from SecretPay
     const { error: insertError } = await supabase
       .from('payment_transactions')
       .insert({
@@ -147,12 +160,22 @@ serve(async (req) => {
     const expirationTime = new Date()
     expirationTime.setHours(expirationTime.getHours() + 1)
 
+    // Extract PIX data from SecretPay response
+    const pixCode = secretpayData.pix?.qrcode || ''
+    
+    // Generate QR Code image URL using a QR code service
+    const qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`
+
+    console.log('PIX Code extracted:', pixCode)
+    console.log('QR Code URL generated:', qrCodeImageUrl)
+
     // Return success response adapted to current frontend structure
     return new Response(JSON.stringify({
       success: true,
       transaction_id: secretpayData.id,
-      qr_code: secretpayData.qrCode || '',
-      qr_code_base64: secretpayData.qrCodeImage || '',
+      qr_code: pixCode,
+      qr_code_base64: '', // SecretPay doesn't provide base64, we'll use the URL
+      qr_code_image: qrCodeImageUrl,
       amount: paymentRequest.amount,
       expires_at: expirationTime.toISOString(),
       request_number: externalRef
