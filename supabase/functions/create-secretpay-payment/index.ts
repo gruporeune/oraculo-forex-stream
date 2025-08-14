@@ -73,15 +73,19 @@ serve(async (req) => {
       },
       items: [
         {
-          name: `Plano ${paymentRequest.plan_name.toUpperCase()} - BullTec`,
+          title: `Plano ${paymentRequest.plan_name.toUpperCase()} - BullTec`,
+          unitPrice: amountInCents,
           quantity: 1,
-          amount: amountInCents
+          tangible: false
         }
       ],
       customer: {
         name: paymentRequest.customer_name,
         email: paymentRequest.customer_email,
-        document: paymentRequest.customer_document,
+        document: {
+          type: "cpf",
+          number: paymentRequest.customer_document
+        },
         phone: paymentRequest.customer_phone || '11999999999'
       },
       postbackUrl: `${supabaseUrl}/functions/v1/secretpay-webhook`,
