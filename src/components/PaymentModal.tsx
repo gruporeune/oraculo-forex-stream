@@ -112,7 +112,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke('create-suitpay-payment', {
+      const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
         body: {
           user_id: user.id,
           plan_name: plan.name,
@@ -181,8 +181,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Call our edge function to check payment status via SuitPay API
-      const { data, error } = await supabase.functions.invoke('check-suitpay-payment', {
+      // Call our edge function to check payment status via SecretPay API
+      const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
         body: {
           payment_id: paymentData.paymentId,
           user_id: user.id
