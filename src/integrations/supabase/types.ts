@@ -451,6 +451,7 @@ export type Database = {
           full_name: string | null
           id: string
           pix_key: string
+          pix_key_type: string | null
           processed_at: string | null
           secretpay_transfer_id: string | null
           status: string
@@ -463,6 +464,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           pix_key: string
+          pix_key_type?: string | null
           processed_at?: string | null
           secretpay_transfer_id?: string | null
           status?: string
@@ -475,6 +477,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           pix_key?: string
+          pix_key_type?: string | null
           processed_at?: string | null
           secretpay_transfer_id?: string | null
           status?: string
@@ -495,6 +498,10 @@ export type Database = {
       calculate_plan_commission_level: {
         Args: { level: number; plan_name: string }
         Returns: number
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
       }
       make_user_admin: {
         Args: { target_email: string }
