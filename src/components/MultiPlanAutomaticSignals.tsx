@@ -6,6 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Play, Pause, BarChart3, TrendingUp, Clock, AlertCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import chatgptLogo from '@/assets/chatgpt-logo.svg';
+import deepseekLogo from '@/assets/deepseek-logo.png';
+import manusLogo from '@/assets/manus-logo.png';
+import grokLogo from '@/assets/grok-logo.jpg';
 
 interface PlanOperation {
   id: string;
@@ -451,26 +455,61 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
               {/* AI Analysis Effect */}
               {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && (
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                     <h4 className="text-white/80 text-sm font-medium">Buscando entradas nas IAs:</h4>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
-                      <span className="text-white/70 text-xs">Chat GPT 4.0</span>
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
+                      <img src={chatgptLogo} alt="ChatGPT" className="w-6 h-6 rounded-full bg-white p-1" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-white/80 text-xs font-medium">Chat GPT 4.0</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1 mt-1">
+                          <div className="bg-green-400 h-1 rounded-full animate-pulse" style={{width: '75%'}}></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
-                      <span className="text-white/70 text-xs">Deep Seek</span>
+                    
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
+                      <img src={deepseekLogo} alt="DeepSeek" className="w-6 h-6 rounded-full object-cover" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                          <span className="text-white/80 text-xs font-medium">Deep Seek</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1 mt-1">
+                          <div className="bg-blue-400 h-1 rounded-full animate-pulse" style={{width: '60%', animationDelay: '0.5s'}}></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-                      <span className="text-white/70 text-xs">Manus</span>
+                    
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
+                      <img src={manusLogo} alt="Manus" className="w-6 h-6 rounded-full object-cover" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                          <span className="text-white/80 text-xs font-medium">Manus</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1 mt-1">
+                          <div className="bg-purple-400 h-1 rounded-full animate-pulse" style={{width: '85%', animationDelay: '1s'}}></div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
-                      <span className="text-white/70 text-xs">Grok 4</span>
+                    
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/10 flex items-center gap-3 hover:bg-white/10 transition-all duration-300">
+                      <img src={grokLogo} alt="Grok 4" className="w-6 h-6 rounded-full object-cover" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
+                          <span className="text-white/80 text-xs font-medium">Grok 4</span>
+                        </div>
+                        <div className="w-full bg-white/10 rounded-full h-1 mt-1">
+                          <div className="bg-orange-400 h-1 rounded-full animate-pulse" style={{width: '70%', animationDelay: '1.5s'}}></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
