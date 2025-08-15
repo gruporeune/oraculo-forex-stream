@@ -448,6 +448,34 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                 </div>
               </div>
 
+              {/* AI Analysis Effect */}
+              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <h4 className="text-white/80 text-sm font-medium">Buscando entradas nas IAs:</h4>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 mb-4">
+                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></div>
+                      <span className="text-white/70 text-xs">Chat GPT 4.0</span>
+                    </div>
+                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-pulse" style={{animationDelay: '0.5s'}}></div>
+                      <span className="text-white/70 text-xs">Deep Seek</span>
+                    </div>
+                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+                      <span className="text-white/70 text-xs">Manus</span>
+                    </div>
+                    <div className="p-2 bg-white/5 rounded border border-white/10 flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '1.5s'}}></div>
+                      <span className="text-white/70 text-xs">Grok 4</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Recent Operations */}
               {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && recentOperations[plan.id] && recentOperations[plan.id].length > 0 && (
                 <div className="space-y-2">
