@@ -92,79 +92,36 @@ serve(async (req) => {
       );
     }
 
-    // ETAPA 1: Obter token de acesso
-    console.log('🔑 Obtendo token de acesso...');
-    
-    const authPayload = {
-      public_key: publicKey,
-    };
-    
-    const authPayloadString = JSON.stringify(authPayload);
-    const authHmac = await generateHMAC(authPayloadString, privateKey);
-    
-    const authResponse = await fetch('https://api.saq.digital/v3/auth/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'hmac': authHmac,
-      },
-      body: authPayloadString,
-    });
-
-    if (!authResponse.ok) {
-      const authError = await authResponse.text();
-      console.error('❌ Erro ao obter token:', authError);
-      return new Response(
-        JSON.stringify({ 
-          success: false, 
-          error: 'Erro na autenticação com SecretPay',
-          details: authError
-        }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const authData = await authResponse.json();
-    const accessToken = authData.access_token;
-
-    if (!accessToken) {
-      console.error('❌ Token de acesso não retornado');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Falha na autenticação' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    console.log('✅ Token obtido com sucesso');
-
-    // ETAPA 2: Processar saque com taxa de 5%
+    // ETAPA 1: Processar saque com taxa de 5%
     const fee = amount * 0.05;
     const netAmount = amount - fee;
 
     console.log(`💸 Valor líquido após taxa de 5%: R$ ${netAmount.toFixed(2)} (Taxa: R$ ${fee.toFixed(2)})`);
 
-    // Dados da transferência PIX
-    const transferPayload = {
-      source_account_branch_identifier: "0001", // Agência padrão - CONFIGURAR NA SECRETPAY
-      source_account_number: "900001", // Conta padrão - CONFIGURAR NA SECRETPAY
-      amount: netAmount,
-      key: pixKey,
-      tag: `withdrawal_${Date.now()}_${userId.substring(0, 8)}`
-    };
-
-    const transferPayloadString = JSON.stringify(transferPayload);
-    const transferHmac = await generateHMAC(transferPayloadString, privateKey);
-
+    // ETAPA 2: Criar saque na SecretPay
     console.log('💸 Enviando transferência PIX...');
 
-    const transferResponse = await fetch('https://api.saq.digital/v3/pix/cash_out', {
+    // Dados da transferência PIX conforme documentação SecretPay
+    const transferPayload = {
+      method: "PIX",
+      amount: Math.round(netAmount * 100), // Valor em centavos
+      netPayout: false, // Taxa já foi descontada
+      pixKey: pixKey,
+      pixKeyType: "CPF", // Será definido dinamicamente pelo tipo selecionado
+      postbackUrl: `${supabaseUrl}/functions/v1/secretpay-withdrawal-webhook`
+    };
+
+    console.log('📋 Payload de transferência:', transferPayload);
+
+    const transferResponse = await fetch('https://api.secretpay.com.br/v1/transfers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${accessToken}`,
-        'hmac': transferHmac,
+        'Authorization': `Basic ${btoa(`${publicKey}:${privateKey}`)}`,
+        'x-withdraw-key': privateKey, // Chave de saque externo
+        'accept': 'application/json',
       },
-      body: transferPayloadString,
+      body: JSON.stringify(transferPayload),
     });
 
     const transferData = await transferResponse.json();
