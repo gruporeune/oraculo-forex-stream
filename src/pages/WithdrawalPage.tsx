@@ -15,7 +15,7 @@ interface WithdrawalPageProps {
 
 const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps) => {
   const { toast } = useToast();
-  const [saqueData, setSaqueData] = useState({ amount: '', pixKey: '' });
+  const [saqueData, setSaqueData] = useState({ amount: '', pixKey: '', fullName: '' });
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
@@ -94,34 +94,60 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       return;
     }
 
+    if (!saqueData.fullName || saqueData.fullName.trim().length < 5) {
+      toast({ 
+        title: "Nome completo obrigatório", 
+        description: "Por favor, insira seu nome completo (mínimo 5 caracteres).", 
+        variant: "destructive" 
+      });
+      setFormLoading(false);
+      return;
+    }
+
     try {
-      // Create withdrawal request
-      const { error: requestError } = await supabase
+      // Create withdrawal request in database first
+      const { data: withdrawalData, error: requestError } = await supabase
         .from('withdrawal_requests')
         .insert({
           user_id: user.id,
           amount: amount,
           pix_key: saqueData.pixKey,
+          full_name: saqueData.fullName,
           status: 'pending'
-        });
+        })
+        .select()
+        .single();
 
       if (requestError) throw requestError;
 
-      // Update user's available balance
-      const newBalance = availableBalance - amount;
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ available_balance: newBalance })
-        .eq('id', user.id);
+      // Process withdrawal via SecretPay
+      const { data: transferResult, error: transferError } = await supabase.functions.invoke('create-secretpay-withdrawal', {
+        body: {
+          amount: amount,
+          pixKey: saqueData.pixKey,
+          fullName: saqueData.fullName,
+          userId: user.id
+        }
+      });
 
-      if (updateError) throw updateError;
+      if (transferError) {
+        // If SecretPay fails, remove the withdrawal request
+        await supabase.from('withdrawal_requests').delete().eq('id', withdrawalData.id);
+        throw new Error(transferError.message || 'Erro ao processar saque via SecretPay');
+      }
+
+      if (!transferResult.success) {
+        // If SecretPay fails, remove the withdrawal request
+        await supabase.from('withdrawal_requests').delete().eq('id', withdrawalData.id);
+        throw new Error(transferResult.error || 'Erro ao processar saque');
+      }
 
       toast({ 
-        title: "Solicitação enviada!", 
-        description: "Sua solicitação de saque foi enviada com sucesso e será processada em até 48 horas úteis." 
+        title: "Saque solicitado com sucesso!", 
+        description: "Seu saque foi enviado para processamento via PIX. Você receberá em instantes!" 
       });
       
-      setSaqueData({ amount: '', pixKey: '' });
+      setSaqueData({ amount: '', pixKey: '', fullName: '' });
       fetchWithdrawalRequests();
       onProfileUpdate();
     } catch (error: any) {
@@ -141,8 +167,9 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'text-yellow-400';
+      case 'processing': return 'text-blue-400';
       case 'approved': return 'text-green-400';
-      case 'completed': return 'text-blue-400';
+      case 'completed': return 'text-green-400';
       case 'rejected': return 'text-red-400';
       default: return 'text-gray-400';
     }
@@ -151,6 +178,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   const getStatusText = (status: string) => {
     switch (status) {
       case 'pending': return 'Pendente';
+      case 'processing': return 'Processando';
       case 'approved': return 'Aprovado';
       case 'completed': return 'Concluído';
       case 'rejected': return 'Rejeitado';
@@ -190,6 +218,21 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             <CardContent>
               <form onSubmit={handleSaque} className="space-y-4">
                 <Input 
+                  placeholder="Nome completo" 
+                  value={saqueData.fullName} 
+                  onChange={e => setSaqueData({...saqueData, fullName: e.target.value})} 
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
+                  required
+                  minLength={5}
+                />
+                <Input 
+                  placeholder="Chave PIX" 
+                  value={saqueData.pixKey} 
+                  onChange={e => setSaqueData({...saqueData, pixKey: e.target.value})} 
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
+                  required
+                />
+                <Input 
                   type="number" 
                   placeholder="Valor do saque" 
                   value={saqueData.amount} 
@@ -198,13 +241,6 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                   required
                   min="50"
                   step="0.01"
-                />
-                <Input 
-                  placeholder="Chave PIX" 
-                  value={saqueData.pixKey} 
-                  onChange={e => setSaqueData({...saqueData, pixKey: e.target.value})} 
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
-                  required
                 />
                 <Button 
                   type="submit" 
@@ -236,11 +272,11 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-white/90">
-            <p>• Taxa de saque: <span className="font-bold">R$ 4,90</span> por transação.</p>
-            <p>• Prazo de pagamento: <span className="font-bold">Até 48 horas úteis</span>.</p>
-            <p>• Saques disponíveis de <span className="font-bold">Segunda a Sexta</span>.</p>
+            <p>• Saques via <span className="font-bold">PIX instantâneo</span> pela SecretPay.</p>
+            <p>• Processamento: <span className="font-bold">Imediato (24/7)</span>.</p>
             <p>• Valor mínimo para saque: <span className="font-bold">R$ 50,00</span>.</p>
-            <p>• Certifique-se de que sua chave PIX está correta.</p>
+            <p>• Certifique-se de que seu nome e chave PIX estão corretos.</p>
+            <p>• Em caso de erro nos dados, o valor será estornado automaticamente.</p>
           </CardContent>
         </Card>
       </div>

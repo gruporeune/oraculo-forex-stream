@@ -12,8 +12,14 @@ verify_jwt = true
 [functions.check-secretpay-payment]
 verify_jwt = true
 
+[functions.create-secretpay-withdrawal]
+verify_jwt = true
+
 [functions.payment-webhook]
 verify_jwt = false
 
 [functions.secretpay-webhook]
+verify_jwt = false
+
+[functions.secretpay-withdrawal-webhook]
 verify_jwt = false

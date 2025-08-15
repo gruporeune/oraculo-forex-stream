@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -448,28 +448,37 @@ export type Database = {
         Row: {
           amount: number
           created_at: string
+          full_name: string | null
           id: string
           pix_key: string
           processed_at: string | null
+          secretpay_transfer_id: string | null
           status: string
+          transfer_data: Json | null
           user_id: string
         }
         Insert: {
           amount: number
           created_at?: string
+          full_name?: string | null
           id?: string
           pix_key: string
           processed_at?: string | null
+          secretpay_transfer_id?: string | null
           status?: string
+          transfer_data?: Json | null
           user_id: string
         }
         Update: {
           amount?: number
           created_at?: string
+          full_name?: string | null
           id?: string
           pix_key?: string
           processed_at?: string | null
+          secretpay_transfer_id?: string | null
           status?: string
+          transfer_data?: Json | null
           user_id?: string
         }
         Relationships: []
@@ -484,7 +493,7 @@ export type Database = {
         Returns: number
       }
       calculate_plan_commission_level: {
-        Args: { plan_name: string; level: number }
+        Args: { level: number; plan_name: string }
         Returns: number
       }
       make_user_admin: {
