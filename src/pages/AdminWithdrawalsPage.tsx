@@ -50,6 +50,7 @@ interface WithdrawalRequest {
     full_name: string | null;
     phone: string | null;
     plan: string | null;
+    username: string | null;
   } | null;
   user_email?: string;
 }
@@ -91,7 +92,7 @@ export default function AdminWithdrawalsPage() {
         // Buscar perfis
         const { data: profilesData, error: profilesError } = await supabase
           .from('profiles')
-          .select('id, full_name, phone, plan')
+          .select('id, full_name, phone, plan, username')
           .in('id', userIds);
 
         if (profilesError) console.error('Erro ao buscar perfis:', profilesError);
@@ -402,9 +403,9 @@ export default function AdminWithdrawalsPage() {
                                       </div>
                                     </div>
                                     <div>
-                                      <Label>ID do Usuário</Label>
-                                      <div className="text-xs font-mono p-2 bg-muted rounded">
-                                        {selectedWithdrawal.user_id}
+                                      <Label>Username</Label>
+                                      <div className="text-sm p-2 bg-muted rounded font-medium">
+                                        @{selectedWithdrawal.profile?.username || 'N/A'}
                                       </div>
                                     </div>
                                   <div>
