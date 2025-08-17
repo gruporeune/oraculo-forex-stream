@@ -13,6 +13,7 @@ import SignalsPage from './SignalsPage';
 import MembersAreaPage from './MembersAreaPage';
 import MaterialsPage from './MaterialsPage';
 import WithdrawalPage from './WithdrawalPage';
+import AdminWithdrawalsPage from './AdminWithdrawalsPage';
 import PlansPage from './PlansPage';
 
 export default function DashboardPage() {
@@ -187,6 +188,12 @@ export default function DashboardPage() {
                     profile={profile} 
                     onProfileUpdate={() => loadProfile(user.id)} 
                   />
+                } 
+              />
+              <Route 
+                path="/admin" 
+                element={
+                  <AdminWithdrawalsPage />
                 } 
               />
             </Routes>
