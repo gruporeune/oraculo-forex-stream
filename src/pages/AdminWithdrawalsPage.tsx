@@ -29,7 +29,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Download, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Download, Eye, CheckCircle, XCircle, Clock, LogOut } from "lucide-react";
 import * as XLSX from 'xlsx';
 
 interface WithdrawalRequest {
@@ -46,7 +46,7 @@ interface WithdrawalRequest {
   rejection_reason: string | null;
   secretpay_transfer_id: string | null;
   processed_by: string | null;
-  profiles: {
+  profile?: {
     full_name: string | null;
     phone: string | null;
     plan: string | null;
@@ -62,30 +62,47 @@ export default function AdminWithdrawalsPage() {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const { toast } = useToast();
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    window.location.href = '/admin/login';
+  };
+
   const fetchWithdrawals = async () => {
     try {
       setLoading(true);
       
       let query = supabase
         .from('withdrawal_requests')
-        .select(`
-          *,
-          profiles (
-            full_name,
-            phone,
-            plan
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (filterStatus !== "all") {
         query = query.eq('status', filterStatus);
       }
 
-      const { data, error } = await query;
-
+      const { data: withdrawalData, error } = await query;
       if (error) throw error;
-      setWithdrawals((data as any) || []);
+
+      // Buscar dados do perfil separadamente
+      if (withdrawalData && withdrawalData.length > 0) {
+        const userIds = withdrawalData.map(w => w.user_id);
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, plan')
+          .in('id', userIds);
+
+        if (profilesError) console.error('Erro ao buscar perfis:', profilesError);
+
+        // Combinar dados
+        const withdrawalsWithProfiles = withdrawalData.map(withdrawal => ({
+          ...withdrawal,
+          profile: profilesData?.find(p => p.id === withdrawal.user_id) || null
+        }));
+
+        setWithdrawals(withdrawalsWithProfiles);
+      } else {
+        setWithdrawals([]);
+      }
     } catch (error) {
       console.error('Erro ao buscar saques:', error);
       toast({
@@ -141,9 +158,9 @@ export default function AdminWithdrawalsPage() {
   const exportToExcel = () => {
     const exportData = withdrawals.map(withdrawal => ({
       'ID': withdrawal.id,
-      'Nome Completo': withdrawal.full_name || withdrawal.profiles?.full_name || 'N/A',
-      'Telefone': withdrawal.profiles?.phone || 'N/A',
-      'Plano': withdrawal.profiles?.plan || 'N/A',
+      'Nome Completo': withdrawal.full_name || withdrawal.profile?.full_name || 'N/A',
+      'Telefone': withdrawal.profile?.phone || 'N/A',
+      'Plano': withdrawal.profile?.plan || 'N/A',
       'Valor (R$)': withdrawal.amount.toFixed(2),
       'Chave PIX': withdrawal.pix_key,
       'Tipo PIX': withdrawal.pix_key_type,
@@ -232,6 +249,11 @@ export default function AdminWithdrawalsPage() {
               <Download className="w-4 h-4" />
               Exportar Excel
             </Button>
+
+            <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2">
+              <LogOut className="w-4 h-4" />
+              Sair
+            </Button>
           </div>
         </div>
 
@@ -308,16 +330,16 @@ export default function AdminWithdrawalsPage() {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {withdrawal.full_name || withdrawal.profiles?.full_name || 'N/A'}
+                            {withdrawal.full_name || withdrawal.profile?.full_name || 'N/A'}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {withdrawal.profiles?.phone || 'N/A'}
+                            {withdrawal.profile?.phone || 'N/A'}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline">
-                          {withdrawal.profiles?.plan?.toUpperCase() || 'FREE'}
+                          {withdrawal.profile?.plan?.toUpperCase() || 'FREE'}
                         </Badge>
                       </TableCell>
                       <TableCell className="font-medium">
@@ -357,18 +379,18 @@ export default function AdminWithdrawalsPage() {
                               <div className="space-y-4">
                                 {/* Withdrawal Details */}
                                 <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <Label>Nome Completo</Label>
-                                    <div className="text-sm p-2 bg-muted rounded">
-                                      {selectedWithdrawal.full_name || selectedWithdrawal.profiles?.full_name || 'N/A'}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label>Telefone</Label>
-                                    <div className="text-sm p-2 bg-muted rounded">
-                                      {selectedWithdrawal.profiles?.phone || 'N/A'}
-                                    </div>
-                                  </div>
+                                   <div>
+                                     <Label>Nome Completo</Label>
+                                     <div className="text-sm p-2 bg-muted rounded">
+                                       {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}
+                                     </div>
+                                   </div>
+                                   <div>
+                                     <Label>Telefone</Label>
+                                     <div className="text-sm p-2 bg-muted rounded">
+                                       {selectedWithdrawal.profile?.phone || 'N/A'}
+                                     </div>
+                                   </div>
                                   <div>
                                     <Label>Valor</Label>
                                     <div className="text-sm p-2 bg-muted rounded font-medium">
