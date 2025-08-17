@@ -125,6 +125,37 @@ export default function AdminWithdrawalsPage() {
 
   const updateWithdrawalStatus = async (id: string, status: string, notes?: string, rejection?: string) => {
     try {
+      // Se for rejeição, precisamos devolver o valor ao saldo do usuário
+      if (status === 'rejected') {
+        // Buscar o saque para obter o valor e user_id
+        const { data: withdrawal, error: withdrawalError } = await supabase
+          .from('withdrawal_requests')
+          .select('amount, user_id')
+          .eq('id', id)
+          .single();
+
+        if (withdrawalError) throw withdrawalError;
+
+        // Buscar o saldo atual do usuário
+        const { data: userProfile, error: profileError } = await supabase
+          .from('profiles')
+          .select('available_balance')
+          .eq('id', withdrawal.user_id)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // Devolver o valor ao saldo disponível do usuário
+        const { error: balanceError } = await supabase
+          .from('profiles')
+          .update({
+            available_balance: (userProfile.available_balance || 0) + withdrawal.amount
+          })
+          .eq('id', withdrawal.user_id);
+
+        if (balanceError) throw balanceError;
+      }
+
       const updateData: any = {
         status,
         processed_at: new Date().toISOString(),
@@ -142,7 +173,7 @@ export default function AdminWithdrawalsPage() {
 
       toast({
         title: "Sucesso",
-        description: `Saque ${status === 'completed' ? 'aprovado' : 'rejeitado'} com sucesso`,
+        description: `Saque ${status === 'completed' ? 'aprovado' : 'rejeitado'} com sucesso${status === 'rejected' ? '. Valor devolvido ao saldo do usuário.' : ''}`,
       });
 
       fetchWithdrawals();
