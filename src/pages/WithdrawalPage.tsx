@@ -116,7 +116,17 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
     }
 
     try {
-      // Create withdrawal request in database first
+      // Subtract from user balance first
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ 
+          available_balance: availableBalance - amount 
+        })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      // Create withdrawal request in database with pending status
       const { data: withdrawalData, error: requestError } = await supabase
         .from('withdrawal_requests')
         .insert({
@@ -130,33 +140,18 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
         .select()
         .single();
 
-      if (requestError) throw requestError;
-
-      // Process withdrawal via SecretPay
-      const { data: transferResult, error: transferError } = await supabase.functions.invoke('create-secretpay-withdrawal', {
-        body: {
-          amount: amount,
-          pixKey: saqueData.pixKey,
-          fullName: saqueData.fullName,
-          userId: user.id
-        }
-      });
-
-      if (transferError) {
-        // If SecretPay fails, remove the withdrawal request
-        await supabase.from('withdrawal_requests').delete().eq('id', withdrawalData.id);
-        throw new Error(transferError.message || 'Erro ao processar saque via SecretPay');
-      }
-
-      if (!transferResult.success) {
-        // If SecretPay fails, remove the withdrawal request
-        await supabase.from('withdrawal_requests').delete().eq('id', withdrawalData.id);
-        throw new Error(transferResult.error || 'Erro ao processar saque');
+      if (requestError) {
+        // Rollback balance update if withdrawal request fails
+        await supabase
+          .from('profiles')
+          .update({ available_balance: availableBalance })
+          .eq('id', user.id);
+        throw requestError;
       }
 
       toast({ 
         title: "Saque solicitado com sucesso!", 
-        description: "Seu saque foi enviado para processamento via PIX. Você receberá em instantes!" 
+        description: "Sua solicitação foi enviada para análise. Você será notificado sobre o status." 
       });
       
       setSaqueData({ amount: '', pixKey: '', fullName: '', pixKeyType: '' });
