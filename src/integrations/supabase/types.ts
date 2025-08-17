@@ -199,6 +199,7 @@ export type Database = {
           total_referral_commissions: number | null
           updated_at: string
           username: string | null
+          welcome_sent: boolean | null
         }
         Insert: {
           auto_operations_completed_today?: number | null
@@ -222,6 +223,7 @@ export type Database = {
           total_referral_commissions?: number | null
           updated_at?: string
           username?: string | null
+          welcome_sent?: boolean | null
         }
         Update: {
           auto_operations_completed_today?: number | null
@@ -245,6 +247,7 @@ export type Database = {
           total_referral_commissions?: number | null
           updated_at?: string
           username?: string | null
+          welcome_sent?: boolean | null
         }
         Relationships: [
           {
