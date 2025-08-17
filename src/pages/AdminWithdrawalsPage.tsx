@@ -125,8 +125,12 @@ export default function AdminWithdrawalsPage() {
 
   const updateWithdrawalStatus = async (id: string, status: string, notes?: string, rejection?: string) => {
     try {
+      console.log('Atualizando status do saque:', { id, status, notes, rejection });
+
       // Se for rejeição, precisamos devolver o valor ao saldo do usuário
       if (status === 'rejected') {
+        console.log('Saque sendo rejeitado, devolvendo saldo...');
+        
         // Buscar o saque para obter o valor e user_id
         const { data: withdrawal, error: withdrawalError } = await supabase
           .from('withdrawal_requests')
@@ -134,7 +138,12 @@ export default function AdminWithdrawalsPage() {
           .eq('id', id)
           .single();
 
-        if (withdrawalError) throw withdrawalError;
+        if (withdrawalError) {
+          console.error('Erro ao buscar dados do saque:', withdrawalError);
+          throw withdrawalError;
+        }
+
+        console.log('Dados do saque encontrados:', withdrawal);
 
         // Buscar o saldo atual do usuário
         const { data: userProfile, error: profileError } = await supabase
@@ -143,17 +152,29 @@ export default function AdminWithdrawalsPage() {
           .eq('id', withdrawal.user_id)
           .single();
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Erro ao buscar perfil do usuário:', profileError);
+          throw profileError;
+        }
+
+        console.log('Saldo atual do usuário:', userProfile.available_balance);
+        const newBalance = (userProfile.available_balance || 0) + withdrawal.amount;
+        console.log('Novo saldo calculado:', newBalance);
 
         // Devolver o valor ao saldo disponível do usuário
         const { error: balanceError } = await supabase
           .from('profiles')
           .update({
-            available_balance: (userProfile.available_balance || 0) + withdrawal.amount
+            available_balance: newBalance
           })
           .eq('id', withdrawal.user_id);
 
-        if (balanceError) throw balanceError;
+        if (balanceError) {
+          console.error('Erro ao atualizar saldo:', balanceError);
+          throw balanceError;
+        }
+
+        console.log('Saldo atualizado com sucesso');
       }
 
       const updateData: any = {
@@ -164,12 +185,19 @@ export default function AdminWithdrawalsPage() {
       if (notes) updateData.admin_notes = notes;
       if (rejection) updateData.rejection_reason = rejection;
 
+      console.log('Atualizando withdrawal_requests com:', updateData);
+
       const { error } = await supabase
         .from('withdrawal_requests')
         .update(updateData)
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao atualizar withdrawal_requests:', error);
+        throw error;
+      }
+
+      console.log('Status do saque atualizado com sucesso');
 
       toast({
         title: "Sucesso",
@@ -294,7 +322,7 @@ export default function AdminWithdrawalsPage() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total de Saques</CardTitle>
@@ -322,6 +350,17 @@ export default function AdminWithdrawalsPage() {
             <CardContent>
               <div className="text-2xl font-bold text-green-600">
                 {withdrawals.filter(w => w.status === 'completed').length}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Rejeitados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">
+                {withdrawals.filter(w => w.status === 'rejected').length}
               </div>
             </CardContent>
           </Card>
