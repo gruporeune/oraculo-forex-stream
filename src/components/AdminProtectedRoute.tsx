@@ -58,7 +58,7 @@ export default function AdminProtectedRoute({ children }: AdminProtectedRoutePro
   }
 
   if (!isAdmin) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return <>{children}</>;

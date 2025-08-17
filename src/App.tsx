@@ -13,6 +13,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ConversionLandingPage from "./pages/ConversionLandingPage";
 import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import AdminLoginPage from "./pages/AdminLoginPage";
 
 const queryClient = new QueryClient();
 
@@ -31,7 +32,9 @@ const App = () => (
               <AdminWithdrawalsPage />
             </AdminProtectedRoute>
           } />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/register/:plan" element={<RegisterPageOld />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

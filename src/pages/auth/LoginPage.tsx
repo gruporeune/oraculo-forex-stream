@@ -38,7 +38,14 @@ export default function LoginPage() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
-          navigate('/dashboard');
+          // Verificar se existe uma rota para redirecionar após login
+          const redirectPath = sessionStorage.getItem('redirectAfterLogin');
+          if (redirectPath) {
+            sessionStorage.removeItem('redirectAfterLogin');
+            navigate(redirectPath);
+          } else {
+            navigate('/dashboard');
+          }
         }
       }
     );
