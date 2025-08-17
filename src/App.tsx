@@ -11,6 +11,8 @@ import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import ConversionLandingPage from "./pages/ConversionLandingPage";
+import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -24,8 +26,12 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/comece-aqui" element={<ConversionLandingPage />} />
           <Route path="/dashboard/*" element={<DashboardPage />} />
+          <Route path="/admin/withdrawals" element={
+            <AdminProtectedRoute>
+              <AdminWithdrawalsPage />
+            </AdminProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="/register/:plan" element={<RegisterPageOld />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

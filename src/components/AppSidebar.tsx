@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
-import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard, Shield } from "lucide-react"
+import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
-import { supabase } from "@/integrations/supabase/client"
 
 import {
   Sidebar,
@@ -27,36 +26,10 @@ const items = [
   { title: "Saques", url: "/dashboard/withdrawals", icon: DollarSign },
 ]
 
-const adminItems = [
-  { title: "Admin Saques", url: "/dashboard/admin", icon: Shield },
-]
-
 export function AppSidebar() {
   const { open, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const [isAdmin, setIsAdmin] = useState(false)
-
-  useEffect(() => {
-    checkAdminStatus()
-  }, [])
-
-  const checkAdminStatus = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data } = await supabase
-        .from('admin_users')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-
-      setIsAdmin(!!data)
-    } catch (error) {
-      setIsAdmin(false)
-    }
-  }
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -90,30 +63,6 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-red-300/80">Administração</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {adminItems.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
-                        end 
-                        className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
-                      >
-                        <item.icon className="mr-2 h-4 w-4" />
-                        {open && <span className="text-white group-hover:text-red-200 transition-colors">{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
     </Sidebar>
   );
