@@ -449,6 +449,7 @@ export type Database = {
       }
       withdrawal_requests: {
         Row: {
+          admin_notes: string | null
           amount: number
           created_at: string
           full_name: string | null
@@ -456,12 +457,15 @@ export type Database = {
           pix_key: string
           pix_key_type: string | null
           processed_at: string | null
+          processed_by: string | null
+          rejection_reason: string | null
           secretpay_transfer_id: string | null
           status: string
           transfer_data: Json | null
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           amount: number
           created_at?: string
           full_name?: string | null
@@ -469,12 +473,15 @@ export type Database = {
           pix_key: string
           pix_key_type?: string | null
           processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
           secretpay_transfer_id?: string | null
           status?: string
           transfer_data?: Json | null
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           amount?: number
           created_at?: string
           full_name?: string | null
@@ -482,6 +489,8 @@ export type Database = {
           pix_key?: string
           pix_key_type?: string | null
           processed_at?: string | null
+          processed_by?: string | null
+          rejection_reason?: string | null
           secretpay_transfer_id?: string | null
           status?: string
           transfer_data?: Json | null

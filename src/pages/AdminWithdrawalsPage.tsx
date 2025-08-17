@@ -1,0 +1,487 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { Download, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import * as XLSX from 'xlsx';
+
+interface WithdrawalRequest {
+  id: string;
+  user_id: string;
+  amount: number;
+  pix_key: string;
+  pix_key_type: string;
+  full_name: string | null;
+  status: string;
+  created_at: string;
+  processed_at: string | null;
+  admin_notes: string | null;
+  rejection_reason: string | null;
+  secretpay_transfer_id: string | null;
+  processed_by: string | null;
+  profiles: {
+    full_name: string | null;
+    phone: string | null;
+    plan: string | null;
+  } | null;
+}
+
+export default function AdminWithdrawalsPage() {
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedWithdrawal, setSelectedWithdrawal] = useState<WithdrawalRequest | null>(null);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const { toast } = useToast();
+
+  const fetchWithdrawals = async () => {
+    try {
+      setLoading(true);
+      
+      let query = supabase
+        .from('withdrawal_requests')
+        .select(`
+          *,
+          profiles (
+            full_name,
+            phone,
+            plan
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filterStatus !== "all") {
+        query = query.eq('status', filterStatus);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setWithdrawals((data as any) || []);
+    } catch (error) {
+      console.error('Erro ao buscar saques:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar pedidos de saque",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWithdrawals();
+  }, [filterStatus]);
+
+  const updateWithdrawalStatus = async (id: string, status: string, notes?: string, rejection?: string) => {
+    try {
+      const updateData: any = {
+        status,
+        processed_at: new Date().toISOString(),
+      };
+
+      if (notes) updateData.admin_notes = notes;
+      if (rejection) updateData.rejection_reason = rejection;
+
+      const { error } = await supabase
+        .from('withdrawal_requests')
+        .update(updateData)
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Saque ${status === 'completed' ? 'aprovado' : 'rejeitado'} com sucesso`,
+      });
+
+      fetchWithdrawals();
+      setSelectedWithdrawal(null);
+      setAdminNotes("");
+      setRejectionReason("");
+    } catch (error) {
+      console.error('Erro ao atualizar saque:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar status do saque",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const exportToExcel = () => {
+    const exportData = withdrawals.map(withdrawal => ({
+      'ID': withdrawal.id,
+      'Nome Completo': withdrawal.full_name || withdrawal.profiles?.full_name || 'N/A',
+      'Telefone': withdrawal.profiles?.phone || 'N/A',
+      'Plano': withdrawal.profiles?.plan || 'N/A',
+      'Valor (R$)': withdrawal.amount.toFixed(2),
+      'Chave PIX': withdrawal.pix_key,
+      'Tipo PIX': withdrawal.pix_key_type,
+      'Status': withdrawal.status,
+      'Data Solicitação': new Date(withdrawal.created_at).toLocaleString('pt-BR'),
+      'Data Processamento': withdrawal.processed_at ? new Date(withdrawal.processed_at).toLocaleString('pt-BR') : 'N/A',
+      'Observações Admin': withdrawal.admin_notes || 'N/A',
+      'Motivo Rejeição': withdrawal.rejection_reason || 'N/A'
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Saques");
+    
+    const fileName = `saques_${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+
+    toast({
+      title: "Sucesso",
+      description: "Relatório exportado com sucesso",
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="secondary"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
+      case 'completed':
+        return <Badge variant="default" className="bg-green-500"><CheckCircle className="w-3 h-3 mr-1" />Aprovado</Badge>;
+      case 'rejected':
+        return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejeitado</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('pt-BR');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-muted rounded w-64"></div>
+            <div className="h-32 bg-muted rounded"></div>
+            <div className="h-96 bg-muted rounded"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">Painel Administrativo</h1>
+            <p className="text-muted-foreground">Gerenciamento de Saques</p>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filtrar por status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="pending">Pendentes</SelectItem>
+                <SelectItem value="completed">Aprovados</SelectItem>
+                <SelectItem value="rejected">Rejeitados</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button onClick={exportToExcel} className="flex items-center gap-2">
+              <Download className="w-4 h-4" />
+              Exportar Excel
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Total de Saques</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{withdrawals.length}</div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Pendentes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">
+                {withdrawals.filter(w => w.status === 'pending').length}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Aprovados</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">
+                {withdrawals.filter(w => w.status === 'completed').length}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Valor Total</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {formatCurrency(withdrawals.reduce((acc, w) => acc + w.amount, 0))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Withdrawals Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Pedidos de Saque</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Data</TableHead>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Plano</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>PIX</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {withdrawals.map((withdrawal) => (
+                    <TableRow key={withdrawal.id}>
+                      <TableCell>
+                        {formatDate(withdrawal.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">
+                            {withdrawal.full_name || withdrawal.profiles?.full_name || 'N/A'}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {withdrawal.profiles?.phone || 'N/A'}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {withdrawal.profiles?.plan?.toUpperCase() || 'FREE'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {formatCurrency(withdrawal.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          <div>{withdrawal.pix_key}</div>
+                          <div className="text-muted-foreground">{withdrawal.pix_key_type}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {getStatusBadge(withdrawal.status)}
+                      </TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                setSelectedWithdrawal(withdrawal);
+                                setAdminNotes(withdrawal.admin_notes || "");
+                                setRejectionReason(withdrawal.rejection_reason || "");
+                              }}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Gerenciar
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Gerenciar Saque</DialogTitle>
+                            </DialogHeader>
+                            
+                            {selectedWithdrawal && (
+                              <div className="space-y-4">
+                                {/* Withdrawal Details */}
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <Label>Nome Completo</Label>
+                                    <div className="text-sm p-2 bg-muted rounded">
+                                      {selectedWithdrawal.full_name || selectedWithdrawal.profiles?.full_name || 'N/A'}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Telefone</Label>
+                                    <div className="text-sm p-2 bg-muted rounded">
+                                      {selectedWithdrawal.profiles?.phone || 'N/A'}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Valor</Label>
+                                    <div className="text-sm p-2 bg-muted rounded font-medium">
+                                      {formatCurrency(selectedWithdrawal.amount)}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Status Atual</Label>
+                                    <div className="text-sm p-2 bg-muted rounded">
+                                      {getStatusBadge(selectedWithdrawal.status)}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Chave PIX</Label>
+                                    <div className="text-sm p-2 bg-muted rounded">
+                                      {selectedWithdrawal.pix_key}
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <Label>Tipo PIX</Label>
+                                    <div className="text-sm p-2 bg-muted rounded">
+                                      {selectedWithdrawal.pix_key_type}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Admin Notes */}
+                                <div>
+                                  <Label htmlFor="admin-notes">Observações Administrativas</Label>
+                                  <Textarea
+                                    id="admin-notes"
+                                    value={adminNotes}
+                                    onChange={(e) => setAdminNotes(e.target.value)}
+                                    placeholder="Adicione observações sobre este saque..."
+                                    rows={3}
+                                  />
+                                </div>
+
+                                {/* Rejection Reason */}
+                                <div>
+                                  <Label htmlFor="rejection-reason">Motivo da Rejeição (opcional)</Label>
+                                  <Textarea
+                                    id="rejection-reason"
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    placeholder="Motivo caso o saque seja rejeitado..."
+                                    rows={2}
+                                  />
+                                </div>
+
+                                {/* Action Buttons */}
+                                {selectedWithdrawal.status === 'pending' && (
+                                  <div className="flex gap-2 pt-4">
+                                    <Button
+                                      onClick={() => updateWithdrawalStatus(
+                                        selectedWithdrawal.id, 
+                                        'completed', 
+                                        adminNotes
+                                      )}
+                                      className="flex-1 bg-green-600 hover:bg-green-700"
+                                    >
+                                      <CheckCircle className="w-4 h-4 mr-1" />
+                                      Aprovar Saque
+                                    </Button>
+                                    <Button
+                                      onClick={() => updateWithdrawalStatus(
+                                        selectedWithdrawal.id, 
+                                        'rejected', 
+                                        adminNotes, 
+                                        rejectionReason
+                                      )}
+                                      variant="destructive"
+                                      className="flex-1"
+                                    >
+                                      <XCircle className="w-4 h-4 mr-1" />
+                                      Rejeitar Saque
+                                    </Button>
+                                  </div>
+                                )}
+
+                                {selectedWithdrawal.status !== 'pending' && (
+                                  <div className="flex gap-2 pt-4">
+                                    <Button
+                                      onClick={() => updateWithdrawalStatus(
+                                        selectedWithdrawal.id, 
+                                        selectedWithdrawal.status, 
+                                        adminNotes
+                                      )}
+                                      className="flex-1"
+                                    >
+                                      Atualizar Observações
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {withdrawals.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  Nenhum pedido de saque encontrado
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
