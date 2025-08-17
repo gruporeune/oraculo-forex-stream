@@ -59,6 +59,21 @@ export default function RegisterPage() {
     setSuccess(null);
     
     try {
+      // Check if username is already taken
+      const { data: existingUser, error: usernameCheckError } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', formData.username)
+        .maybeSingle();
+
+      if (usernameCheckError) {
+        throw new Error('Erro ao verificar username');
+      }
+
+      if (existingUser) {
+        throw new Error('Este username já está em uso. Escolha outro.');
+      }
+
       const redirectUrl = `${window.location.origin}/`;
       
       // Check for referral code in URL
