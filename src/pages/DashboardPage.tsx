@@ -18,85 +18,44 @@ import PlansPage from './PlansPage';
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Use the daily signals reset hook
   useDailySignalsReset(user?.id);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const initializeAuth = async () => {
-      try {
-        // First get current session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user) {
-          navigate('/login');
-          return;
-        }
-
-        if (isMounted) {
-          setUser(session.user);
-          await loadProfile(session.user.id);
-        }
-      } catch (error) {
-        console.error('Auth initialization error:', error);
-        navigate('/login');
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!isMounted) return;
-
+      (event, session) => {
         if (!session?.user) {
           navigate('/login');
-          return;
+        } else {
+          setUser(session.user);
+          loadProfile(session.user.id);
         }
-
-        setUser(session.user);
-        // Defer profile loading to avoid blocking auth state changes
-        setTimeout(() => {
-          if (isMounted) {
-            loadProfile(session.user.id);
-          }
-        }, 0);
       }
     );
 
-    initializeAuth();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session?.user) {
+        navigate('/login');
+      } else {
+        setUser(session.user);
+        loadProfile(session.user.id);
+      }
+    });
 
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   const loadProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-      if (error) {
-        console.error('Error loading profile:', error);
-        return;
-      }
-
-      if (data) {
-        setProfile(data);
-      }
-    } catch (error) {
-      console.error('Profile loading error:', error);
+    if (data) {
+      setProfile(data);
     }
   };
 
@@ -105,16 +64,10 @@ export default function DashboardPage() {
     navigate('/');
   };
 
-  if (isLoading || !user) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-black via-purple-900/20 to-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center mb-4 mx-auto animate-pulse">
-            <span className="text-white font-bold text-lg">O</span>
-          </div>
-          <div className="text-white text-lg font-medium">Carregando sua conta...</div>
-          <div className="text-white/60 text-sm mt-2">Aguarde enquanto carregamos seus dados</div>
-        </div>
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Carregando...</div>
       </div>
     );
   }
