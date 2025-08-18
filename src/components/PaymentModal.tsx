@@ -114,37 +114,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
-      // Check current user plans to enforce purchase limits
-      const { data: userPlans, error: plansError } = await supabase
-        .from('user_plans')
-        .select('plan_name')
-        .eq('user_id', user.id)
-        .eq('is_active', true);
-
-      if (plansError) {
-        console.error('Error fetching user plans:', plansError);
-        toast({
-          title: "Erro",
-          description: "Erro ao verificar planos existentes",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Count existing plans of the same type
-      const planName = plan.name.toLowerCase();
-      const existingPlanCount = userPlans?.filter(p => p.plan_name === planName).length || 0;
-
-      // Check if user has reached the limit of 3 plans of the same type
-      if (existingPlanCount >= 3) {
-        toast({
-          title: "Limite atingido",
-          description: `Você já possui o limite máximo de 3 planos ${plan.name}. Não é possível comprar mais deste plano.`,
-          variant: "destructive"
-        });
-        return;
-      }
-
       const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
         body: {
           user_id: user.id,
