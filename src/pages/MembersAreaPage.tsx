@@ -140,7 +140,7 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
         <div className="absolute inset-0">
           <iframe
             className="absolute top-1/2 left-1/2 w-full h-full min-w-[177.77vh] min-h-full object-cover transform -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            src="https://www.youtube.com/embed/HPq39_pbBk0?autoplay=1&mute=1&loop=1&playlist=HPq39_pbBk0&controls=0&showinfo=0&autohide=1&modestbranding=1"
+            src="https://www.youtube.com/embed/4oq96jMDZvk?autoplay=1&mute=1&loop=1&playlist=4oq96jMDZvk&controls=0&showinfo=0&autohide=1&modestbranding=1"
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -153,7 +153,7 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
         <div className="absolute bottom-0 left-0 p-4 md:p-8 text-white max-w-lg z-10">
           <h1 className="text-3xl md:text-5xl font-extrabold mb-4 text-shadow">A história do Bitcoin</h1>
           <p className="text-sm md:text-base mb-6 text-shadow-md">A primeira criptomoeda criada em 2008, guarda muitos segredos e enigmas pelo seu criador, Satoshi Nakamoto. Assista e veja um pouco da sua emocionante história.</p>
-          <Button onClick={() => handlePlay('HPq39_pbBk0', 'A história do Bitcoin')} className="bg-white text-black font-bold px-6 py-3 rounded-lg flex items-center space-x-2 hover:bg-gray-200">
+          <Button onClick={() => handlePlay('4oq96jMDZvk', 'A história do Bitcoin')} className="bg-white text-black font-bold px-6 py-3 rounded-lg flex items-center space-x-2 hover:bg-gray-200">
             <Play className="w-6 h-6" />
             <span>Assistir Agora</span>
           </Button>
