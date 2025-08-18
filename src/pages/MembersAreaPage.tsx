@@ -87,25 +87,25 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
 
   const courses = {
     introducao: [
-      { id: 1, title: "O que é OB?", youtubeId: "P8CwzT-MmSg", thumb: "https://storage.googleapis.com/hostinger-horizons-assets-prod/2336c78e-def0-4586-a63c-7123d4877007/480a2c8317d1a95d6199fe7cf6bb401c.png" },
-      { id: 2, title: "Analise Geral", youtubeId: "drqZdFQr2KY", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//2%20-%20analise%20geral.png" },
-      { id: 3, title: "PriceAction", youtubeId: "InXpWbNd0fY", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//3%20-%20price%20action.png" },
-      { id: 4, title: "Operacionais", youtubeId: "I2gFX_CDPR0", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//4%20-%20operacionais.png" },
-      { id: 5, title: "Gestão de Risco", youtubeId: "ioHV0BEYEN0", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//gestao.jpg" },
+      { id: 1, title: "O que é OB?", youtubeId: "el3pUXM2Brk", thumb: "https://storage.googleapis.com/hostinger-horizons-assets-prod/2336c78e-def0-4586-a63c-7123d4877007/480a2c8317d1a95d6199fe7cf6bb401c.png" },
+      { id: 2, title: "Analise Geral", youtubeId: "T68av5Xen4w", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//2%20-%20analise%20geral.png" },
+      { id: 3, title: "PriceAction", youtubeId: "cNZBOa-aFFk", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//3%20-%20price%20action.png" },
+      { id: 4, title: "Operacionais", youtubeId: "yysWdHQcYlo", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//4%20-%20operacionais.png" },
+      { id: 5, title: "Gestão de Risco", youtubeId: "zOsn1g7c_zc", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//gestao.jpg" },
     ],
     analise: [
-      { id: 6, title: "Introdução a Analise Grafica", youtubeId: "8nM-3Ko5wWo", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//6%20-%20intro.jpg" },
-      { id: 7, title: "Analise Técnica", youtubeId: "P8RyxHZb8yU", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//8%20-%20analise%20tecnica.png" },
-      { id: 8, title: "Teoria de Down", youtubeId: "igCw7uJRSjU", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//7%20-%20teoria%20de%20down.png" },
-      { id: 9, title: "Suporte e Resistencia", youtubeId: "eQMpJd5ym7I", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//9%20-%20aprenda%20suporte%20e%20resistencia.png" },
-      { id: 10, title: "Pontos de Pivô", youtubeId: "wpcNv1ArPXA", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//10-pivo.jpg" },
+      { id: 6, title: "Introdução a Analise Grafica", youtubeId: "O1r6aiC2W6w", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//6%20-%20intro.jpg" },
+      { id: 7, title: "Analise Técnica", youtubeId: "Qwi-voZpBZk", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//8%20-%20analise%20tecnica.png" },
+      { id: 8, title: "Teoria de Down", youtubeId: "X8Mrihjxhpw", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//7%20-%20teoria%20de%20down.png" },
+      { id: 9, title: "Suporte e Resistencia", youtubeId: "K8wK8qph010", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//9%20-%20aprenda%20suporte%20e%20resistencia.png" },
+      { id: 10, title: "Pontos de Pivô", youtubeId: "lGv2p0FImJ4", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//10-pivo.jpg" },
     ],
     operacionais: [
-      { id: 11, title: "Canal de alta como operar?", youtubeId: "zPkv-VwDppI", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//11%20-%20canal%20de%20alta.png" },
-      { id: 12, title: "SUP/RES como operar?", youtubeId: "Z_nAroQr7GE", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//12%20-%20suporte%20e%20resistencia%20como%20operar.png" },
-      { id: 13, title: "Harami, como operar?", youtubeId: "xzyAGf9MAGc", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//13%20-%20harami%20como%20operar.png" },
-      { id: 14, title: "Bandeira, como operar?", youtubeId: "f4t8MSDxXG4", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//14%20-%20bandeira%20como%20operar.png" },
-      { id: 15, title: "4 Operacionais para OB", youtubeId: "8P0phNkRsiY", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//15%20-%204%20operacionais%20pra%20ob.png" },
+      { id: 11, title: "Canal de alta como operar?", youtubeId: "DCcF8U4fAwU", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//11%20-%20canal%20de%20alta.png" },
+      { id: 12, title: "SUP/RES como operar?", youtubeId: "XQ0p8rwT93Y", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//12%20-%20suporte%20e%20resistencia%20como%20operar.png" },
+      { id: 13, title: "Harami, como operar?", youtubeId: "uBl-ma-PzsY", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//13%20-%20harami%20como%20operar.png" },
+      { id: 14, title: "Bandeira, como operar?", youtubeId: "KjUXVyShzTk", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//14%20-%20bandeira%20como%20operar.png" },
+      { id: 15, title: "4 Operacionais para OB", youtubeId: "bmmdCEkndGE", thumb: "https://rxlymqymfccfjupiquvg.supabase.co/storage/v1/object/public/thumbnails//15%20-%204%20operacionais%20pra%20ob.png" },
     ],
   };
 
