@@ -444,7 +444,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
               const resetTime = new Date(Date.now() + 24 * 60 * 60 * 1000);
               setTargetAchievedTime(resetTime);
               
-               // Save earnings to history immediately when target is reached - individual entry
+               // Save earnings to history immediately when target is reached - use UPSERT to avoid duplicates
                const saveEarningsHistory = async () => {
                  if (!userId) return;
                  
@@ -454,13 +454,15 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                    const brasilDate = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
                    const today = brasilDate.toISOString().split('T')[0];
                    
-                   // Create individual entry for this cycle's earnings with current timestamp
-                   await supabase.from('daily_earnings_history').insert({
+                   // Use UPSERT to avoid duplicate entries for the same day
+                   await supabase.from('daily_earnings_history').upsert({
                      user_id: userId,
                      date: today,
-                     total_earnings: config.targetProfit, // Exact target amount for this cycle
+                     total_earnings: config.targetProfit,
                      total_commissions: 0,
                      operations_count: newCompletedCount
+                   }, {
+                     onConflict: 'user_id,date'
                    });
                    
                    console.log('Earnings history saved successfully');
@@ -469,7 +471,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
                  }
                };
               
-              saveEarningsHistory();
+               saveEarningsHistory();
             }
           }
           
