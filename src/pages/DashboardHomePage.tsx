@@ -22,21 +22,38 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
   useEffect(() => {
     if (user?.id) {
       loadUserPlans();
+      
+      // Auto-refresh plans every 30 seconds
+      const interval = setInterval(() => {
+        loadUserPlans();
+      }, 30000);
+
+      return () => clearInterval(interval);
     }
   }, [user?.id]);
 
   const loadUserPlans = async () => {
     try {
-      const { data, error } = await supabase
-        .from('user_plans')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true);
+      const { data, error } = await Promise.race([
+        supabase
+          .from('user_plans')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_active', true),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Plans load timeout')), 5000)
+        )
+      ]) as any;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading user plans:', error);
+        return;
+      }
+      
       setUserPlans(data || []);
     } catch (error) {
-      console.error('Error loading user plans:', error);
+      console.error('Failed to load user plans:', error);
+      // Keep existing plans on error to avoid showing empty state
     }
   };
 

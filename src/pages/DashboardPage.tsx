@@ -18,56 +18,140 @@ import PlansPage from './PlansPage';
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   // Use the daily signals reset hook
   useDailySignalsReset(user?.id);
 
+  // Auto-refresh profile data every 30 seconds
   useEffect(() => {
+    if (!user?.id) return;
+    
+    const interval = setInterval(() => {
+      loadProfile(user.id);
+    }, 30000);
+
+    return () => clearInterval(interval);
+  }, [user?.id]);
+
+  useEffect(() => {
+    let mounted = true;
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        if (!mounted) return;
+        
         if (!session?.user) {
           navigate('/login');
         } else {
           setUser(session.user);
-          loadProfile(session.user.id);
+          await loadProfile(session.user.id);
         }
       }
     );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        navigate('/login');
-      } else {
-        setUser(session.user);
-        loadProfile(session.user.id);
-      }
-    });
+    // Initial session check with timeout
+    const initSession = async () => {
+      try {
+        const { data: { session }, error } = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Session timeout')), 5000)
+          )
+        ]) as any;
 
-    return () => subscription.unsubscribe();
+        if (!mounted) return;
+        
+        if (error) {
+          console.error('Session error:', error);
+          navigate('/login');
+          return;
+        }
+
+        if (!session?.user) {
+          navigate('/login');
+        } else {
+          setUser(session.user);
+          await loadProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error('Failed to get session:', error);
+        if (mounted) {
+          navigate('/login');
+        }
+      }
+    };
+
+    initSession();
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   const loadProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await Promise.race([
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Profile load timeout')), 8000)
+        )
+      ]) as any;
 
-    if (data) {
-      setProfile(data);
+      if (error) {
+        console.error('Profile load error:', error);
+        return;
+      }
+
+      if (data) {
+        setProfile(data);
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Failed to load profile:', error);
+      setLoading(false);
+      // Try to reload profile after a delay if still no data
+      if (!profile) {
+        setTimeout(() => loadProfile(userId), 2000);
+      }
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/');
+    try {
+      // Force logout with timeout
+      await Promise.race([
+        supabase.auth.signOut(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Logout timeout')), 3000)
+        )
+      ]);
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout by clearing localStorage and redirecting
+      localStorage.clear();
+    } finally {
+      // Always navigate regardless of logout success
+      navigate('/');
+      window.location.reload();
+    }
   };
 
-  if (!user) {
+  if (!user || loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Carregando...</div>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+          <div className="text-white">
+            {!user ? 'Verificando autenticação...' : 'Carregando dados do usuário...'}
+          </div>
+        </div>
       </div>
     );
   }
