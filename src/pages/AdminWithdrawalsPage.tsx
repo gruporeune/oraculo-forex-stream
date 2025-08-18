@@ -29,8 +29,12 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Download, Eye, CheckCircle, XCircle, Clock, LogOut } from "lucide-react";
+import { Download, Eye, CheckCircle, XCircle, Clock, LogOut, Calendar as CalendarIcon } from "lucide-react";
 import * as XLSX from 'xlsx';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface WithdrawalRequest {
   id: string;
@@ -62,6 +66,7 @@ export default function AdminWithdrawalsPage() {
   const [adminNotes, setAdminNotes] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedDate, setSelectedDate] = useState<Date>();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -80,6 +85,19 @@ export default function AdminWithdrawalsPage() {
 
       if (filterStatus !== "all") {
         query = query.eq('status', filterStatus);
+      }
+
+      // Filtrar por data se uma data específica foi selecionada
+      if (selectedDate) {
+        const startOfDay = new Date(selectedDate);
+        startOfDay.setHours(0, 0, 0, 0);
+        
+        const endOfDay = new Date(selectedDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        
+        query = query
+          .gte('created_at', startOfDay.toISOString())
+          .lte('created_at', endOfDay.toISOString());
       }
 
       const { data: withdrawalData, error } = await query;
@@ -121,7 +139,7 @@ export default function AdminWithdrawalsPage() {
 
   useEffect(() => {
     fetchWithdrawals();
-  }, [filterStatus]);
+  }, [filterStatus, selectedDate]);
 
   const updateWithdrawalStatus = async (id: string, status: string, notes?: string, rejection?: string) => {
     try {
@@ -219,7 +237,18 @@ export default function AdminWithdrawalsPage() {
   };
 
   const exportToExcel = () => {
-    const exportData = withdrawals.map(withdrawal => ({
+    // Filtrar dados para exportação baseado na data selecionada
+    let dataToExport = withdrawals;
+    
+    if (selectedDate) {
+      const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+      dataToExport = withdrawals.filter(withdrawal => {
+        const withdrawalDate = format(new Date(withdrawal.created_at), 'yyyy-MM-dd');
+        return withdrawalDate === selectedDateStr;
+      });
+    }
+
+    const exportData = dataToExport.map(withdrawal => ({
       'ID Saque': withdrawal.id,
       'ID do Usuário': withdrawal.user_id,
       'Nome Completo': withdrawal.full_name || withdrawal.profile?.full_name || 'N/A',
@@ -239,7 +268,8 @@ export default function AdminWithdrawalsPage() {
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Saques");
     
-    const fileName = `saques_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const dateStr = selectedDate ? format(selectedDate, 'yyyy-MM-dd') : new Date().toISOString().split('T')[0];
+    const fileName = `saques_${dateStr}.xlsx`;
     XLSX.writeFile(wb, fileName);
 
     toast({
@@ -309,9 +339,43 @@ export default function AdminWithdrawalsPage() {
               </SelectContent>
             </Select>
 
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "dd/MM/yyyy") : "Filtrar por data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  initialFocus
+                  className="pointer-events-auto"
+                />
+                <div className="p-2 border-t">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full"
+                    onClick={() => setSelectedDate(undefined)}
+                  >
+                    Limpar filtro
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
+
             <Button onClick={exportToExcel} className="flex items-center gap-2">
               <Download className="w-4 h-4" />
-              Exportar Excel
+              Exportar Excel {selectedDate && `(${format(selectedDate, "dd/MM/yyyy")})`}
             </Button>
 
             <Button onClick={handleLogout} variant="outline" className="flex items-center gap-2">
