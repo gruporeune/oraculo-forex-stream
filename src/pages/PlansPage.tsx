@@ -47,8 +47,8 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "R$ 2.750",
-    originalPrice: "R$ 3.999",
+    price: "R$ 999",
+    originalPrice: "R$ 1.299",
     description: "Para traders de alto volume",
     icon: Gem,
     features: [
@@ -65,28 +65,6 @@ const plans = [
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700"
-  },
-  {
-    name: "PLATINUM",
-    price: "R$ 5.000",
-    originalPrice: "R$ 7.499",
-    description: "O máximo em performance",
-    icon: Diamond,
-    features: [
-      "1000 sinais por dia",
-      "2% lucro diário até 200%",
-      "Área de membros Elite",
-      "Grupo VIP exclusivo",
-      "Consultoria semanal 1:1",
-      "Estratégias personalizadas",
-      "Suporte VIP 24/7",
-      "Acesso a ferramentas premium",
-      "Mentoria exclusiva"
-    ],
-    popular: false,
-    gradient: "from-yellow-600 to-yellow-400",
-    borderColor: "border-yellow-500/50",
-    buttonColor: "bg-yellow-600 hover:bg-yellow-700"
   }
 ];
 
@@ -118,7 +96,7 @@ export default function PlansPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
