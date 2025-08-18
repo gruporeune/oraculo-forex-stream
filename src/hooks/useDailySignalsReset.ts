@@ -43,8 +43,8 @@ export const useDailySignalsReset = (userId: string) => {
     // Check immediately
     checkAndResetSignals();
 
-    // Set up interval to check every hour
-    const interval = setInterval(checkAndResetSignals, 60 * 60 * 1000); // 1 hour
+    // Set up interval to check every 6 hours to reduce database load
+    const interval = setInterval(checkAndResetSignals, 6 * 60 * 60 * 1000); // 6 hours
 
     return () => clearInterval(interval);
   }, [userId]);
