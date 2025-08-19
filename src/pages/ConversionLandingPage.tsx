@@ -182,10 +182,10 @@ export default function ConversionLandingPage() {
               <CardContent className="p-4 md:p-8">
                 <div className="text-center mb-8">
                   <h3 className="text-xl md:text-2xl font-bold text-white mb-4">
-                    🎯 DEMONSTRAÇÃO: Veja o ORÁCULO em Ação
+                    ⚠️ CUIDADO!
                   </h3>
-                  <p className="text-gray-300 text-sm md:text-base">
-                    Assista nossa IA gerando lucros automaticamente (Simulação realística)
+                  <p className="text-red-400 text-sm md:text-base font-bold">
+                    O que você está prestes a experimentar, poderá te fazer ganhar dinheiro de verdade!
                   </p>
                 </div>
 
@@ -308,9 +308,12 @@ export default function ConversionLandingPage() {
                     >
                       <div className="mb-4">
                         <h4 className="text-xl md:text-2xl font-bold text-white mb-2">
-                          🎉 IMPRESSIONANTE! Viu Como Funciona?
+                          🎉 IMPRESSIONANTE!
                         </h4>
-                        <p className="text-green-300 text-sm md:text-base">
+                        <p className="text-green-300 text-lg md:text-xl font-bold">
+                          Você ganhou: <span className="text-3xl md:text-4xl font-black text-green-400 drop-shadow-lg animate-pulse">R$ {totalProfit.toFixed(2)}</span>!!
+                        </p>
+                        <p className="text-green-300 text-sm md:text-base mt-2">
                           Agora imagine isso funcionando 24/7 na sua conta real!
                         </p>
                       </div>
