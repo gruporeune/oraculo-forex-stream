@@ -56,6 +56,8 @@ serve(async (req) => {
     // Parse request
     const paymentRequest: PaymentRequest = await req.json()
     console.log('SecretPay payment request:', paymentRequest)
+    console.log('Plan name received:', paymentRequest.plan_name)
+    console.log('Amount received:', paymentRequest.amount, 'type:', typeof paymentRequest.amount)
 
     // Get user profile for additional customer data
     const { data: userProfile } = await supabase
@@ -76,6 +78,38 @@ serve(async (req) => {
     
     // Convert amount to centavos (SecretPay expects amount in cents)
     const amountInCents = Math.round(paymentRequest.amount * 100)
+    console.log('Amount in cents calculated:', amountInCents)
+    
+    // Check for minimum amount (SecretPay might reject very low amounts)
+    if (amountInCents < 100) { // Less than R$ 1.00
+      console.error('Amount too low:', amountInCents, 'cents')
+      return new Response('Amount too low for PIX payment', { 
+        status: 400,
+        headers: corsHeaders 
+      })
+    }
+    
+    // Validate CPF format (11 digits)
+    const cpfNumbers = paymentRequest.customer_document.replace(/\D/g, '')
+    if (cpfNumbers.length !== 11) {
+      console.error('Invalid CPF length:', cpfNumbers.length)
+      return new Response('Invalid CPF format', { 
+        status: 400,
+        headers: corsHeaders 
+      })
+    }
+    
+    // Validate and format phone number
+    let phoneNumber = paymentRequest.customer_phone?.replace(/\D/g, '') || ''
+    if (phoneNumber.length < 10) {
+      console.log('Phone too short, using default')
+      phoneNumber = '11999999999'
+    } else if (phoneNumber.length === 10) {
+      phoneNumber = '55' + phoneNumber // Add country code
+    } else if (phoneNumber.length === 11 && !phoneNumber.startsWith('55')) {
+      phoneNumber = '55' + phoneNumber // Add country code
+    }
+    console.log('Phone number formatted:', phoneNumber)
 
     // Prepare SecretPay payload
     const secretpayPayload = {
@@ -99,7 +133,7 @@ serve(async (req) => {
           type: "cpf",
           number: paymentRequest.customer_document
         },
-        phone: paymentRequest.customer_phone || '11999999999'
+        phone: phoneNumber
       },
       postbackUrl: `${supabaseUrl}/functions/v1/secretpay-webhook`,
       externalRef: externalRef,
@@ -125,6 +159,17 @@ serve(async (req) => {
     if (!secretpayResponse.ok) {
       const errorText = await secretpayResponse.text()
       console.error('SecretPay API error:', secretpayResponse.status, errorText)
+      console.error('Request payload was:', JSON.stringify(secretpayPayload, null, 2))
+      
+      // Log specific 424 errors for debugging
+      if (secretpayResponse.status === 424) {
+        console.error('Provider error 424 - possible causes:')
+        console.error('- Amount might be outside accepted range')
+        console.error('- Document validation failed')
+        console.error('- Phone number format invalid')
+        console.error('- External reference duplicate')
+      }
+      
       return new Response(`SecretPay API error: ${errorText}`, { 
         status: secretpayResponse.status,
         headers: corsHeaders 
