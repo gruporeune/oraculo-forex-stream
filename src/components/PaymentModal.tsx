@@ -149,13 +149,15 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       let amountValue;
       const priceText = plan.price.replace('R$ ', '');
       
-      if (priceText.includes('.')) {
-        // Format like "999" or "1.299" 
-        amountValue = parseFloat(priceText.replace('.', ''));
-      } else {
-        // Format like "200" or "600"
-        amountValue = parseFloat(priceText);
-      }
+      // Map plan names to their actual values to avoid conversion errors
+      const planValues = {
+        'PARTNER': 200,
+        'MASTER': 600, 
+        'PREMIUM': 999,
+        'PLATINUM': 5000
+      };
+      
+      amountValue = planValues[plan.name.toUpperCase()] || parseFloat(priceText.replace('.', '').replace(',', '.'));
 
       console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue);
 
