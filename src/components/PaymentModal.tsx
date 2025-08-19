@@ -145,11 +145,25 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         return;
       }
 
+      // Correct amount conversion - handle different price formats
+      let amountValue;
+      const priceText = plan.price.replace('R$ ', '');
+      
+      if (priceText.includes('.')) {
+        // Format like "999" or "1.299" 
+        amountValue = parseFloat(priceText.replace('.', ''));
+      } else {
+        // Format like "200" or "600"
+        amountValue = parseFloat(priceText);
+      }
+
+      console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue);
+
       const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
         body: {
           user_id: user.id,
           plan_name: plan.name,
-          amount: parseFloat(plan.price.replace('R$ ', '').replace('.', '').replace(',', '.')),
+          amount: amountValue,
           customer_name: formData.name,
           customer_email: formData.email,
           customer_document: formData.cpf.replace(/\D/g, ''),
