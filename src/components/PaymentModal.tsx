@@ -159,7 +159,9 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       
       amountValue = planValues[plan.name.toUpperCase()] || parseFloat(priceText.replace('.', '').replace(',', '.'));
 
-      console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue);
+      console.log('=== PAYMENT MODAL DEBUG ===')
+      console.log('Plan selected:', plan.name, 'Price:', plan.price)
+      console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue)
 
       const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
         body: {

@@ -55,9 +55,12 @@ serve(async (req) => {
 
     // Parse request
     const paymentRequest: PaymentRequest = await req.json()
-    console.log('SecretPay payment request:', paymentRequest)
+    console.log('=== SECRETPAY PAYMENT DEBUG ===')
     console.log('Plan name received:', paymentRequest.plan_name)
     console.log('Amount received:', paymentRequest.amount, 'type:', typeof paymentRequest.amount)
+    console.log('Customer name:', paymentRequest.customer_name)
+    console.log('Customer document:', paymentRequest.customer_document)
+    console.log('Full request:', JSON.stringify(paymentRequest, null, 2))
 
     // Get user profile for additional customer data
     const { data: userProfile } = await supabase
@@ -79,6 +82,14 @@ serve(async (req) => {
     // Convert amount to centavos (SecretPay expects amount in cents)
     const amountInCents = Math.round(paymentRequest.amount * 100)
     console.log('Amount in cents calculated:', amountInCents)
+    
+    // Special validation for different plans
+    if (paymentRequest.plan_name === 'PREMIUM') {
+      console.log('=== PREMIUM PLAN PROCESSING ===')
+      console.log('Original amount:', paymentRequest.amount)
+      console.log('Amount in cents:', amountInCents)
+      console.log('Expected: 94900 cents for R$ 949')
+    }
     
     // Check for minimum amount (SecretPay might reject very low amounts)
     if (amountInCents < 100) { // Less than R$ 1.00
@@ -140,7 +151,13 @@ serve(async (req) => {
       metadata: `Plano ${paymentRequest.plan_name} - Usuario ${paymentRequest.user_id}`
     }
 
-    console.log('SecretPay payload:', JSON.stringify(secretpayPayload, null, 2))
+    console.log('=== SECRETPAY PAYLOAD FINAL ===')
+    console.log('Amount in payload:', secretpayPayload.amount)
+    console.log('Plan name in title:', secretpayPayload.items[0].title)
+    console.log('Customer name:', secretpayPayload.customer.name)
+    console.log('Customer document:', secretpayPayload.customer.document.number)
+    console.log('Customer phone:', secretpayPayload.customer.phone)
+    console.log('Full payload:', JSON.stringify(secretpayPayload, null, 2))
 
     // Create Basic Auth header
     const credentials = btoa(`${secretpayPublicKey}:${secretpayPrivateKey}`)
