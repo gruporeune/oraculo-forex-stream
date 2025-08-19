@@ -47,7 +47,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const planLimits = {
     partner: { dailyTarget: 1.00 },
     master: { dailyTarget: 6.00 },
-    premium: { dailyTarget: 41.25 },
+    premium: { dailyTarget: 14.98 },
     platinum: { dailyTarget: 100.00 }
   };
 

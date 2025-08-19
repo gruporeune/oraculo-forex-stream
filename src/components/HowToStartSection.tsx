@@ -56,23 +56,13 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "R$ 2.750", 
+    price: "R$ 999", 
     description: "Para traders de alto volume",
     icon: Gem,
     features: ["500 sinais por dia", "1,5% lucro diário até 200%", "Área de membros", "Grupo VIP"],
     color: "border-blue-500",
     buttonVariant: "outline" as const,
     popular: true,
-  },
-  {
-    name: "PLATINUM",
-    price: "R$ 5.000",
-    description: "O máximo em performance", 
-    icon: Diamond,
-    features: ["1000 sinais por dia", "2% lucro diário até 200%", "Área de membros", "Grupo VIP", "Suporte VIP 24/7"],
-    color: "border-yellow-500",
-    buttonVariant: "outline" as const,
-    popular: false,
   },
 ];
 
@@ -144,7 +134,7 @@ export function HowToStartSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
