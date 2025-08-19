@@ -153,7 +153,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const planValues = {
         'PARTNER': 200,
         'MASTER': 600, 
-        'PREMIUM': 999,
+        'PREMIUM': 949,
         'PLATINUM': 5000
       };
       

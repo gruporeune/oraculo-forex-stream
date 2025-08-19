@@ -47,7 +47,7 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "R$ 999",
+    price: "R$ 949",
     originalPrice: "R$ 1.299",
     description: "Para traders de alto volume",
     icon: Gem,
