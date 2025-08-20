@@ -40,7 +40,7 @@ const plans = [
       "Webinars exclusivos",
       "Relatórios personalizados"
     ],
-    popular: false,
+    popular: true,
     gradient: "from-purple-600 to-purple-400",
     borderColor: "border-purple-500/50",
     buttonColor: "bg-purple-600 hover:bg-purple-700"
@@ -61,7 +61,7 @@ const plans = [
       "Acesso antecipado a novos recursos",
       "Suporte 24/7"
     ],
-    popular: true,
+    popular: false,
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700"
@@ -91,9 +91,22 @@ export default function PlansPage() {
             Plano
           </span>
         </h1>
-        <p className="text-white/70 text-lg max-w-2xl mx-auto">
+        <p className="text-white/70 text-lg max-w-2xl mx-auto mb-6">
           Cada plano foi desenvolvido para maximizar seus lucros no mercado de opções binárias com nossa IA avançada.
         </p>
+        
+        {/* Important Notice */}
+        <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4 max-w-4xl mx-auto">
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <Star className="w-5 h-5 text-yellow-400" />
+            <h3 className="text-yellow-400 font-bold text-lg">IMPORTANTE</h3>
+            <Star className="w-5 h-5 text-yellow-400" />
+          </div>
+          <p className="text-white/90 text-base">
+            Você pode adquirir até <span className="font-bold text-yellow-400">3 contas por plano</span>, sendo necessário <span className="font-bold text-yellow-400">comprar uma por vez</span>. 
+            Após a confirmação do pagamento, você poderá adquirir contas adicionais do mesmo plano.
+          </p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -147,10 +160,15 @@ export default function PlansPage() {
                 </div>
                 
                 <Button
-                  className={`w-full ${plan.buttonColor} text-white font-semibold py-3 text-base hover:scale-105 transition-all duration-300`}
-                  onClick={() => handlePurchase(plan)}
+                  className={`w-full font-semibold py-3 text-base transition-all duration-300 ${
+                    plan.name === 'PREMIUM' 
+                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
+                      : `${plan.buttonColor} text-white hover:scale-105`
+                  }`}
+                  onClick={() => plan.name !== 'PREMIUM' && handlePurchase(plan)}
+                  disabled={plan.name === 'PREMIUM'}
                 >
-                  ASSINAR AGORA
+                  {plan.name === 'PREMIUM' ? 'EM BREVE' : 'ASSINAR AGORA'}
                 </Button>
                 
                 <div className="text-center">
