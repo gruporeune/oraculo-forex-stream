@@ -3,9 +3,6 @@ project_id = "nzxidhlktjpzkxhofswx"
 [functions.create-payment]
 verify_jwt = true
 
-[functions.create-abacatepay-payment]
-verify_jwt = true
-
 [functions.create-secretpay-payment]
 verify_jwt = true
 
