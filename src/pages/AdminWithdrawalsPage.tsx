@@ -50,6 +50,8 @@ interface WithdrawalRequest {
   rejection_reason: string | null;
   secretpay_transfer_id: string | null;
   processed_by: string | null;
+  withdrawal_type?: string;
+  usdt_wallet?: string | null;
   profile?: {
     full_name: string | null;
     phone: string | null;
@@ -255,8 +257,10 @@ export default function AdminWithdrawalsPage() {
       'Telefone': withdrawal.profile?.phone || 'N/A',
       'Plano': withdrawal.profile?.plan || 'N/A',
       'Valor (R$)': withdrawal.amount.toFixed(2),
-      'Chave PIX': withdrawal.pix_key,
-      'Tipo PIX': withdrawal.pix_key_type,
+      'Tipo Pagamento': withdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX',
+      'Chave PIX': withdrawal.withdrawal_type === 'pix' ? withdrawal.pix_key : 'N/A',
+      'Tipo PIX': withdrawal.withdrawal_type === 'pix' ? withdrawal.pix_key_type : 'N/A',
+      'Carteira USDT': withdrawal.withdrawal_type === 'usdt' ? withdrawal.usdt_wallet || 'N/A' : 'N/A',
       'Status': withdrawal.status,
       'Data Solicitação': new Date(withdrawal.created_at).toLocaleString('pt-BR'),
       'Data Processamento': withdrawal.processed_at ? new Date(withdrawal.processed_at).toLocaleString('pt-BR') : 'N/A',
@@ -456,7 +460,7 @@ export default function AdminWithdrawalsPage() {
                     <TableHead>ID do Usuário</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Valor</TableHead>
-                    <TableHead>PIX</TableHead>
+                    <TableHead>Pagamento</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Ações</TableHead>
                   </TableRow>
@@ -490,12 +494,27 @@ export default function AdminWithdrawalsPage() {
                       <TableCell className="font-medium">
                         {formatCurrency(withdrawal.amount)}
                       </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
-                          <div>{withdrawal.pix_key}</div>
-                          <div className="text-muted-foreground">{withdrawal.pix_key_type}</div>
-                        </div>
-                      </TableCell>
+                       <TableCell>
+                         <div className="text-sm">
+                           {withdrawal.withdrawal_type === 'usdt' ? (
+                             <>
+                               <div className="font-medium text-blue-600">USDT (TRC20)</div>
+                               <div className="text-muted-foreground font-mono text-xs">
+                                 {withdrawal.usdt_wallet ? 
+                                   `${withdrawal.usdt_wallet.slice(0, 8)}...${withdrawal.usdt_wallet.slice(-8)}` : 
+                                   'N/A'
+                                 }
+                               </div>
+                             </>
+                           ) : (
+                             <>
+                               <div className="font-medium text-green-600">PIX</div>
+                               <div className="text-muted-foreground">{withdrawal.pix_key}</div>
+                               <div className="text-xs text-muted-foreground">{withdrawal.pix_key_type}</div>
+                             </>
+                           )}
+                         </div>
+                       </TableCell>
                       <TableCell>
                         {getStatusBadge(withdrawal.status)}
                       </TableCell>
@@ -554,18 +573,35 @@ export default function AdminWithdrawalsPage() {
                                       {getStatusBadge(selectedWithdrawal.status)}
                                     </div>
                                   </div>
-                                  <div>
-                                    <Label>Chave PIX</Label>
-                                    <div className="text-sm p-2 bg-muted rounded">
-                                      {selectedWithdrawal.pix_key}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label>Tipo PIX</Label>
-                                    <div className="text-sm p-2 bg-muted rounded">
-                                      {selectedWithdrawal.pix_key_type}
-                                    </div>
-                                  </div>
+                                   <div>
+                                     <Label>Tipo de Pagamento</Label>
+                                     <div className="text-sm p-2 bg-muted rounded">
+                                       {selectedWithdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX'}
+                                     </div>
+                                   </div>
+                                   {selectedWithdrawal.withdrawal_type === 'usdt' ? (
+                                     <div>
+                                       <Label>Carteira USDT</Label>
+                                       <div className="text-sm p-2 bg-muted rounded font-mono">
+                                         {selectedWithdrawal.usdt_wallet || 'N/A'}
+                                       </div>
+                                     </div>
+                                   ) : (
+                                     <>
+                                       <div>
+                                         <Label>Chave PIX</Label>
+                                         <div className="text-sm p-2 bg-muted rounded">
+                                           {selectedWithdrawal.pix_key}
+                                         </div>
+                                       </div>
+                                       <div>
+                                         <Label>Tipo PIX</Label>
+                                         <div className="text-sm p-2 bg-muted rounded">
+                                           {selectedWithdrawal.pix_key_type}
+                                         </div>
+                                       </div>
+                                     </>
+                                   )}
                                 </div>
 
                                 {/* Admin Notes */}
