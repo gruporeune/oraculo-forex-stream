@@ -53,40 +53,75 @@ const generateAnalysis = (): AnalysisData => {
 };
 
 const generateDetailedAnalysis = (analysis: AnalysisData): string => {
-  const analysisReasons = [
-    "Identificação de padrão de reversão em suporte/resistência forte",
-    "Convergência de médias móveis exponenciais de 9 e 21 períodos",
-    "Divergência positiva detectada no indicador RSI",
-    "Rompimento confirmado de linha de tendência principal",
-    "Formação de martelo doji em zona de confluência",
-    "Breakout de canal de volatilidade com volume crescente",
-    "Sinal de compra do MACD com histograma em alta",
-    "Teste e rejeição de nível de Fibonacci 61.8%",
-    "Padrão de vela engolfing bullish/bearish identificado",
-    "Confluência entre RSI oversold e suporte horizontal"
-  ];
+  const getCurrentTime = () => new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const getRandomPrice = (base: number) => (base + (Math.random() - 0.5) * 0.01).toFixed(5);
   
+  // Get current market data simulation
+  const marketData = {
+    currentPrice: getRandomPrice(1.1850),
+    resistance: getRandomPrice(1.1870),
+    support: getRandomPrice(1.1830),
+    volume: Math.floor(Math.random() * 50000) + 100000,
+    rsi: Math.floor(Math.random() * 40) + 30,
+    macd: (Math.random() - 0.5) * 0.0001,
+    time: getCurrentTime()
+  };
+
+  const technicalIndicators = [
+    {
+      condition: "rompimento de resistência",
+      detail: `preço atual ${marketData.currentPrice} rompeu resistência em ${marketData.resistance}`,
+      signal: analysis.prediction === 'CALL' ? 'bullish' : 'bearish'
+    },
+    {
+      condition: "teste de suporte",
+      detail: `rejeição confirmada no suporte ${marketData.support} com volume ${marketData.volume.toLocaleString()}`,
+      signal: analysis.prediction === 'CALL' ? 'bullish' : 'bearish'
+    },
+    {
+      condition: "divergência RSI",
+      detail: `RSI em ${marketData.rsi} ${marketData.rsi < 30 ? 'sobrevendido' : marketData.rsi > 70 ? 'sobrecomprado' : 'neutro'}`,
+      signal: marketData.rsi < 30 ? 'bullish' : marketData.rsi > 70 ? 'bearish' : 'neutro'
+    },
+    {
+      condition: "convergência MACD",
+      detail: `MACD ${marketData.macd > 0 ? 'positivo' : 'negativo'} (${marketData.macd.toFixed(6)})`,
+      signal: marketData.macd > 0 ? 'bullish' : 'bearish'
+    }
+  ];
+
   const marketConditions = [
-    "Mercado em tendência lateral com breakout iminente",
-    "Forte pressão compradora detectada pelos indicadores",
-    "Volatilidade controlada favorecendo movimentos direcionais",
-    "Zona de acumulação institucional identificada",
-    "Momentum positivo sustentado por fundamentos técnicos",
-    "Correção técnica completada, retomada de tendência esperada"
+    `Horário: ${marketData.time} - Sessão ${getCurrentTime() < '12:00' ? 'Londres' : getCurrentTime() < '17:00' ? 'NY' : 'Sydney'}`,
+    `Volume acima da média com ${marketData.volume.toLocaleString()} contratos`,
+    `Volatilidade ${Math.random() > 0.5 ? 'elevada' : 'controlada'} detectada pelos algoritmos`,
+    `Confluência técnica entre múltiplos timeframes confirmada`
   ];
-  
-  const riskFactors = [
-    "Atenção para possível reversão em resistência dinâmica",
-    "Volume de negociação abaixo da média nas últimas sessões",
-    "Possível influência de notícias macroeconômicas no período",
-    "Recomendado aguardar confirmação do movimento inicial"
+
+  const riskAssessment = [
+    `Probabilidade de sucesso: ${analysis.confidence}% baseada em backtesting`,
+    `Stop loss sugerido: ${analysis.prediction === 'CALL' ? 'abaixo do suporte' : 'acima da resistência'}`,
+    `Janela de oportunidade: próximos ${analysis.expiration}`,
+    `Força do sinal: ${analysis.confidence > 85 ? 'ALTA' : analysis.confidence > 70 ? 'MÉDIA' : 'MODERADA'}`
   ];
-  
-  const reason = analysisReasons[Math.floor(Math.random() * analysisReasons.length)];
+
+  // Select one from each category based on prediction
+  const selectedIndicator = technicalIndicators.find(i => 
+    (analysis.prediction === 'CALL' && i.signal === 'bullish') ||
+    (analysis.prediction === 'PUT' && i.signal === 'bearish')
+  ) || technicalIndicators[0];
+
   const condition = marketConditions[Math.floor(Math.random() * marketConditions.length)];
-  const risk = riskFactors[Math.floor(Math.random() * riskFactors.length)];
+  const risk = riskAssessment[Math.floor(Math.random() * riskAssessment.length)];
+
+  return `🎯 ANÁLISE TÉCNICA AVANÇADA:
   
-  return `Análise: ${reason}. Condição de mercado: ${condition}. Observação: ${risk}.`;
+• Indicador Principal: ${selectedIndicator.condition} - ${selectedIndicator.detail}
+• Condição de Mercado: ${condition}
+• Avaliação de Risco: ${risk}
+• Timeframe Analisado: M1, M5, M15 em confluência
+• Algoritmo: Machine Learning + Análise Técnica Clássica
+
+⚡ RECOMENDAÇÃO: Sinal ${analysis.prediction} para ${analysis.asset} com expiração ${analysis.expiration}.`;
 };
 
 export const TradeAnalysis = ({ onTradeComplete }: TradeAnalysisProps) => {

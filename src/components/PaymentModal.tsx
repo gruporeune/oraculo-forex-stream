@@ -135,11 +135,11 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const planName = plan.name.toLowerCase();
       const existingPlanCount = userPlans?.filter(p => p.plan_name === planName).length || 0;
 
-      // Check if user has reached the limit of 3 plans of the same type
-      if (existingPlanCount >= 3) {
+      // Check if user has reached the limit of 5 plans of the same type
+      if (existingPlanCount >= 5) {
         toast({
           title: "Limite atingido",
-          description: `Você já possui o limite máximo de 3 planos ${plan.name}. Não é possível comprar mais deste plano.`,
+          description: `Você já possui o limite máximo de 5 planos ${plan.name}. Não é possível comprar mais deste plano.`,
           variant: "destructive"
         });
         return;

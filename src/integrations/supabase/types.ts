@@ -357,6 +357,57 @@ export type Database = {
           },
         ]
       }
+      usdt_payments: {
+        Row: {
+          admin_notes: string | null
+          amount_usd: number
+          created_at: string
+          id: string
+          plan_name: string
+          processed_at: string | null
+          processed_by: string | null
+          proof_image_path: string | null
+          status: string
+          transaction_hash: string
+          updated_at: string
+          user_id: string
+          user_wallet: string | null
+          wallet_address: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          plan_name?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          proof_image_path?: string | null
+          status?: string
+          transaction_hash: string
+          updated_at?: string
+          user_id: string
+          user_wallet?: string | null
+          wallet_address?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          amount_usd?: number
+          created_at?: string
+          id?: string
+          plan_name?: string
+          processed_at?: string | null
+          processed_by?: string | null
+          proof_image_path?: string | null
+          status?: string
+          transaction_hash?: string
+          updated_at?: string
+          user_id?: string
+          user_wallet?: string | null
+          wallet_address?: string
+        }
+        Relationships: []
+      }
       user_plans: {
         Row: {
           auto_operations_completed_today: number
@@ -462,7 +513,9 @@ export type Database = {
           secretpay_transfer_id: string | null
           status: string
           transfer_data: Json | null
+          usdt_wallet: string | null
           user_id: string
+          withdrawal_type: string | null
         }
         Insert: {
           admin_notes?: string | null
@@ -478,7 +531,9 @@ export type Database = {
           secretpay_transfer_id?: string | null
           status?: string
           transfer_data?: Json | null
+          usdt_wallet?: string | null
           user_id: string
+          withdrawal_type?: string | null
         }
         Update: {
           admin_notes?: string | null
@@ -494,7 +549,9 @@ export type Database = {
           secretpay_transfer_id?: string | null
           status?: string
           transfer_data?: Json | null
+          usdt_wallet?: string | null
           user_id?: string
+          withdrawal_type?: string | null
         }
         Relationships: []
       }

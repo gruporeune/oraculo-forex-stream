@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
 import { PaymentModal } from '@/components/PaymentModal';
+import { USDTPaymentModal } from '@/components/USDTPaymentModal';
 
 const plans = [
   {
@@ -23,7 +24,8 @@ const plans = [
     popular: false,
     gradient: "from-green-600 to-green-400",
     borderColor: "border-green-500/50",
-    buttonColor: "bg-green-600 hover:bg-green-700"
+    buttonColor: "bg-green-600 hover:bg-green-700",
+    paymentType: "pix"
   },
   {
     name: "MASTER",
@@ -43,7 +45,29 @@ const plans = [
     popular: true,
     gradient: "from-purple-600 to-purple-400",
     borderColor: "border-purple-500/50",
-    buttonColor: "bg-purple-600 hover:bg-purple-700"
+    buttonColor: "bg-purple-600 hover:bg-purple-700",
+    paymentType: "pix"
+  },
+  {
+    name: "INTERNATIONAL",
+    price: "$100 USD",
+    originalPrice: "$150 USD",
+    description: "Para traders internacionais",
+    icon: Crown,
+    features: [
+      "100 sinais por dia",
+      "1% lucro diário até 200%",
+      "Área de membros VIP",
+      "Suporte prioritário",
+      "Análises técnicas avançadas",
+      "Webinars exclusivos",
+      "Relatórios personalizados"
+    ],
+    popular: false,
+    gradient: "from-cyan-600 to-blue-400",
+    borderColor: "border-cyan-500/50",
+    buttonColor: "bg-cyan-600 hover:bg-cyan-700",
+    paymentType: "usdt"
   },
   {
     name: "PREMIUM",
@@ -64,17 +88,23 @@ const plans = [
     popular: false,
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
-    buttonColor: "bg-blue-600 hover:bg-blue-700"
+    buttonColor: "bg-blue-600 hover:bg-blue-700",
+    paymentType: "pix"
   }
 ];
 
 export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
 
   const handlePurchase = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
-    setIsPaymentModalOpen(true);
+    if (plan.paymentType === 'usdt') {
+      setIsUSDTModalOpen(true);
+    } else {
+      setIsPaymentModalOpen(true);
+    }
   };
 
   return (
@@ -103,13 +133,13 @@ export default function PlansPage() {
             <Star className="w-5 h-5 text-yellow-400" />
           </div>
           <p className="text-white/90 text-base">
-            Você pode adquirir até <span className="font-bold text-yellow-400">3 contas por plano</span>, sendo necessário <span className="font-bold text-yellow-400">comprar uma por vez</span>. 
+            Você pode adquirir até <span className="font-bold text-yellow-400">5 contas por plano</span>, sendo necessário <span className="font-bold text-yellow-400">comprar uma por vez</span>. 
             Após a confirmação do pagamento, você poderá adquirir contas adicionais do mesmo plano.
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
@@ -182,16 +212,26 @@ export default function PlansPage() {
         ))}
       </div>
 
-      {/* Payment Modal */}
+      {/* Payment Modals */}
       {selectedPlan && (
-        <PaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => {
-            setIsPaymentModalOpen(false);
-            setSelectedPlan(null);
-          }}
-          plan={selectedPlan}
-        />
+        <>
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => {
+              setIsPaymentModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            plan={selectedPlan}
+          />
+          <USDTPaymentModal
+            isOpen={isUSDTModalOpen}
+            onClose={() => {
+              setIsUSDTModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            plan={selectedPlan}
+          />
+        </>
       )}
 
     </motion.div>

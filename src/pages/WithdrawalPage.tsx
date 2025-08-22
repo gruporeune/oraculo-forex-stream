@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, DollarSign, Info, FileText, Loader2, CreditCard, Smartphone, Mail, FileCheck, Hash } from 'lucide-react';
+import { Wallet, DollarSign, Info, FileText, Loader2, CreditCard, Smartphone, Mail, FileCheck, Hash, Banknote } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface WithdrawalPageProps {
@@ -16,7 +16,7 @@ interface WithdrawalPageProps {
 
 const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps) => {
   const { toast } = useToast();
-  const [saqueData, setSaqueData] = useState({ amount: '', pixKey: '', fullName: '', pixKeyType: '' });
+  const [saqueData, setSaqueData] = useState({ amount: '', pixKey: '', fullName: '', pixKeyType: '', usdtWallet: '', withdrawalType: 'pix' });
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
@@ -85,10 +85,20 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       return;
     }
 
-    if (!saqueData.pixKey) {
+    if (saqueData.withdrawalType === 'pix' && !saqueData.pixKey) {
       toast({ 
         title: "Chave PIX ausente", 
         description: "Por favor, insira sua chave PIX.", 
+        variant: "destructive" 
+      });
+      setFormLoading(false);
+      return;
+    }
+
+    if (saqueData.withdrawalType === 'usdt' && !saqueData.usdtWallet) {
+      toast({ 
+        title: "Carteira USDT ausente", 
+        description: "Por favor, insira sua carteira USDT.", 
         variant: "destructive" 
       });
       setFormLoading(false);
@@ -105,7 +115,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       return;
     }
 
-    if (!saqueData.pixKeyType) {
+    if (saqueData.withdrawalType === 'pix' && !saqueData.pixKeyType) {
       toast({ 
         title: "Tipo de chave PIX obrigatório", 
         description: "Por favor, selecione o tipo da sua chave PIX.", 
@@ -127,16 +137,24 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       if (updateError) throw updateError;
 
       // Create withdrawal request in database with pending status
+      const withdrawalInsert: any = {
+        user_id: user.id,
+        amount: amount,
+        full_name: saqueData.fullName,
+        withdrawal_type: saqueData.withdrawalType,
+        status: 'pending'
+      };
+
+      if (saqueData.withdrawalType === 'pix') {
+        withdrawalInsert.pix_key = saqueData.pixKey;
+        withdrawalInsert.pix_key_type = saqueData.pixKeyType;
+      } else if (saqueData.withdrawalType === 'usdt') {
+        withdrawalInsert.usdt_wallet = saqueData.usdtWallet;
+      }
+
       const { data: withdrawalData, error: requestError } = await supabase
         .from('withdrawal_requests')
-        .insert({
-          user_id: user.id,
-          amount: amount,
-          pix_key: saqueData.pixKey,
-          pix_key_type: saqueData.pixKeyType,
-          full_name: saqueData.fullName,
-          status: 'pending'
-        })
+        .insert(withdrawalInsert)
         .select()
         .single();
 
@@ -154,7 +172,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
         description: "Sua solicitação foi enviada para análise. Você será notificado sobre o status." 
       });
       
-      setSaqueData({ amount: '', pixKey: '', fullName: '', pixKeyType: '' });
+      setSaqueData({ amount: '', pixKey: '', fullName: '', pixKeyType: '', usdtWallet: '', withdrawalType: 'pix' });
       fetchWithdrawalRequests();
       onProfileUpdate();
     } catch (error: any) {
@@ -234,56 +252,102 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                 />
                 
                 <div className="space-y-2">
-                  <label className="text-sm text-white/80">Tipo de Chave PIX</label>
+                  <label className="text-sm text-white/80">Tipo de Recebimento</label>
                   <Select 
-                    value={saqueData.pixKeyType} 
-                    onValueChange={value => setSaqueData({...saqueData, pixKeyType: value})}
+                    value={saqueData.withdrawalType} 
+                    onValueChange={value => setSaqueData({...saqueData, withdrawalType: value})}
                   >
                     <SelectTrigger className="bg-white/10 border-white/20 text-white">
-                      <SelectValue placeholder="Selecione o tipo da chave PIX" />
+                      <SelectValue placeholder="Selecione como deseja receber" />
                     </SelectTrigger>
                     <SelectContent className="bg-black border-white/20">
-                      <SelectItem value="cpf" className="text-white hover:bg-white/10">
-                        <div className="flex items-center">
-                          <FileCheck className="mr-2 h-4 w-4" />
-                          CPF
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="cnpj" className="text-white hover:bg-white/10">
+                      <SelectItem value="pix" className="text-white hover:bg-white/10">
                         <div className="flex items-center">
                           <CreditCard className="mr-2 h-4 w-4" />
-                          CNPJ
+                          PIX (Reais)
                         </div>
                       </SelectItem>
-                      <SelectItem value="phone" className="text-white hover:bg-white/10">
+                      <SelectItem value="usdt" className="text-white hover:bg-white/10">
                         <div className="flex items-center">
-                          <Smartphone className="mr-2 h-4 w-4" />
-                          Celular
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="email" className="text-white hover:bg-white/10">
-                        <div className="flex items-center">
-                          <Mail className="mr-2 h-4 w-4" />
-                          E-mail
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="random" className="text-white hover:bg-white/10">
-                        <div className="flex items-center">
-                          <Hash className="mr-2 h-4 w-4" />
-                          Chave Aleatória
+                          <Banknote className="mr-2 h-4 w-4" />
+                          USDT (TRC20)
                         </div>
                       </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <Input 
-                  placeholder="Chave PIX" 
-                  value={saqueData.pixKey} 
-                  onChange={e => setSaqueData({...saqueData, pixKey: e.target.value})} 
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
-                  required
-                />
+                {saqueData.withdrawalType === 'pix' && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-sm text-white/80">Tipo de Chave PIX</label>
+                      <Select 
+                        value={saqueData.pixKeyType} 
+                        onValueChange={value => setSaqueData({...saqueData, pixKeyType: value})}
+                      >
+                        <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                          <SelectValue placeholder="Selecione o tipo da chave PIX" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-black border-white/20">
+                          <SelectItem value="cpf" className="text-white hover:bg-white/10">
+                            <div className="flex items-center">
+                              <FileCheck className="mr-2 h-4 w-4" />
+                              CPF
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="cnpj" className="text-white hover:bg-white/10">
+                            <div className="flex items-center">
+                              <CreditCard className="mr-2 h-4 w-4" />
+                              CNPJ
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="phone" className="text-white hover:bg-white/10">
+                            <div className="flex items-center">
+                              <Smartphone className="mr-2 h-4 w-4" />
+                              Celular
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="email" className="text-white hover:bg-white/10">
+                            <div className="flex items-center">
+                              <Mail className="mr-2 h-4 w-4" />
+                              E-mail
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="random" className="text-white hover:bg-white/10">
+                            <div className="flex items-center">
+                              <Hash className="mr-2 h-4 w-4" />
+                              Chave Aleatória
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <Input 
+                      placeholder="Chave PIX" 
+                      value={saqueData.pixKey} 
+                      onChange={e => setSaqueData({...saqueData, pixKey: e.target.value})} 
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
+                      required={saqueData.withdrawalType === 'pix'}
+                    />
+                  </>
+                )}
+
+                {saqueData.withdrawalType === 'usdt' && (
+                  <div className="space-y-2">
+                    <label className="text-sm text-white/80">Carteira USDT (TRC20)</label>
+                    <Input 
+                      placeholder="Digite o endereço da sua carteira USDT TRC20" 
+                      value={saqueData.usdtWallet} 
+                      onChange={e => setSaqueData({...saqueData, usdtWallet: e.target.value})} 
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50" 
+                      required={saqueData.withdrawalType === 'usdt'}
+                    />
+                    <p className="text-xs text-orange-400">
+                      ⚠️ Certifique-se de que o endereço é da rede TRC20 (TRON)
+                    </p>
+                  </div>
+                )}
                 
                 <div className="space-y-2">
                   <Input 
@@ -331,12 +395,24 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-white/90">
-            <p>• Saques via <span className="font-bold">PIX instantâneo</span> pela SecretPay.</p>
-            <p>• Processamento: <span className="font-bold">Imediato (24/7)</span>.</p>
-            <p>• Valor mínimo para saque: <span className="font-bold">R$ 50,00</span>.</p>
-            <p>• <span className="font-bold text-orange-400">Taxa de 5%</span> sobre o valor do saque.</p>
-            <p>• Certifique-se de que seu nome e chave PIX estão corretos.</p>
-            <p>• Em caso de erro nos dados, o valor será estornado automaticamente.</p>
+            <div className="space-y-2">
+              <h4 className="font-semibold text-white">PIX (Reais):</h4>
+              <p>• Saques via <span className="font-bold">PIX instantâneo</span> pela SecretPay.</p>
+              <p>• Processamento: <span className="font-bold">Imediato (24/7)</span>.</p>
+              <p>• <span className="font-bold text-orange-400">Taxa de 5%</span> sobre o valor do saque.</p>
+            </div>
+            <div className="space-y-2 pt-3 border-t border-white/10">
+              <h4 className="font-semibold text-white">USDT (TRC20):</h4>
+              <p>• Saques em <span className="font-bold">USDT na rede TRC20</span>.</p>
+              <p>• Processamento: <span className="font-bold">Manual (até 24h)</span>.</p>
+              <p>• <span className="font-bold text-orange-400">Taxa de 5%</span> sobre o valor do saque.</p>
+              <p>• Conversão: <span className="font-bold">1 USD = R$ 6,00</span> (fixo).</p>
+            </div>
+            <div className="pt-3 border-t border-white/10">
+              <p>• Valor mínimo para saque: <span className="font-bold">R$ 50,00</span>.</p>
+              <p>• Certifique-se de que seus dados estão corretos.</p>
+              <p>• Em caso de erro nos dados, o valor será estornado automaticamente.</p>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -359,7 +435,12 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                 <div key={i} className="flex justify-between items-center p-3 border-b border-white/10 text-sm">
                   <div>
                     <p className="font-medium">{formatDate(request.created_at)}</p>
-                    <p className="text-white/70 text-xs">PIX: {request.pix_key}</p>
+                    <p className="text-white/70 text-xs">
+                      {request.withdrawal_type === 'usdt' 
+                        ? `USDT: ${request.usdt_wallet?.slice(0, 8)}...${request.usdt_wallet?.slice(-8)}` 
+                        : `PIX: ${request.pix_key}`
+                      }
+                    </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium">{formatCurrency(request.amount)}</p>
