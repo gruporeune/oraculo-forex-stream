@@ -29,7 +29,21 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
 
   const USDT_WALLET = "TVSQjGopxtp81AaNrrw8B25CWeAGVddLf4";
   const NETWORK = "TRC20 (TRON)";
-  const AMOUNT_USD = 100;
+  
+  // Get plan amount based on plan name
+  const getPlanAmount = () => {
+    switch (plan.name.toLowerCase()) {
+      case 'premium':
+        return 458;
+      case 'platinum':
+        return 833;
+      case 'international':
+      default:
+        return 100;
+    }
+  };
+  
+  const AMOUNT_USD = getPlanAmount();
 
   const handleCopyWallet = async () => {
     try {
@@ -115,7 +129,8 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
           user_wallet: userWallet,
           transaction_hash: transactionHash,
           proof_image_path: fileName,
-          plan_name: 'international'
+          plan_name: plan.name.toLowerCase(),
+          amount_usd: AMOUNT_USD
         });
 
       if (insertError) {
@@ -168,6 +183,24 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
               <p className="text-2xl font-bold text-white">${AMOUNT_USD} USDT</p>
               <p className="text-white/70 text-sm">{plan.description}</p>
             </motion.div>
+
+            {/* Important Notice */}
+            {(plan.name.toLowerCase() === 'international' || plan.name.toLowerCase() === 'premium' || plan.name.toLowerCase() === 'platinum') && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-orange-600/20 border border-orange-500/30 rounded-lg p-4"
+              >
+                <h4 className="font-semibold mb-2 text-orange-400">⚠️ Importante:</h4>
+                <p className="text-orange-100 text-sm mb-2">
+                  Primeiro faça a transferência via USDT na rede TRON e depois preencha os campos abaixo corretamente para a comprovação. 
+                  Após a verificação você será ativado com sucesso!
+                </p>
+                <p className="text-orange-200 text-xs font-medium">
+                  🕐 Após o pagamento e comprovação, poderá demorar até 1 hora para a ativação do seu plano.
+                </p>
+              </motion.div>
+            )}
 
             {/* Payment Instructions */}
             <div className="space-y-4">
