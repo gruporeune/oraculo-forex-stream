@@ -164,7 +164,7 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="bg-black/95 border-white/20 text-white max-w-md mx-auto">
+      <DialogContent className="bg-black/95 border-white/20 text-white max-w-md mx-auto max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-center">
             Pagamento USDT - Plano {plan.name}
