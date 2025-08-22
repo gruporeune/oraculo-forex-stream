@@ -71,8 +71,8 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "R$ 949",
-    originalPrice: "R$ 1.299",
+    price: "$500 USD",
+    originalPrice: "$750 USD",
     description: "Para traders de alto volume",
     icon: Gem,
     features: [
@@ -89,7 +89,29 @@ const plans = [
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700",
-    paymentType: "pix"
+    paymentType: "usdt"
+  },
+  {
+    name: "PLATINUM",
+    price: "$1000 USD",
+    originalPrice: "$1500 USD",
+    description: "O máximo em trading automatizado",
+    icon: Diamond,
+    features: [
+      "1000 sinais por dia",
+      "2% lucro diário até 200%",
+      "Área de membros Platinum",
+      "Consultoria 1:1 semanal",
+      "Estratégias VIP exclusivas",
+      "Acesso beta a novos recursos",
+      "Suporte prioritário 24/7",
+      "Analista pessoal dedicado"
+    ],
+    popular: false,
+    gradient: "from-slate-600 to-slate-400",
+    borderColor: "border-slate-500/50",
+    buttonColor: "bg-slate-600 hover:bg-slate-700",
+    paymentType: "usdt"
   }
 ];
 
@@ -139,7 +161,7 @@ export default function PlansPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
@@ -190,15 +212,10 @@ export default function PlansPage() {
                 </div>
                 
                 <Button
-                  className={`w-full font-semibold py-3 text-base transition-all duration-300 ${
-                    plan.name === 'PREMIUM' 
-                      ? 'bg-gray-600 text-gray-300 cursor-not-allowed' 
-                      : `${plan.buttonColor} text-white hover:scale-105`
-                  }`}
-                  onClick={() => plan.name !== 'PREMIUM' && handlePurchase(plan)}
-                  disabled={plan.name === 'PREMIUM'}
+                  className={`w-full font-semibold py-3 text-base transition-all duration-300 ${plan.buttonColor} text-white hover:scale-105`}
+                  onClick={() => handlePurchase(plan)}
                 >
-                  {plan.name === 'PREMIUM' ? 'EM BREVE' : 'ASSINAR AGORA'}
+                  ASSINAR AGORA
                 </Button>
                 
                 <div className="text-center">

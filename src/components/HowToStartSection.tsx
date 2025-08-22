@@ -53,16 +53,34 @@ const plans = [
     features: ["100 sinais por dia", "1% lucro diário até 200%", "Área de membros", "Suporte prioritário"],
     color: "border-purple-500",
     buttonVariant: "default" as const,
+    popular: true,
+  },
+  {
+    name: "INTERNATIONAL",
+    price: "$100 USD",
+    description: "Para traders internacionais",
+    icon: Crown,
+    features: ["100 sinais por dia", "1% lucro diário até 200%", "Área de membros VIP", "Suporte prioritário"],
+    color: "border-cyan-500",
+    buttonVariant: "outline" as const,
   },
   {
     name: "PREMIUM",
-    price: "R$ 999", 
+    price: "$500 USD", 
     description: "Para traders de alto volume",
     icon: Gem,
-    features: ["500 sinais por dia", "1,5% lucro diário até 200%", "Área de membros", "Grupo VIP"],
+    features: ["500 sinais por dia", "1,5% lucro diário até 200%", "Área de membros Premium", "Grupo VIP"],
     color: "border-blue-500",
     buttonVariant: "outline" as const,
-    popular: true,
+  },
+  {
+    name: "PLATINUM",
+    price: "$1000 USD",
+    description: "O máximo em trading automatizado",
+    icon: Diamond,
+    features: ["1000 sinais por dia", "2% lucro diário até 200%", "Área de membros Platinum", "Analista dedicado"],
+    color: "border-slate-500",
+    buttonVariant: "outline" as const,
   },
 ];
 
@@ -134,7 +152,7 @@ export function HowToStartSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-6">
           {plans.map((plan, index) => (
             <motion.div
               key={plan.name}
