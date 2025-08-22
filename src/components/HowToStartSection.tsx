@@ -66,7 +66,8 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "$500 USD", 
+    price: "$458 USD",
+    priceInReals: "R$ 2.750", 
     description: "Para traders de alto volume",
     icon: Gem,
     features: ["500 sinais por dia", "1,5% lucro diário até 200%", "Área de membros Premium", "Grupo VIP"],
@@ -75,7 +76,8 @@ const plans = [
   },
   {
     name: "PLATINUM",
-    price: "$1000 USD",
+    price: "$833 USD",
+    priceInReals: "R$ 5.000",
     description: "O máximo em trading automatizado",
     icon: Diamond,
     features: ["1000 sinais por dia", "2% lucro diário até 200%", "Área de membros Platinum", "Analista dedicado"],
@@ -176,6 +178,11 @@ export function HowToStartSection() {
                     <plan.icon className="w-8 h-8 mx-auto mb-3 text-purple-600" />
                     <h4 className="text-xl font-bold">{plan.name}</h4>
                     <div className="text-2xl font-bold mt-2">{plan.price}</div>
+                    {plan.priceInReals && (
+                      <div className="text-sm font-semibold text-yellow-600 mt-1">
+                        {plan.priceInReals}
+                      </div>
+                    )}
                     <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
                   </div>
                   

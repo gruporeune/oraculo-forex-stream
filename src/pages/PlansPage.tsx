@@ -71,8 +71,9 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "$500 USD",
-    originalPrice: "$750 USD",
+    price: "$458 USD",
+    priceInReals: "R$ 2.750",
+    originalPrice: "$687 USD",
     description: "Para traders de alto volume",
     icon: Gem,
     features: [
@@ -93,8 +94,9 @@ const plans = [
   },
   {
     name: "PLATINUM",
-    price: "$1000 USD",
-    originalPrice: "$1500 USD",
+    price: "$833 USD",
+    priceInReals: "R$ 5.000",
+    originalPrice: "$1250 USD",
     description: "O máximo em trading automatizado",
     icon: Diamond,
     features: [
@@ -191,6 +193,11 @@ export default function PlansPage() {
                     <div className="text-3xl font-bold text-white">
                       {plan.price}
                     </div>
+                    {plan.priceInReals && (
+                      <div className="text-lg font-semibold text-yellow-400">
+                        {plan.priceInReals}
+                      </div>
+                    )}
                     <div className="text-sm text-white/50 line-through">
                       {plan.originalPrice}
                     </div>
