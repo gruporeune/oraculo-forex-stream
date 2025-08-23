@@ -96,23 +96,47 @@ serve(async (req) => {
     // Debug token information
     const token = Deno.env.get('FATUREFY_API_TOKEN');
     console.log('Using Faturefy token:', token ? `${token.substring(0, 10)}...` : 'TOKEN NOT FOUND');
+    console.log('API URL:', 'https://api.faturefy.site/api-pix/new-pix-invoice');
 
     // Call Faturefy API
     const faturefyResponse = await fetch('https://api.faturefy.site/api-pix/new-pix-invoice', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify(faturefyPayload)
     });
 
+    console.log('Faturefy response status:', faturefyResponse.status);
+    console.log('Faturefy response headers:', Object.fromEntries(faturefyResponse.headers.entries()));
+
     if (!faturefyResponse.ok) {
       const errorText = await faturefyResponse.text();
-      console.error('Faturefy API error:', faturefyResponse.status, errorText);
+      console.error('Faturefy API error details:');
+      console.error('Status:', faturefyResponse.status);
+      console.error('Status Text:', faturefyResponse.statusText);
+      console.error('Response Body:', errorText);
+      console.error('Request Payload was:', JSON.stringify(faturefyPayload, null, 2));
+      
+      let errorMessage = 'Erro na API de pagamento';
+      try {
+        const errorJson = JSON.parse(errorText);
+        if (errorJson.message) {
+          errorMessage = errorJson.message;
+        } else if (errorJson.error) {
+          errorMessage = errorJson.error;
+        }
+      } catch (e) {
+        // Se não conseguir fazer parse do JSON, usa a mensagem padrão
+        console.log('Could not parse error response as JSON');
+      }
+      
       return new Response(JSON.stringify({ 
         success: false, 
-        error: 'Erro na API de pagamento' 
+        error: errorMessage,
+        details: errorText
       }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
