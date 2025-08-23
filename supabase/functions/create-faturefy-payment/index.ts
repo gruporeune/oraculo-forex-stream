@@ -71,24 +71,40 @@ serve(async (req) => {
       });
     }
 
-    // Prepare Faturefy API request
+    // Clean and validate CPF (remove any formatting)
+    const cleanDocument = customer_document.replace(/\D/g, '');
+    if (cleanDocument.length !== 11) {
+      return new Response(JSON.stringify({ 
+        success: false, 
+        error: 'CPF deve ter exatamente 11 dígitos' 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Clean and format phone (remove any formatting, ensure it starts with country code)
+    const cleanPhone = customer_phone.replace(/\D/g, '');
+    const formattedPhone = cleanPhone.length === 11 ? `+55${cleanPhone}` : 
+                          cleanPhone.length === 13 ? `+${cleanPhone}` : cleanPhone;
+
+    // Try multiple payload formats to ensure compatibility
     const faturefyPayload = {
       amount: amountInCents,
-      description: `Plano ${plan_name} - Oráculo Trading`,
+      description: `Plano ${plan_name.toUpperCase()} - Oráculo Trading`,
       customer: {
-        name: customer_name,
-        email: customer_email,
-        document: customer_document,
-        phone: customer_phone,
-        cep: customer_cep,
-        cidade: customer_city,
-        bairro: customer_neighborhood,
-        rua: customer_street,
-        numero: customer_number,
-        complemento: customer_complement,
-        estado: customer_state
-      },
-      id_solicitacao: "auto" // Let Faturefy generate the ID
+        name: customer_name.trim(),
+        email: customer_email.toLowerCase().trim(),
+        document: cleanDocument,
+        phone: formattedPhone,
+        cep: customer_cep.replace(/\D/g, ''),
+        cidade: customer_city.trim(),
+        bairro: customer_neighborhood.trim(),
+        rua: customer_street.trim(),
+        numero: customer_number.toString(),
+        complemento: customer_complement || "",
+        estado: customer_state.toUpperCase().trim()
+      }
     };
 
     console.log('Creating Faturefy payment with payload:', JSON.stringify(faturefyPayload, null, 2));
@@ -120,27 +136,224 @@ serve(async (req) => {
       console.error('Response Body:', errorText);
       console.error('Request Payload was:', JSON.stringify(faturefyPayload, null, 2));
       
-      let errorMessage = 'Erro na API de pagamento';
-      try {
-        const errorJson = JSON.parse(errorText);
-        if (errorJson.message) {
-          errorMessage = errorJson.message;
-        } else if (errorJson.error) {
-          errorMessage = errorJson.error;
-        }
-      } catch (e) {
-        // Se não conseguir fazer parse do JSON, usa a mensagem padrão
-        console.log('Could not parse error response as JSON');
-      }
+      // Try alternative payload format
+      console.log('Trying alternative payload format...');
       
-      return new Response(JSON.stringify({ 
-        success: false, 
-        error: errorMessage,
-        details: errorText
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      const alternativePayload = {
+        valor: amountInCents, // Some APIs use 'valor' instead of 'amount'
+        descricao: `Plano ${plan_name.toUpperCase()} - Oráculo Trading`,
+        cliente: {
+          nome: customer_name.trim(),
+          email: customer_email.toLowerCase().trim(),
+          cpf: cleanDocument,
+          telefone: formattedPhone
+        },
+        endereco: {
+          cep: customer_cep.replace(/\D/g, ''),
+          cidade: customer_city.trim(),
+          bairro: customer_neighborhood.trim(),
+          rua: customer_street.trim(),
+          numero: customer_number.toString(),
+          complemento: customer_complement || "",
+          uf: customer_state.toUpperCase().trim()
+        }
+      };
+
+      const alternativeResponse = await fetch('https://api.faturefy.site/api-pix/new-pix-invoice', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(alternativePayload)
       });
+
+      if (!alternativeResponse.ok) {
+        const altErrorText = await alternativeResponse.text();
+        console.error('Alternative payload also failed:', alternativeResponse.status, altErrorText);
+        
+        // Try minimal payload
+        console.log('Trying minimal payload format...');
+        
+        const minimalPayload = {
+          amount: amountInCents,
+          description: `Plano ${plan_name.toUpperCase()}`,
+          customer_name: customer_name.trim(),
+          customer_email: customer_email.toLowerCase().trim(),
+          customer_document: cleanDocument,
+          customer_phone: formattedPhone
+        };
+
+        const minimalResponse = await fetch('https://api.faturefy.site/api-pix/new-pix-invoice', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(minimalPayload)
+        });
+
+        if (!minimalResponse.ok) {
+          const minErrorText = await minimalResponse.text();
+          console.error('Minimal payload also failed:', minimalResponse.status, minErrorText);
+          
+          let errorMessage = 'Erro na API de pagamento';
+          try {
+            const errorJson = JSON.parse(errorText);
+            if (errorJson.message) {
+              errorMessage = errorJson.message;
+            } else if (errorJson.error) {
+              errorMessage = errorJson.error;
+            }
+          } catch (e) {
+            console.log('Could not parse error response as JSON');
+          }
+          
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: errorMessage,
+            details: `Original: ${errorText}, Alt: ${altErrorText}, Min: ${minErrorText}`
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        } else {
+          // Minimal payload worked, use its response
+          const minimalData = await minimalResponse.json();
+          console.log('Minimal payload successful:', JSON.stringify(minimalData, null, 2));
+          
+          // Continue with the successful response data
+          if (!minimalData.data) {
+            console.error('Invalid minimal response structure:', minimalData);
+            return new Response(JSON.stringify({ 
+              success: false, 
+              error: 'Resposta inválida da API de pagamento' 
+            }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+          
+          // Store payment transaction using minimal response data
+          const transactionData = {
+            user_id,
+            amount,
+            external_id: minimalData.data.idSolicitacao || minimalData.data.transactionId || `min-${Date.now()}`,
+            plan_name: plan_name.toLowerCase(),
+            status: 'pending',
+            payment_provider: 'faturefy',
+            qr_code: minimalData.data.pixCode,
+            qr_code_text: minimalData.data.pixCode,
+            transaction_data: {
+              ...minimalData.data,
+              payload_type: 'minimal',
+              customer_data: {
+                name: customer_name,
+                email: customer_email,
+                document: cleanDocument,
+                phone: formattedPhone
+              }
+            }
+          };
+
+          const { error: insertError } = await supabase
+            .from('payment_transactions')
+            .insert(transactionData);
+
+          if (insertError) {
+            console.error('Error inserting minimal transaction:', insertError);
+            return new Response(JSON.stringify({ 
+              success: false, 
+              error: 'Erro ao salvar transação' 
+            }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          return new Response(JSON.stringify({
+            success: true,
+            transaction_id: minimalData.data.transactionId || minimalData.data.idSolicitacao,
+            qr_code: minimalData.data.pixCode,
+            qr_code_image: minimalData.data.pixQrCode,
+            amount: amount,
+            request_number: minimalData.data.idSolicitacao,
+            status: minimalData.data.status || 'pending',
+            generated_at: minimalData.data.generatedAt || new Date().toISOString()
+          }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      } else {
+        // Alternative payload worked
+        const alternativeData = await alternativeResponse.json();
+        console.log('Alternative payload successful:', JSON.stringify(alternativeData, null, 2));
+        
+        if (!alternativeData.data) {
+          console.error('Invalid alternative response structure:', alternativeData);
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: 'Resposta inválida da API de pagamento' 
+          }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+        
+        // Store payment transaction using alternative response data  
+        const transactionData = {
+          user_id,
+          amount,
+          external_id: alternativeData.data.idSolicitacao || alternativeData.data.transactionId || `alt-${Date.now()}`,
+          plan_name: plan_name.toLowerCase(),
+          status: 'pending',
+          payment_provider: 'faturefy',
+          qr_code: alternativeData.data.pixCode,
+          qr_code_text: alternativeData.data.pixCode,
+          transaction_data: {
+            ...alternativeData.data,
+            payload_type: 'alternative',
+            customer_data: {
+              name: customer_name,
+              email: customer_email,
+              document: cleanDocument,
+              phone: formattedPhone
+            }
+          }
+        };
+
+        const { error: insertError } = await supabase
+          .from('payment_transactions')
+          .insert(transactionData);
+
+        if (insertError) {
+          console.error('Error inserting alternative transaction:', insertError);
+          return new Response(JSON.stringify({ 
+            success: false, 
+            error: 'Erro ao salvar transação' 
+          }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        return new Response(JSON.stringify({
+          success: true,
+          transaction_id: alternativeData.data.transactionId || alternativeData.data.idSolicitacao,
+          qr_code: alternativeData.data.pixCode,
+          qr_code_image: alternativeData.data.pixQrCode,
+          amount: amount,
+          request_number: alternativeData.data.idSolicitacao,
+          status: alternativeData.data.status || 'pending',
+          generated_at: alternativeData.data.generatedAt || new Date().toISOString()
+        }), {
+          status: 200,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     const faturefyData = await faturefyResponse.json();

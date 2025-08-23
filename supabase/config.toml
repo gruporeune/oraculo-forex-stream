@@ -6,6 +6,9 @@ verify_jwt = true
 [functions.check-faturefy-payment]
 verify_jwt = true
 
+[functions.faturefy-webhook]
+verify_jwt = false
+
 [functions.create-secretpay-withdrawal]
 verify_jwt = true
 
