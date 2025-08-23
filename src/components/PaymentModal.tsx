@@ -153,7 +153,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const planValues = {
         'PARTNER': 200,
         'MASTER': 600, 
-        'PREMIUM': 949,
+        'PREMIUM': 2750,
         'PLATINUM': 5000
       };
       
@@ -163,7 +163,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       console.log('Plan selected:', plan.name, 'Price:', plan.price)
       console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue)
 
-      const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
+      const { data, error } = await supabase.functions.invoke('create-faturefy-payment', {
         body: {
           user_id: user.id,
           plan_name: plan.name,
@@ -186,7 +186,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
       console.log('Payment created successfully:', data);
 
-      // Use the data directly from SecretPay
+      // Use the data directly from Faturefy
       const adaptedData = {
         success: data.success,
         transaction_id: data.transaction_id,
@@ -235,8 +235,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Call our edge function to check payment status via SecretPay API
-      const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
+      // Call our edge function to check payment status via Faturefy API
+      const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
         body: {
           payment_id: paymentData.request_number, // Use request_number as payment_id
           user_id: user.id

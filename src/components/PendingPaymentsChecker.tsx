@@ -24,13 +24,13 @@ export function PendingPaymentsChecker() {
 
       console.log('Checking pending payments for user:', user.id);
 
-      // Get pending SecretPay transactions with better error handling
+      // Get pending Faturefy transactions with better error handling
       const { data: pendingTransactions, error } = await supabase
         .from('payment_transactions')
         .select('id, external_id, plan_name, status, payment_provider, created_at')
         .eq('user_id', user.id)
         .eq('status', 'pending')
-        .eq('payment_provider', 'secretpay')
+        .eq('payment_provider', 'faturefy')
         .order('created_at', { ascending: false });
 
       console.log('Query result:', { pendingTransactions, error });
@@ -61,7 +61,7 @@ export function PendingPaymentsChecker() {
       for (const transaction of pendingTransactions) {
         try {
           console.log('Checking transaction:', transaction.external_id);
-          const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
+          const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
             body: {
               payment_id: transaction.external_id,
               user_id: user.id
@@ -141,10 +141,10 @@ export function PendingPaymentsChecker() {
       // Check each recent transaction
       let activatedPlans = 0;
       for (const transaction of recentTransactions) {
-        if (transaction.status === 'pending' && transaction.payment_provider === 'secretpay') {
+        if (transaction.status === 'pending' && transaction.payment_provider === 'faturefy') {
           try {
             console.log('Checking recent transaction:', transaction.external_id);
-            const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
+            const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
               body: {
                 payment_id: transaction.external_id,
                 user_id: userId

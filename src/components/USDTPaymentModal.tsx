@@ -37,7 +37,6 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
         return 458;
       case 'platinum':
         return 833;
-      case 'international':
       default:
         return 100;
     }
@@ -185,7 +184,7 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
             </motion.div>
 
             {/* Important Notice */}
-            {(plan.name.toLowerCase() === 'international' || plan.name.toLowerCase() === 'premium' || plan.name.toLowerCase() === 'platinum') && (
+            {(plan.name.toLowerCase() === 'premium' || plan.name.toLowerCase() === 'platinum') && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
