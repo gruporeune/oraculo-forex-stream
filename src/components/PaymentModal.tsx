@@ -39,7 +39,14 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     name: '',
     phone: '',
     email: '',
-    cpf: ''
+    cpf: '',
+    cep: '',
+    cidade: '',
+    bairro: '',
+    rua: '',
+    numero: '',
+    complemento: '',
+    estado: 'SC' // Default para Santa Catarina
   });
   const { toast } = useToast();
 
@@ -59,9 +66,19 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     return value;
   };
 
+  const formatCEP = (value: string) => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 8) {
+      return numbers.replace(/(\d{5})(\d{3})/, '$1-$2');
+    }
+    return value;
+  };
+
   const createPayment = async () => {
     // Validar campos obrigatórios
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim()) {
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim() || 
+        !formData.cep.trim() || !formData.cidade.trim() || !formData.bairro.trim() || 
+        !formData.rua.trim() || !formData.numero.trim() || !formData.estado.trim()) {
       toast({
         title: "Erro",
         description: "Todos os campos são obrigatórios",
@@ -172,7 +189,14 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
           customer_name: formData.name,
           customer_email: formData.email,
           customer_document: formData.cpf.replace(/\D/g, ''),
-          customer_phone: formData.phone.replace(/\D/g, '')
+          customer_phone: formData.phone.replace(/\D/g, ''),
+          customer_cep: formData.cep.replace(/\D/g, ''),
+          customer_city: formData.cidade,
+          customer_neighborhood: formData.bairro,
+          customer_street: formData.rua,
+          customer_number: formData.numero,
+          customer_complement: formData.complemento,
+          customer_state: formData.estado
         }
       });
 
@@ -285,7 +309,19 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   const handleClose = () => {
     setPaymentData(null);
-    setFormData({ name: '', phone: '', email: '', cpf: '' });
+    setFormData({ 
+      name: '', 
+      phone: '', 
+      email: '', 
+      cpf: '', 
+      cep: '', 
+      cidade: '', 
+      bairro: '', 
+      rua: '', 
+      numero: '', 
+      complemento: '', 
+      estado: 'SC' 
+    });
     setIsLoading(false);
     setIsCopied(false);
     setIsCheckingPayment(false);
@@ -371,10 +407,121 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                     maxLength={14}
                   />
                 </div>
+
+                {/* Seção de Endereço */}
+                <div className="border-t border-purple-500/30 pt-4">
+                  <h5 className="font-medium text-sm text-white/90 mb-3">Dados de Endereço *</h5>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-white">CEP *</label>
+                      <input
+                        type="text"
+                        value={formData.cep}
+                        onChange={(e) => setFormData({...formData, cep: formatCEP(e.target.value)})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                        placeholder="00000-000"
+                        maxLength={9}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-white">Estado *</label>
+                      <select
+                        value={formData.estado}
+                        onChange={(e) => setFormData({...formData, estado: e.target.value})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                      >
+                        <option value="AC">AC</option>
+                        <option value="AL">AL</option>
+                        <option value="AP">AP</option>
+                        <option value="AM">AM</option>
+                        <option value="BA">BA</option>
+                        <option value="CE">CE</option>
+                        <option value="DF">DF</option>
+                        <option value="ES">ES</option>
+                        <option value="GO">GO</option>
+                        <option value="MA">MA</option>
+                        <option value="MT">MT</option>
+                        <option value="MS">MS</option>
+                        <option value="MG">MG</option>
+                        <option value="PA">PA</option>
+                        <option value="PB">PB</option>
+                        <option value="PR">PR</option>
+                        <option value="PE">PE</option>
+                        <option value="PI">PI</option>
+                        <option value="RJ">RJ</option>
+                        <option value="RN">RN</option>
+                        <option value="RS">RS</option>
+                        <option value="RO">RO</option>
+                        <option value="RR">RR</option>
+                        <option value="SC">SC</option>
+                        <option value="SP">SP</option>
+                        <option value="SE">SE</option>
+                        <option value="TO">TO</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-white">Cidade *</label>
+                      <input
+                        type="text"
+                        value={formData.cidade}
+                        onChange={(e) => setFormData({...formData, cidade: e.target.value})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                        placeholder="Sua cidade"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-white">Bairro *</label>
+                      <input
+                        type="text"
+                        value={formData.bairro}
+                        onChange={(e) => setFormData({...formData, bairro: e.target.value})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                        placeholder="Seu bairro"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-white">Rua *</label>
+                      <input
+                        type="text"
+                        value={formData.rua}
+                        onChange={(e) => setFormData({...formData, rua: e.target.value})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                        placeholder="Nome da rua"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-white">Número *</label>
+                      <input
+                        type="text"
+                        value={formData.numero}
+                        onChange={(e) => setFormData({...formData, numero: e.target.value})}
+                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                        placeholder="123"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <label className="text-sm font-medium text-white">Complemento</label>
+                    <input
+                      type="text"
+                      value={formData.complemento}
+                      onChange={(e) => setFormData({...formData, complemento: e.target.value})}
+                      className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                      placeholder="Apto, casa, etc. (opcional)"
+                    />
+                  </div>
+                </div>
               </div>
 
               <p className="text-xs text-white/60">
-                * Campos obrigatórios para gerar o PIX
+                * Todos os campos são obrigatórios para gerar o PIX
               </p>
 
               <Button 
