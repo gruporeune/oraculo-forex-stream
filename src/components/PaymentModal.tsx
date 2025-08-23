@@ -14,6 +14,7 @@ interface PaymentModalProps {
   plan: {
     name: string;
     price: string;
+    priceInReals?: string;
     gradient: string;
   };
 }
@@ -312,7 +313,9 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
             transition={{ duration: 0.3 }}
           >
             <h3 className="text-lg font-bold">{plan.name}</h3>
-            <p className="text-2xl font-bold">{plan.price}</p>
+            <p className="text-2xl font-bold">
+              {plan.priceInReals ? plan.priceInReals : plan.price}
+            </p>
             <p className="text-sm opacity-90">Pagamento único • Acesso imediato</p>
           </motion.div>
 
