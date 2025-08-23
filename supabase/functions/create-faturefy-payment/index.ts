@@ -88,23 +88,14 @@ serve(async (req) => {
     const formattedPhone = cleanPhone.length === 11 ? `+55${cleanPhone}` : 
                           cleanPhone.length === 13 ? `+${cleanPhone}` : cleanPhone;
 
-    // Try multiple payload formats to ensure compatibility
+    // Simplified payload based on Faturefy documentation
     const faturefyPayload = {
       amount: amountInCents,
       description: `Plano ${plan_name.toUpperCase()} - Oráculo Trading`,
-      customer: {
-        name: customer_name.trim(),
-        email: customer_email.toLowerCase().trim(),
-        document: cleanDocument,
-        phone: formattedPhone,
-        cep: customer_cep.replace(/\D/g, ''),
-        cidade: customer_city.trim(),
-        bairro: customer_neighborhood.trim(),
-        rua: customer_street.trim(),
-        numero: customer_number.toString(),
-        complemento: customer_complement || "",
-        estado: customer_state.toUpperCase().trim()
-      }
+      customer_name: customer_name.trim(),
+      customer_email: customer_email.toLowerCase().trim(),
+      customer_document: cleanDocument,
+      customer_phone: formattedPhone
     };
 
     console.log('Creating Faturefy payment with payload:', JSON.stringify(faturefyPayload, null, 2));
