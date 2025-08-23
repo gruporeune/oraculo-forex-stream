@@ -86,7 +86,7 @@ export default function DashboardPage() {
                   <SidebarTrigger className="text-white" />
                   <div className="flex items-center">
                     <img 
-                      src="/lovable-uploads/295795d5-7da2-4124-a39b-751e43fe951c.png" 
+                      src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
                       alt="Oráculo Logo" 
                       className="h-20 w-auto object-contain"
                     />
