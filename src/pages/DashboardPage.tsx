@@ -84,13 +84,12 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <SidebarTrigger className="text-white" />
-                  <div className="flex items-center space-x-2">
-                    <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-purple-400 rounded-lg flex items-center justify-center">
-                      <span className="text-white font-bold text-sm">O</span>
-                    </div>
-                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
-                      ORÁCULO
-                    </h1>
+                  <div className="flex items-center">
+                    <img 
+                      src="/lovable-uploads/295795d5-7da2-4124-a39b-751e43fe951c.png" 
+                      alt="Oráculo Logo" 
+                      className="h-12 w-auto object-contain"
+                    />
                   </div>
                 </div>
                 
