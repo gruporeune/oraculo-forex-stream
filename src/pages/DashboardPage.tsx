@@ -88,7 +88,7 @@ export default function DashboardPage() {
                     <img 
                       src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
                       alt="Oráculo Logo" 
-                      className="h-20 w-auto object-contain"
+                      className="h-10 w-auto object-contain"
                     />
                   </div>
                 </div>
