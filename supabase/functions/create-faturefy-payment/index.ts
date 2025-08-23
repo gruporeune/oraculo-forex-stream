@@ -83,19 +83,31 @@ serve(async (req) => {
       });
     }
 
-    // Clean and format phone (remove any formatting, ensure it starts with country code)
+    // Clean and format phone (remove any formatting, NO country code for Faturefy)
     const cleanPhone = customer_phone.replace(/\D/g, '');
-    const formattedPhone = cleanPhone.length === 11 ? `+55${cleanPhone}` : 
-                          cleanPhone.length === 13 ? `+${cleanPhone}` : cleanPhone;
+    // For Faturefy, phone should be without +55 prefix
+    const formattedPhone = cleanPhone.length === 13 && cleanPhone.startsWith('55') ? 
+                          cleanPhone.substring(2) : 
+                          cleanPhone.length === 11 ? cleanPhone : cleanPhone;
 
-    // Simplified payload based on Faturefy documentation
+    // Payload format exactly as specified by Faturefy documentation
     const faturefyPayload = {
-      amount: amountInCents,
+      amount: amountInCents, // Integer em centavos
       description: `Plano ${plan_name.toUpperCase()} - Oráculo Trading`,
-      customer_name: customer_name.trim(),
-      customer_email: customer_email.toLowerCase().trim(),
-      customer_document: cleanDocument,
-      customer_phone: formattedPhone
+      customer: {
+        name: customer_name.trim(),
+        email: customer_email.toLowerCase().trim(),
+        document: cleanDocument, // CPF válido
+        phone: formattedPhone, // Sem +55
+        cep: customer_cep.replace(/\D/g, ''),
+        cidade: customer_city.trim(),
+        bairro: customer_neighborhood.trim(),
+        rua: customer_street.trim(),
+        numero: customer_number.toString(),
+        complemento: customer_complement || "",
+        estado: customer_state.toUpperCase().trim()
+      },
+      id_solicitacao: "auto" // Sistema gera automaticamente
     };
 
     console.log('Creating Faturefy payment with payload:', JSON.stringify(faturefyPayload, null, 2));
