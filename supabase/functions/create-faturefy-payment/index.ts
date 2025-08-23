@@ -92,12 +92,16 @@ serve(async (req) => {
     };
 
     console.log('Creating Faturefy payment with payload:', JSON.stringify(faturefyPayload, null, 2));
+    
+    // Debug token information
+    const token = Deno.env.get('FATUREFY_API_TOKEN');
+    console.log('Using Faturefy token:', token ? `${token.substring(0, 10)}...` : 'TOKEN NOT FOUND');
 
     // Call Faturefy API
     const faturefyResponse = await fetch('https://api.faturefy.site/api-pix/new-pix-invoice', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${Deno.env.get('FATUREFY_API_TOKEN')}`,
+        'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(faturefyPayload)
