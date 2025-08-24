@@ -25,6 +25,7 @@ interface GeneratedSignal {
 }
 
 export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsPageProps) {
+  const [marketType, setMarketType] = useState('');
   const [selectedAsset, setSelectedAsset] = useState('');
   const [selectedExpiration, setSelectedExpiration] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -32,10 +33,22 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
   const [canGenerate, setCanGenerate] = useState(true);
   const { toast } = useToast();
 
-  const assets = [
+  const realMarketAssets = [
     'EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'NZD/USD',
     'EUR/GBP', 'GBP/JPY', 'EUR/JPY', 'AUD/JPY', 'USD/CHF', 'CAD/JPY'
   ];
+
+  const otcMarketAssets = [
+    'EUR/USD (OTC)', 'GBP/USD (OTC)', 'USD/JPY (OTC)', 'AUD/USD (OTC)', 
+    'USD/CAD (OTC)', 'NZD/USD (OTC)', 'EUR/GBP (OTC)', 'GBP/JPY (OTC)', 
+    'EUR/JPY (OTC)', 'AUD/JPY (OTC)', 'USD/CHF (OTC)', 'CAD/JPY (OTC)',
+    'GBP/AUD (OTC)', 'EUR/AUD (OTC)', 'GBP/CAD (OTC)', 'AUD/CAD (OTC)',
+    'CHF/JPY (OTC)', 'EUR/CHF (OTC)', 'GBP/CHF (OTC)', 'AUD/CHF (OTC)'
+  ];
+
+  const getCurrentAssets = () => {
+    return marketType === 'otc' ? otcMarketAssets : realMarketAssets;
+  };
 
   const expirationTimes = [
     { value: '1', label: '1 Minuto' },
@@ -95,6 +108,11 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
     loadUserPlans();
   }, [user.id]);
 
+  // Reset selected asset when market type changes
+  useEffect(() => {
+    setSelectedAsset('');
+  }, [marketType]);
+
   const loadUserPlans = async () => {
     try {
       const { data, error } = await supabase
@@ -139,7 +157,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
   };
 
   const generateSignal = async () => {
-    if (!selectedAsset || !selectedExpiration || !canGenerate) return;
+    if (!marketType || !selectedAsset || !selectedExpiration || !canGenerate) return;
 
     setIsGenerating(true);
     
@@ -253,6 +271,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       });
 
       // Reset form
+      setMarketType('');
       setSelectedAsset('');
       setSelectedExpiration('');
 
@@ -300,13 +319,26 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-white/70 text-sm mb-2 block">Ativo Financeiro</label>
-              <Select value={selectedAsset} onValueChange={setSelectedAsset}>
+              <label className="text-white/70 text-sm mb-2 block">Tipo de Mercado</label>
+              <Select value={marketType} onValueChange={setMarketType}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Selecione o par de moedas" />
+                  <SelectValue placeholder="Selecione o tipo de mercado" />
                 </SelectTrigger>
                 <SelectContent>
-                  {assets.map(asset => (
+                  <SelectItem value="real">Mercado Real</SelectItem>
+                  <SelectItem value="otc">Mercado OTC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-white/70 text-sm mb-2 block">Ativo Financeiro</label>
+              <Select value={selectedAsset} onValueChange={setSelectedAsset} disabled={!marketType}>
+                <SelectTrigger className="bg-white/5 border-white/10 text-white">
+                  <SelectValue placeholder={marketType ? "Selecione o par de moedas" : "Primeiro selecione o tipo de mercado"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {getCurrentAssets().map(asset => (
                     <SelectItem key={asset} value={asset}>
                       {asset}
                     </SelectItem>
@@ -333,7 +365,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
 
             <Button
               onClick={generateSignal}
-              disabled={!selectedAsset || !selectedExpiration || !canGenerate || isGenerating}
+              disabled={!marketType || !selectedAsset || !selectedExpiration || !canGenerate || isGenerating}
               className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600"
             >
               {isGenerating ? (
