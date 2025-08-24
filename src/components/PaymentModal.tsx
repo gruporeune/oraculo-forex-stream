@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Loader2, Copy, Check, QrCode } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import QRCodeGenerator from 'qrcode';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ interface PaymentData {
 export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
@@ -50,6 +52,29 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     tangible: false // false = produto digital, true = produto físico
   });
   const { toast } = useToast();
+
+  // Generate QR Code image when payment data is available
+  useEffect(() => {
+    const generateQRCode = async () => {
+      if (paymentData?.qr_code && !qrCodeImage) {
+        try {
+          const qrCodeDataURL = await QRCodeGenerator.toDataURL(paymentData.qr_code, {
+            width: 200,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          });
+          setQrCodeImage(qrCodeDataURL);
+        } catch (error) {
+          console.error('Error generating QR Code:', error);
+        }
+      }
+    };
+
+    generateQRCode();
+  }, [paymentData?.qr_code, qrCodeImage]);
 
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -326,6 +351,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   const handleClose = () => {
     setPaymentData(null);
+    setQrCodeImage(null);
     setFormData({ 
       name: '', 
       phone: '', 
@@ -616,12 +642,13 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
               </div>
 
               {/* QR Code Image */}
-              {paymentData.qr_code_image && (
+              {qrCodeImage && (
                 <div className="text-center">
+                  <p className="text-sm text-white/80 mb-2">QR Code PIX</p>
                   <img 
-                    src={paymentData.qr_code_image} 
+                    src={qrCodeImage} 
                     alt="QR Code PIX" 
-                    className="mx-auto max-w-[200px] h-auto border border-purple-500/30 rounded"
+                    className="mx-auto max-w-[200px] h-auto border border-purple-500/30 rounded bg-white p-2"
                   />
                 </div>
               )}
