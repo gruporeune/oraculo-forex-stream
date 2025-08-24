@@ -95,6 +95,7 @@ serve(async (req) => {
     const faturefyPayload = {
       amount: amountInCents, // Integer em centavos
       description: `Plano ${plan_name.toUpperCase()} - Oráculo Trading`,
+      tangible: tangible, // Adicionar o campo tangible no payload principal
       customer: {
         name: customer_name.trim(),
         email: customer_email.toLowerCase().trim(),
