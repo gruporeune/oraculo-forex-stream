@@ -46,7 +46,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     rua: '',
     numero: '',
     complemento: '',
-    estado: 'SC' // Default para Santa Catarina
+    estado: 'SC', // Default para Santa Catarina
+    tangible: false // false = produto digital, true = produto físico
   });
   const { toast } = useToast();
 
@@ -75,13 +76,22 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   };
 
   const createPayment = async () => {
-    // Validar campos obrigatórios
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim() || 
-        !formData.cep.trim() || !formData.cidade.trim() || !formData.bairro.trim() || 
-        !formData.rua.trim() || !formData.numero.trim() || !formData.estado.trim()) {
+    // Validar campos obrigatórios básicos
+    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim()) {
       toast({
         title: "Erro",
-        description: "Todos os campos são obrigatórios",
+        description: "Nome, telefone, email e CPF são obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validar campos de endereço apenas se for produto físico
+    if (formData.tangible && (!formData.cep.trim() || !formData.cidade.trim() || !formData.bairro.trim() || 
+        !formData.rua.trim() || !formData.numero.trim() || !formData.estado.trim())) {
+      toast({
+        title: "Erro",
+        description: "Para produtos físicos, todos os campos de endereço são obrigatórios",
         variant: "destructive"
       });
       return;
@@ -181,23 +191,30 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       console.log('Plan selected:', plan.name, 'Price:', plan.price)
       console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue)
 
+      const requestBody: any = {
+        user_id: user.id,
+        plan_name: plan.name,
+        amount: amountValue,
+        customer_name: formData.name,
+        customer_email: formData.email,
+        customer_document: formData.cpf.replace(/\D/g, ''),
+        customer_phone: formData.phone.replace(/\D/g, ''),
+        tangible: formData.tangible
+      };
+
+      // Adicionar dados de endereço apenas se for produto físico
+      if (formData.tangible) {
+        requestBody.customer_cep = formData.cep.replace(/\D/g, '');
+        requestBody.customer_city = formData.cidade;
+        requestBody.customer_neighborhood = formData.bairro;
+        requestBody.customer_street = formData.rua;
+        requestBody.customer_number = formData.numero;
+        requestBody.customer_complement = formData.complemento;
+        requestBody.customer_state = formData.estado;
+      }
+
       const { data, error } = await supabase.functions.invoke('create-faturefy-payment', {
-        body: {
-          user_id: user.id,
-          plan_name: plan.name,
-          amount: amountValue,
-          customer_name: formData.name,
-          customer_email: formData.email,
-          customer_document: formData.cpf.replace(/\D/g, ''),
-          customer_phone: formData.phone.replace(/\D/g, ''),
-          customer_cep: formData.cep.replace(/\D/g, ''),
-          customer_city: formData.cidade,
-          customer_neighborhood: formData.bairro,
-          customer_street: formData.rua,
-          customer_number: formData.numero,
-          customer_complement: formData.complemento,
-          customer_state: formData.estado
-        }
+        body: requestBody
       });
 
       if (error) {
@@ -320,7 +337,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       rua: '', 
       numero: '', 
       complemento: '', 
-      estado: 'SC' 
+      estado: 'SC',
+      tangible: false
     });
     setIsLoading(false);
     setIsCopied(false);
@@ -362,6 +380,25 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
               </h4>
               
               <div className="grid grid-cols-1 gap-4">
+                {/* Tipo de Produto */}
+                <div>
+                  <label className="text-sm font-medium text-white">Tipo de Produto *</label>
+                  <select
+                    value={formData.tangible ? 'fisico' : 'digital'}
+                    onChange={(e) => setFormData({...formData, tangible: e.target.value === 'fisico'})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                  >
+                    <option value="digital">Produto Digital (Acesso Online)</option>
+                    <option value="fisico">Produto Físico (Entrega no Endereço)</option>
+                  </select>
+                  <p className="text-xs text-white/60 mt-1">
+                    {formData.tangible ? 
+                      'Será necessário informar endereço para entrega' : 
+                      'Apenas dados pessoais são necessários'
+                    }
+                  </p>
+                </div>
+
                 <div>
                   <label className="text-sm font-medium text-white">Nome Completo *</label>
                   <input
@@ -408,9 +445,10 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                   />
                 </div>
 
-                {/* Seção de Endereço */}
-                <div className="border-t border-purple-500/30 pt-4">
-                  <h5 className="font-medium text-sm text-white/90 mb-3">Dados de Endereço *</h5>
+                {/* Seção de Endereço - Apenas para produtos físicos */}
+                {formData.tangible && (
+                  <div className="border-t border-purple-500/30 pt-4">
+                    <h5 className="font-medium text-sm text-white/90 mb-3">Dados de Endereço para Entrega *</h5>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -517,7 +555,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                       placeholder="Apto, casa, etc. (opcional)"
                     />
                   </div>
-                </div>
+                  </div>
+                )}
               </div>
 
               <p className="text-xs text-white/60">

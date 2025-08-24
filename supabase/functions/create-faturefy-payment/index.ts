@@ -21,6 +21,7 @@ serve(async (req) => {
       customer_email, 
       customer_document, 
       customer_phone,
+      tangible = false,
       customer_cep = "88000000",
       customer_city = "Florianópolis",
       customer_neighborhood = "Centro",
@@ -98,17 +99,21 @@ serve(async (req) => {
         name: customer_name.trim(),
         email: customer_email.toLowerCase().trim(),
         document: cleanDocument, // CPF válido
-        phone: formattedPhone, // Sem +55
-        cep: customer_cep.replace(/\D/g, ''),
-        cidade: customer_city.trim(),
-        bairro: customer_neighborhood.trim(),
-        rua: customer_street.trim(),
-        numero: customer_number.toString(),
-        complemento: customer_complement || "",
-        estado: customer_state.toUpperCase().trim()
+        phone: formattedPhone // Sem +55
       },
       id_solicitacao: "auto" // Sistema gera automaticamente
     };
+
+    // Adicionar dados de endereço apenas se for produto físico (tangible = true)
+    if (tangible) {
+      faturefyPayload.customer.cep = customer_cep.replace(/\D/g, '');
+      faturefyPayload.customer.cidade = customer_city.trim();
+      faturefyPayload.customer.bairro = customer_neighborhood.trim();
+      faturefyPayload.customer.rua = customer_street.trim();
+      faturefyPayload.customer.numero = customer_number.toString();
+      faturefyPayload.customer.complemento = customer_complement || "";
+      faturefyPayload.customer.estado = customer_state.toUpperCase().trim();
+    }
 
     console.log('Creating Faturefy payment with payload:', JSON.stringify(faturefyPayload, null, 2));
     
