@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { DashboardCards } from '@/components/DashboardCards';
 import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 import { useToast } from '@/hooks/use-toast';
 import { Tilt } from '@/components/ui/tilt';
@@ -19,7 +18,6 @@ interface DashboardHomePageProps {
 export default function DashboardHomePage({ user, profile, onProfileUpdate }: DashboardHomePageProps) {
   const [userPlans, setUserPlans] = useState<any[]>([]);
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   useEffect(() => {
     if (user?.id) {
@@ -79,10 +77,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
     >
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">
-          {t('dashboard.title')}
+          Bem-vindo ao ORÁCULO! 🎉
         </h2>
         <p className="text-white/70">
-          {t('dashboard.subtitle')}
+          Sua jornada para operar com inteligência artificial começa aqui.
         </p>
       </div>
 

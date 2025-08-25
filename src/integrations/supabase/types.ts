@@ -124,11 +124,13 @@ export type Database = {
       }
       payment_transactions: {
         Row: {
+          abacate_payment_id: string | null
           amount: number
           created_at: string
           external_id: string
           id: string
           paid_at: string | null
+          paylatam_transaction_id: string | null
           payment_provider: string | null
           plan_name: string
           qr_code: string | null
@@ -139,11 +141,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          abacate_payment_id?: string | null
           amount: number
           created_at?: string
           external_id: string
           id?: string
           paid_at?: string | null
+          paylatam_transaction_id?: string | null
           payment_provider?: string | null
           plan_name: string
           qr_code?: string | null
@@ -154,11 +158,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          abacate_payment_id?: string | null
           amount?: number
           created_at?: string
           external_id?: string
           id?: string
           paid_at?: string | null
+          paylatam_transaction_id?: string | null
           payment_provider?: string | null
           plan_name?: string
           qr_code?: string | null
@@ -499,7 +505,7 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
-          pix_key: string | null
+          pix_key: string
           pix_key_type: string | null
           processed_at: string | null
           processed_by: string | null
@@ -517,7 +523,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          pix_key?: string | null
+          pix_key: string
           pix_key_type?: string | null
           processed_at?: string | null
           processed_by?: string | null
@@ -535,7 +541,7 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
-          pix_key?: string | null
+          pix_key?: string
           pix_key_type?: string | null
           processed_at?: string | null
           processed_by?: string | null

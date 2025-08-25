@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
-import { useLanguage } from "@/contexts/LanguageContext"
 
 import {
   Sidebar,
@@ -16,22 +15,21 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+const items = [
+  { title: "Dashboard", url: "/dashboard", icon: Home },
+  { title: "Perfil", url: "/dashboard/profile", icon: User },
+  { title: "Rede", url: "/dashboard/network", icon: Network },
+  { title: "Sinais", url: "/dashboard/signals", icon: TrendingUp },
+  { title: "Área de Membros", url: "/dashboard/members", icon: Users },
+  { title: "Materiais Extras", url: "/dashboard/materials", icon: Package },
+  { title: "Planos", url: "/dashboard/plans", icon: CreditCard },
+  { title: "Saques", url: "/dashboard/withdrawals", icon: DollarSign },
+]
+
 export function AppSidebar() {
   const { open, setOpen } = useSidebar()
   const location = useLocation()
-  const { t } = useLanguage()
   const currentPath = location.pathname
-
-  const items = [
-    { title: t('navigation.dashboard'), url: "/dashboard", icon: Home },
-    { title: t('navigation.profile'), url: "/dashboard/profile", icon: User },
-    { title: t('navigation.network'), url: "/dashboard/network", icon: Network },
-    { title: t('navigation.signals'), url: "/dashboard/signals", icon: TrendingUp },
-    { title: t('navigation.members'), url: "/dashboard/members", icon: Users },
-    { title: t('navigation.materials'), url: "/dashboard/materials", icon: Package },
-    { title: t('navigation.plans'), url: "/dashboard/plans", icon: CreditCard },
-    { title: t('navigation.withdrawals'), url: "/dashboard/withdrawals", icon: DollarSign },
-  ]
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
@@ -44,7 +42,7 @@ export function AppSidebar() {
     >
       <SidebarContent className="bg-gradient-to-b from-purple-900 via-black to-orange-600 backdrop-blur-xl border-r border-purple-500/20">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-purple-200/80">{t('navigation.dashboard')}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
 
           <SidebarGroupContent>
             <SidebarMenu>

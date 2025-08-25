@@ -9,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import NetworkGraph from '@/components/NetworkGraph';
 import ReferralsList from '@/components/ReferralsList';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface NetworkPageProps {
   user: any;
@@ -40,7 +39,6 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
   const [indirectReferrals, setIndirectReferrals] = useState<Referral[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-  const { t } = useLanguage();
 
   const referralLink = `${window.location.origin}/register?ref=${profile?.referral_code}`;
 
@@ -306,8 +304,8 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
   const copyReferralLink = () => {
     navigator.clipboard.writeText(referralLink);
     toast({
-      title: t('network.linkCopied'),
-      description: t('network.linkCopiedDescription')
+      title: "Link copiado!",
+      description: "Seu link de indicação foi copiado para a área de transferência"
     });
   };
 
@@ -339,8 +337,8 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">{t('network.title')}</h2>
-        <p className="text-white/70">{t('network.subtitle')}</p>
+        <h2 className="text-3xl font-bold text-white mb-2">Rede de Indicações</h2>
+        <p className="text-white/70">Gerencie sua rede e acompanhe suas comissões</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -349,12 +347,12 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
               <Users className="w-4 h-4" />
-              {t('network.totalReferrals')}
+              Total de Indicados
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{referrals.length}</div>
-            <p className="text-xs text-white/70">{t('network.directReferrals')}</p>
+            <p className="text-xs text-white/70">Indicados diretos (Nível 1)</p>
           </CardContent>
         </Card>
 
@@ -362,12 +360,12 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              {t('network.totalCommissions')}
+              Comissões Totais
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">{formatCurrency(totalCommissions)}</div>
-            <p className="text-xs text-white/70">{t('network.accumulatedEarnings')}</p>
+            <p className="text-xs text-white/70">Ganhos acumulados</p>
           </CardContent>
         </Card>
 
@@ -375,14 +373,14 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
               <DollarSign className="w-4 h-4" />
-              {t('network.dailyCommissions')}
+              Comissões Hoje
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-white">
               {formatCurrency(profile?.daily_referral_commissions || 0)}
             </div>
-            <p className="text-xs text-white/70">{t('network.dailyEarnings')}</p>
+            <p className="text-xs text-white/70">Ganhos do dia</p>
           </CardContent>
         </Card>
       </div>
@@ -395,7 +393,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Link className="w-5 h-5" />
-            {t('network.referralLink')}
+            Seu Link de Indicação
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -407,11 +405,11 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
             />
             <Button onClick={copyReferralLink} className="bg-purple-600 hover:bg-purple-700">
               <Copy className="w-4 h-4 mr-2" />
-              {t('common.copy')}
+              Copiar
             </Button>
           </div>
           <p className="text-white/70 text-sm mt-2">
-            {t('network.commissionLevels')}
+            Compartilhe este link e ganhe comissões de até 3 níveis: <strong>10%</strong> no 1º nível, <strong>3%</strong> no 2º nível e <strong>2%</strong> no 3º nível.
           </p>
         </CardContent>
       </Card>
@@ -421,20 +419,20 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Users className="w-5 h-5" />
-            {t('network.directReferralsList')}
+            Seus Indicados Diretos (Nível 1)
           </CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <div className="text-center py-8">
               <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <p className="text-white/70">{t('network.loadingReferrals')}</p>
+              <p className="text-white/70">Carregando indicados...</p>
             </div>
           ) : referrals.length === 0 ? (
             <div className="text-center py-8">
               <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-              <p className="text-white/70 mb-2">{t('network.noDirectReferrals')}</p>
-              <p className="text-white/50 text-sm">{t('network.shareLink')}</p>
+              <p className="text-white/70 mb-2">Nenhum indicado direto ainda</p>
+              <p className="text-white/50 text-sm">Compartilhe seu link para começar a ganhar comissões</p>
             </div>
           ) : (
             <div className="space-y-4">

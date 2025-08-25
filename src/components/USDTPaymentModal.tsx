@@ -33,10 +33,6 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
   // Get plan amount based on plan name
   const getPlanAmount = () => {
     switch (plan.name.toLowerCase()) {
-      case 'partner':
-        return 33;
-      case 'master':
-        return 100;
       case 'premium':
         return 458;
       case 'platinum':
@@ -188,7 +184,7 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
             </motion.div>
 
             {/* Important Notice */}
-            {(plan.name.toLowerCase() === 'premium' || plan.name.toLowerCase() === 'platinum' || plan.name.toLowerCase() === 'partner' || plan.name.toLowerCase() === 'master') && (
+            {(plan.name.toLowerCase() === 'premium' || plan.name.toLowerCase() === 'platinum') && (
               <motion.div 
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}

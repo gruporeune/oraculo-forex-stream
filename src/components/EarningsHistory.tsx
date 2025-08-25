@@ -3,7 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, TrendingUp, Clock } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EarningsRecord {
   id: string;
@@ -22,7 +21,6 @@ interface EarningsHistoryProps {
 export function EarningsHistory({ userId }: EarningsHistoryProps) {
   const [earningsHistory, setEarningsHistory] = useState<EarningsRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t, language } = useLanguage();
 
   useEffect(() => {
     const loadEarningsHistory = async () => {
@@ -60,8 +58,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
   const formatDate = (dateString: string) => {
     // Convert to Brazil timezone (UTC-3)
     const date = new Date(dateString + 'T00:00:00-03:00');
-    const locale = language === 'en' ? 'en-US' : language === 'es' ? 'es-ES' : 'pt-BR';
-    return date.toLocaleDateString(locale, {
+    return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -71,8 +68,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
 
   const formatTime = (dateTimeString: string) => {
     const date = new Date(dateTimeString);
-    const locale = language === 'en' ? 'en-US' : language === 'es' ? 'es-ES' : 'pt-BR';
-    return date.toLocaleTimeString(locale, {
+    return date.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
       timeZone: 'America/Sao_Paulo'
@@ -89,7 +85,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">
             <Calendar className="w-5 h-5" />
-            {t('earnings.title')}
+            Histórico dos Ganhos
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -106,11 +102,11 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Calendar className="w-5 h-5" />
-          {t('earnings.title')}
+          Histórico dos Ganhos
         </CardTitle>
         {earningsHistory.length > 0 && (
           <p className="text-white/70 text-sm">
-            {t('common.totalAccumulated')}: R$ {getTotalEarnings().toFixed(2)} | {t('common.last30Days')}
+            Total acumulado: R$ {getTotalEarnings().toFixed(2)} | Últimos 30 dias
           </p>
         )}
       </CardHeader>
@@ -120,9 +116,9 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
             <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-600 to-gray-500 rounded-full flex items-center justify-center">
               <Calendar className="w-8 h-8 text-white" />
             </div>
-            <p className="text-white/70">{t('common.noHistoryYet')}</p>
+            <p className="text-white/70">Nenhum histórico de ganhos ainda</p>
             <p className="text-white/50 text-sm mt-2">
-              {t('common.earningsWillAppear')}
+              Seus ganhos diários aparecerão aqui após as operações
             </p>
           </div>
         ) : (
@@ -151,7 +147,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                 {/* Ganhos por plano */}
                 {record.plan_earnings && Object.keys(record.plan_earnings).length > 0 && (
                   <div className="mb-3">
-                    <span className="text-white/70 text-sm font-medium mb-2 block">{t('common.earnsByPlan')}:</span>
+                    <span className="text-white/70 text-sm font-medium mb-2 block">Ganhos por Plano:</span>
                     <div className="grid grid-cols-3 gap-2">
                       {Object.entries(record.plan_earnings).map(([planName, earnings]) => (
                         <div key={planName} className="bg-white/5 rounded p-2 text-center">
@@ -168,7 +164,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                 <div className="grid grid-cols-2 gap-4">
                   {record.total_earnings > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70 text-sm">{t('common.totalProfit')}:</span>
+                      <span className="text-white/70 text-sm">Lucro Total:</span>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3 text-green-400" />
                         <span className="text-green-400 font-medium">
@@ -180,7 +176,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                   
                   {record.total_commissions > 0 && (
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70 text-sm">{t('common.commissions')}:</span>
+                      <span className="text-white/70 text-sm">Comissões:</span>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3 text-blue-400" />
                         <span className="text-blue-400 font-medium">
@@ -194,7 +190,7 @@ export function EarningsHistory({ userId }: EarningsHistoryProps) {
                 {(record.total_earnings > 0 || record.total_commissions > 0) && (
                   <div className="mt-2 pt-2 border-t border-white/10">
                     <div className="flex items-center justify-between">
-                      <span className="text-white/70 text-sm font-medium">{t('common.dailyTotal')}:</span>
+                      <span className="text-white/70 text-sm font-medium">Total do Dia:</span>
                       <span className="text-white font-bold">
                         R$ {(record.total_earnings + record.total_commissions).toFixed(2)}
                       </span>
