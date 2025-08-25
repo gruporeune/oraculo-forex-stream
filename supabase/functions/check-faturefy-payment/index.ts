@@ -82,8 +82,8 @@ serve(async (req) => {
       });
     }
 
-    // Check if payment is approved (status: "aprovado")
-    if (statusData.status === 'aprovado') {
+    // Check if payment is approved - Faturefy uses different status values
+    if (statusData.status === 'aprovado' || statusData.status === 'paid' || statusData.status === 'PAID' || statusData.status === 'completed') {
       console.log('Payment approved, activating plan...');
 
       // Update transaction status
