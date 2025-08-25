@@ -39,17 +39,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const [isPaymentConfirmed, setIsPaymentConfirmed] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    phone: '',
     email: '',
-    cpf: '',
-    cep: '',
-    cidade: '',
-    bairro: '',
-    rua: '',
-    numero: '',
-    complemento: '',
-    estado: 'SC', // Default para Santa Catarina
-    tangible: false // false = produto digital, true = produto físico
+    cpf: ''
   });
   const { toast } = useToast();
 
@@ -102,21 +93,10 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   const createPayment = async () => {
     // Validar campos obrigatórios básicos
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.email.trim() || !formData.cpf.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.cpf.trim()) {
       toast({
         title: "Erro",
-        description: "Nome, telefone, email e CPF são obrigatórios",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validar campos de endereço apenas se for produto físico
-    if (formData.tangible && (!formData.cep.trim() || !formData.cidade.trim() || !formData.bairro.trim() || 
-        !formData.rua.trim() || !formData.numero.trim() || !formData.estado.trim())) {
-      toast({
-        title: "Erro",
-        description: "Para produtos físicos, todos os campos de endereço são obrigatórios",
+        description: "Nome, email e CPF são obrigatórios",
         variant: "destructive"
       });
       return;
@@ -139,17 +119,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       toast({
         title: "Erro",
         description: "CPF deve ter 11 dígitos",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Validar formato do telefone
-    const phoneNumbers = formData.phone.replace(/\D/g, '');
-    if (phoneNumbers.length < 10) {
-      toast({
-        title: "Erro",
-        description: "Telefone inválido",
         variant: "destructive"
       });
       return;
@@ -216,29 +185,14 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       console.log('Plan selected:', plan.name, 'Price:', plan.price)
       console.log('Processing payment for plan:', plan.name, 'with amount:', amountValue)
 
-      const requestBody: any = {
-        user_id: user.id,
-        plan_name: plan.name,
-        amount: amountValue,
-        customer_name: formData.name,
-        customer_email: formData.email,
-        customer_document: formData.cpf.replace(/\D/g, ''),
-        customer_phone: formData.phone.replace(/\D/g, ''),
-        tangible: formData.tangible
+      const requestBody = {
+        plan: plan.name.toLowerCase(),
+        userEmail: formData.email,
+        userName: formData.name,
+        userDocument: formData.cpf.replace(/\D/g, '')
       };
 
-      // Adicionar dados de endereço apenas se for produto físico
-      if (formData.tangible) {
-        requestBody.customer_cep = formData.cep.replace(/\D/g, '');
-        requestBody.customer_city = formData.cidade;
-        requestBody.customer_neighborhood = formData.bairro;
-        requestBody.customer_street = formData.rua;
-        requestBody.customer_number = formData.numero;
-        requestBody.customer_complement = formData.complemento;
-        requestBody.customer_state = formData.estado;
-      }
-
-      const { data, error } = await supabase.functions.invoke('create-faturefy-payment', {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
         body: requestBody
       });
 
@@ -253,15 +207,15 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
       console.log('Payment created successfully:', data);
 
-      // Use the data directly from Faturefy
+      // Use the data directly from PayLatam
       const adaptedData = {
         success: data.success,
-        transaction_id: data.transaction_id,
-        qr_code: data.qr_code,
-        qr_code_image: data.qr_code_image,
-        amount: data.amount,
-        expires_at: data.expires_at,
-        request_number: data.request_number
+        transaction_id: data.data.transaction_id,
+        qr_code: data.data.qr_code,
+        qr_code_image: data.data.qr_code_image,
+        amount: data.data.amount,
+        expires_at: data.data.expires_at,
+        request_number: data.data.external_id
       };
 
       setPaymentData(adaptedData);
@@ -302,28 +256,28 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Call our edge function to check payment status via Faturefy API
-      const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
-        body: {
-          payment_id: paymentData.request_number, // Use request_number as payment_id
-          user_id: user.id
-        }
-      });
+      // Check payment status in database
+      const { data: transaction, error } = await supabase
+        .from('payment_transactions')
+        .select('status')
+        .eq('external_id', paymentData.request_number)
+        .eq('user_id', user.id)
+        .single();
 
       if (error) {
         console.error('Error checking payment:', error);
         throw new Error('Falha ao verificar pagamento');
       }
 
-      console.log('Payment status check result:', data);
+      console.log('Payment status check result:', transaction);
 
-      if (data?.status === 'paid') {
+      if (transaction?.status === 'paid') {
         setIsPaymentConfirmed(true);
         toast({
           title: "Pagamento confirmado!",
           description: "Seu plano foi ativado com sucesso!",
         });
-      } else if (data?.status === 'failed') {
+      } else if (transaction?.status === 'failed') {
         toast({
           title: "Pagamento falhou",
           description: "O pagamento não foi processado. Tente novamente.",
@@ -354,17 +308,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     setQrCodeImage(null);
     setFormData({ 
       name: '', 
-      phone: '', 
       email: '', 
-      cpf: '', 
-      cep: '', 
-      cidade: '', 
-      bairro: '', 
-      rua: '', 
-      numero: '', 
-      complemento: '', 
-      estado: 'SC',
-      tangible: false
+      cpf: ''
     });
     setIsLoading(false);
     setIsCopied(false);
@@ -406,25 +351,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
               </h4>
               
               <div className="grid grid-cols-1 gap-4">
-                {/* Tipo de Produto */}
-                <div>
-                  <label className="text-sm font-medium text-white">Tipo de Produto *</label>
-                  <select
-                    value={formData.tangible ? 'fisico' : 'digital'}
-                    onChange={(e) => setFormData({...formData, tangible: e.target.value === 'fisico'})}
-                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                  >
-                    <option value="digital">Produto Digital (Acesso Online)</option>
-                    <option value="fisico">Produto Físico (Entrega no Endereço)</option>
-                  </select>
-                  <p className="text-xs text-white/60 mt-1">
-                    {formData.tangible ? 
-                      'Será necessário informar endereço para entrega' : 
-                      'Apenas dados pessoais são necessários'
-                    }
-                  </p>
-                </div>
-
                 <div>
                   <label className="text-sm font-medium text-white">Nome Completo *</label>
                   <input
@@ -448,18 +374,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-white">Telefone *</label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({...formData, phone: formatPhone(e.target.value)})}
-                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                    placeholder="(11) 99999-9999"
-                    maxLength={15}
-                  />
-                </div>
-
-                <div>
                   <label className="text-sm font-medium text-white">CPF *</label>
                   <input
                     type="text"
@@ -470,119 +384,6 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                     maxLength={14}
                   />
                 </div>
-
-                {/* Seção de Endereço - Apenas para produtos físicos */}
-                {formData.tangible && (
-                  <div className="border-t border-purple-500/30 pt-4">
-                    <h5 className="font-medium text-sm text-white/90 mb-3">Dados de Endereço para Entrega *</h5>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-sm font-medium text-white">CEP *</label>
-                      <input
-                        type="text"
-                        value={formData.cep}
-                        onChange={(e) => setFormData({...formData, cep: formatCEP(e.target.value)})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                        placeholder="00000-000"
-                        maxLength={9}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-white">Estado *</label>
-                      <select
-                        value={formData.estado}
-                        onChange={(e) => setFormData({...formData, estado: e.target.value})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                      >
-                        <option value="AC">AC</option>
-                        <option value="AL">AL</option>
-                        <option value="AP">AP</option>
-                        <option value="AM">AM</option>
-                        <option value="BA">BA</option>
-                        <option value="CE">CE</option>
-                        <option value="DF">DF</option>
-                        <option value="ES">ES</option>
-                        <option value="GO">GO</option>
-                        <option value="MA">MA</option>
-                        <option value="MT">MT</option>
-                        <option value="MS">MS</option>
-                        <option value="MG">MG</option>
-                        <option value="PA">PA</option>
-                        <option value="PB">PB</option>
-                        <option value="PR">PR</option>
-                        <option value="PE">PE</option>
-                        <option value="PI">PI</option>
-                        <option value="RJ">RJ</option>
-                        <option value="RN">RN</option>
-                        <option value="RS">RS</option>
-                        <option value="RO">RO</option>
-                        <option value="RR">RR</option>
-                        <option value="SC">SC</option>
-                        <option value="SP">SP</option>
-                        <option value="SE">SE</option>
-                        <option value="TO">TO</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-white">Cidade *</label>
-                      <input
-                        type="text"
-                        value={formData.cidade}
-                        onChange={(e) => setFormData({...formData, cidade: e.target.value})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                        placeholder="Sua cidade"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-white">Bairro *</label>
-                      <input
-                        type="text"
-                        value={formData.bairro}
-                        onChange={(e) => setFormData({...formData, bairro: e.target.value})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                        placeholder="Seu bairro"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-white">Rua *</label>
-                      <input
-                        type="text"
-                        value={formData.rua}
-                        onChange={(e) => setFormData({...formData, rua: e.target.value})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                        placeholder="Nome da rua"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium text-white">Número *</label>
-                      <input
-                        type="text"
-                        value={formData.numero}
-                        onChange={(e) => setFormData({...formData, numero: e.target.value})}
-                        className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                        placeholder="123"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="text-sm font-medium text-white">Complemento</label>
-                    <input
-                      type="text"
-                      value={formData.complemento}
-                      onChange={(e) => setFormData({...formData, complemento: e.target.value})}
-                      className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
-                      placeholder="Apto, casa, etc. (opcional)"
-                    />
-                  </div>
-                  </div>
-                )}
               </div>
 
               <p className="text-xs text-white/60">

@@ -1,12 +1,9 @@
 project_id = "nzxidhlktjpzkxhofswx"
 
-[functions.create-faturefy-payment]
+[functions.create-payment]
 verify_jwt = true
 
-[functions.check-faturefy-payment]
-verify_jwt = true
-
-[functions.faturefy-webhook]
+[functions.payment-webhook]
 verify_jwt = false
 
 [functions.create-secretpay-withdrawal]
