@@ -194,12 +194,18 @@ export default function PlansPage() {
                     {plan.name}
                   </CardTitle>
                   <div className="space-y-1">
-                    <div className="text-3xl font-bold text-white">
-                      {plan.price}
-                    </div>
-                    {plan.priceUSD && (
-                      <div className="text-lg font-semibold text-blue-400">
-                        {plan.priceUSD}
+                    {plan.priceUSD ? (
+                      <>
+                        <div className="text-3xl font-bold text-white">
+                          {plan.priceUSD}
+                        </div>
+                        <div className="text-lg font-semibold text-yellow-400">
+                          {plan.price}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="text-3xl font-bold text-white">
+                        {plan.price}
                       </div>
                     )}
                     {plan.priceInReals && (
