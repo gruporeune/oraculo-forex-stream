@@ -76,6 +76,24 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     generateQRCode();
   }, [paymentData?.qr_code, qrCodeImage]);
 
+  // Auto-check payment status every 3 seconds
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (paymentData?.request_number && !isPaymentConfirmed) {
+      intervalId = setInterval(() => {
+        console.log('Auto-checking payment status...');
+        checkPaymentStatus();
+      }, 3000); // Check every 3 seconds
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [paymentData?.request_number, isPaymentConfirmed]);
+
   const formatCPF = (value: string) => {
     const numbers = value.replace(/\D/g, '');
     if (numbers.length <= 11) {
