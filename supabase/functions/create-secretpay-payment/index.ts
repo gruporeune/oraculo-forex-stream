@@ -126,7 +126,7 @@ serve(async (req) => {
           plan_name: plan,
           amount: amount,
           status: 'pending',
-          payment_provider: 'secretpay',
+          payment_provider: 'secretpay', 
           qr_code: secretPayData.pix?.qrCodeImage || secretPayData.pixQRCode || secretPayData.qrCode,
           qr_code_text: secretPayData.pix?.qrCode || secretPayData.pixQRCode || secretPayData.qrCode,
           transaction_data: secretPayData

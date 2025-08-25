@@ -60,6 +60,7 @@ serve(async (req) => {
       .from('payment_transactions')
       .select('*')
       .eq('external_id', externalRef)
+      .eq('payment_provider', 'secretpay')
       .single()
 
     if (fetchError || !transaction) {
