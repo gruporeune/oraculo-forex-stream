@@ -11,17 +11,28 @@ interface PaymentRequest {
   userEmail: string
   userName: string
   userDocument: string
+  userPhone?: string
 }
 
-interface PayLatamResponse {
-  success: boolean
-  data?: {
-    qr_code: string
-    qr_code_text: string
-    transaction_id: string
-    external_id: string
+interface SecretPayResponse {
+  id: string
+  status: string
+  amount: number
+  pix?: {
+    qrcode: string
+    end2EndId?: string
+    receiptUrl?: string
+    expirationDate: string
   }
-  error?: string
+  customer: {
+    name: string
+    email: string
+    document: {
+      type: string
+      number: string
+    }
+  }
+  externalRef: string
 }
 
 serve(async (req) => {
@@ -32,68 +43,27 @@ serve(async (req) => {
 
   try {
     // Get environment variables
-    const paylatamClientId = Deno.env.get('PAYLATAM_CLIENT_ID')
-    const paylatamClientSecret = Deno.env.get('PAYLATAM_CLIENT_SECRET')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const secretpayPrivateKey = Deno.env.get('SECRETPAY_PRIVATE_KEY')!
+    const secretpayPublicKey = Deno.env.get('SECRETPAY_PUBLIC_KEY')!
 
-    console.log('Environment check:', {
-      hasPaylatamClientId: !!paylatamClientId,
-      hasPaylatamClientSecret: !!paylatamClientSecret,
-      clientIdLength: paylatamClientId ? paylatamClientId.length : 0,
-      clientSecretLength: paylatamClientSecret ? paylatamClientSecret.length : 0,
-      clientIdPrefix: paylatamClientId ? paylatamClientId.substring(0, 8) + '...' : 'not found',
-      clientSecretPrefix: paylatamClientSecret ? paylatamClientSecret.substring(0, 4) + '...' : 'not found'
+    console.log('SecretPay credentials check:', {
+      hasPublicKey: !!secretpayPublicKey,
+      hasPrivateKey: !!secretpayPrivateKey,
+      publicKeyLength: secretpayPublicKey ? secretpayPublicKey.length : 0,
+      privateKeyLength: secretpayPrivateKey ? secretpayPrivateKey.length : 0,
+      publicKeyPreview: secretpayPublicKey ? secretpayPublicKey.substring(0, 8) + '...' : 'not found',
+      privateKeyPreview: secretpayPrivateKey ? secretpayPrivateKey.substring(0, 8) + '...' : 'not found'
     })
-
-    if (!paylatamClientId) {
-      console.error('PayLatam Client ID not configured')
-      throw new Error('PayLatam Client ID not configured')
-    }
-
-    if (!paylatamClientSecret) {
-      console.error('PayLatam Client Secret not configured')
-      throw new Error('PayLatam Client Secret not configured')
-    }
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // First, generate access token with Basic Auth
-    const credentials = `${paylatamClientId}:${paylatamClientSecret}`
-    const encodedCredentials = btoa(credentials)
-    
-    console.log('Step 1: Generating access token...')
-    const tokenResponse = await fetch('https://api.paylatambr.com/oauth/token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Basic ${encodedCredentials}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: 'grant_type=client_credentials'
-    })
-    
-    if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text()
-      console.error('Token generation failed:', {
-        status: tokenResponse.status,
-        statusText: tokenResponse.statusText,
-        errorText: errorText
-      })
-      throw new Error(`Token generation failed: ${tokenResponse.status} - ${errorText}`)
-    }
-    
-    const tokenData = await tokenResponse.json()
-    const accessToken = tokenData.access_token
-    
-    console.log('Access token generated successfully:', {
-      hasToken: !!accessToken,
-      tokenType: tokenData.token_type,
-      expiresIn: tokenData.expires_in
-    })
-
     // Get request data
-    const { plan, userEmail, userName, userDocument }: PaymentRequest = await req.json()
+    const { plan, userEmail, userName, userDocument, userPhone }: PaymentRequest = await req.json()
+    
+    console.log('Creating SecretPay payment:', { plan, userEmail, userName })
 
     // Define plan prices
     const planPrices: Record<string, number> = {
@@ -108,119 +78,139 @@ serve(async (req) => {
       throw new Error('Invalid plan selected')
     }
 
-    // Generate unique external ID
-    const externalId = `${plan}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-
-    // Prepare PayLatam payload (without client_id in body)
-    const paylatamPayload = {
-      amount: amount,
-      external_id: externalId,
-      payerQuestion: `Pagamento do plano ${plan.toUpperCase()} - BullTec`,
-      payer: {
-        name: userName,
-        document: userDocument,
-        email: userEmail
-      },
-      postbackUrl: `${supabaseUrl}/functions/v1/payment-webhook`
+    // Get user by email
+    const { data: user, error: userError } = await supabase.auth.admin.getUserByEmail(userEmail)
+    if (userError || !user?.user) {
+      console.error('Error getting user:', userError)
+      throw new Error('User not found')
     }
 
-    console.log('Step 2: Creating PayLatam PIX QR Code...', {
-      amount,
-      plan,
-      externalId,
-      userEmail,
-      payloadKeys: Object.keys(paylatamPayload)
-    })
+    // Generate unique external reference
+    const externalRef = `bulltec_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    
+    // Convert amount to centavos (SecretPay expects amount in cents)
+    const amountInCents = Math.round(amount * 100)
+    console.log('Amount in cents calculated:', amountInCents)
+    
+    // Validate CPF format (11 digits)
+    const cpfNumbers = userDocument.replace(/\D/g, '')
+    if (cpfNumbers.length !== 11) {
+      console.error('Invalid CPF length:', cpfNumbers.length)
+      throw new Error('Invalid CPF format')
+    }
+    
+    // Format phone number
+    let phoneNumber = userPhone?.replace(/\D/g, '') || ''
+    if (phoneNumber.length < 10) {
+      phoneNumber = '11999999999' // Default phone
+    } else if (phoneNumber.length === 10) {
+      phoneNumber = '55' + phoneNumber
+    } else if (phoneNumber.length === 11 && !phoneNumber.startsWith('55')) {
+      phoneNumber = '55' + phoneNumber
+    }
 
-    // Call PayLatam API with Bearer token
-    const paylatamResponse = await fetch('https://api.paylatambr.com/v2/pix/qrcode', {
+    // Prepare SecretPay payload
+    const secretpayPayload = {
+      amount: amountInCents,
+      paymentMethod: "pix",
+      pix: {
+        expiresIn: 3600
+      },
+      items: [
+        {
+          title: `Plano ${plan.toUpperCase()} - BullTec`,
+          unitPrice: amountInCents,
+          quantity: 1,
+          tangible: false
+        }
+      ],
+      customer: {
+        name: userName,
+        email: userEmail,
+        document: userDocument,
+        phone: phoneNumber
+      },
+      postbackUrl: `${supabaseUrl}/functions/v1/secretpay-webhook`,
+      externalRef: externalRef,
+      metadata: `Plano ${plan} - Usuario ${user.user.id}`
+    }
+
+    console.log('SecretPay payload:', JSON.stringify(secretpayPayload, null, 2))
+
+    // Create Basic Auth header
+    const credentials = btoa(`${secretpayPublicKey}:${secretpayPrivateKey}`)
+    
+    // Call SecretPay API
+    const secretpayResponse = await fetch('https://api.secretpay.com.br/v1/transactions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Basic ${credentials}`,
+        'Accept': 'application/json'
       },
-      body: JSON.stringify(paylatamPayload)
+      body: JSON.stringify(secretpayPayload)
     })
 
-    console.log('PayLatam API call completed:', {
-      status: paylatamResponse.status,
-      statusText: paylatamResponse.statusText,
-      ok: paylatamResponse.ok
-    })
+    if (!secretpayResponse.ok) {
+      const errorText = await secretpayResponse.text()
+      console.error('SecretPay API error:', secretpayResponse.status, errorText)
+      throw new Error(`Erro na API SecretPay: ${secretpayResponse.status}`)
+    }
 
-    console.log('PayLatam response status:', paylatamResponse.status)
+    const secretpayData: SecretPayResponse = await secretpayResponse.json()
+    console.log('SecretPay response:', secretpayData)
 
-    if (!paylatamResponse.ok) {
-      const errorText = await paylatamResponse.text()
-      console.error('PayLatam API error:', {
-        status: paylatamResponse.status,
-        statusText: paylatamResponse.statusText,
-        errorText: errorText
+    // Store payment transaction in Supabase
+    const { error: insertError } = await supabase
+      .from('payment_transactions')
+      .insert({
+        external_id: externalRef,
+        user_id: user.user.id,
+        plan_name: plan,
+        amount: amount,
+        status: 'pending',
+        payment_provider: 'secretpay',
+        transaction_data: secretpayData,
+        created_at: new Date().toISOString()
       })
-      throw new Error(`PayLatam API error: ${paylatamResponse.status} - ${errorText}`)
+
+    if (insertError) {
+      console.error('Error storing payment transaction:', insertError)
+      throw new Error('Error storing payment transaction')
     }
 
-    const paylatamData = await paylatamResponse.json()
-    console.log('PayLatam response data:', paylatamData)
+    // Calculate expiration time (1 hour from now)
+    const expirationTime = new Date()
+    expirationTime.setHours(expirationTime.getHours() + 1)
 
-    // Store payment record in database for tracking
-    const { data: user, error: userError } = await supabase.auth.admin.getUserByEmail(userEmail)
+    // Extract PIX data from SecretPay response
+    const pixCode = secretpayData.pix?.qrcode || ''
     
-    if (userError) {
-      console.error('Error getting user:', userError)
-    }
-    
-    if (user?.user) {
-      // Create a payment tracking record
-      const { error: insertError } = await supabase
-        .from('payment_transactions')
-        .insert({
-          user_id: user.user.id,
-          external_id: externalId,
-          plan_name: plan,
-          amount: amount,
-          status: 'pending',
-          paylatam_transaction_id: paylatamData.transaction_id || paylatamData.data?.transaction_id || null,
-          qr_code: paylatamData.qr_code || paylatamData.data?.qr_code || null,
-          qr_code_text: paylatamData.qr_code_text || paylatamData.data?.qr_code_text || null
-        })
+    // Generate QR Code image URL using a QR code service
+    const qrCodeImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(pixCode)}`
 
-      if (insertError) {
-        console.error('Error storing payment record:', insertError)
-      }
-    } else {
-      console.log('User not found for email:', userEmail)
-    }
-
-    return new Response(
-      JSON.stringify({
-        success: true,
-        data: {
-          qr_code: paylatamData.qr_code || paylatamData.data?.qr_code,
-          qr_code_text: paylatamData.qr_code_text || paylatamData.data?.qr_code_text,
-          transaction_id: paylatamData.transaction_id || paylatamData.data?.transaction_id,
-          external_id: externalId,
-          amount: amount,
-          plan: plan
-        }
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      }
-    )
+    return new Response(JSON.stringify({
+      success: true,
+      transaction_id: secretpayData.id,
+      qr_code: pixCode,
+      qr_code_base64: '',
+      qr_code_image: qrCodeImageUrl,
+      amount: amount,
+      expires_at: expirationTime.toISOString(),
+      request_number: externalRef
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
+    })
 
   } catch (error) {
-    console.error('Error creating payment:', error)
-    return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    )
+    console.error('SecretPay payment error:', error)
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500
+    })
   }
 })
