@@ -30,6 +30,7 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   });
 
   const [translations, setTranslations] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadTranslations(language);
@@ -38,19 +39,33 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
 
   const loadTranslations = async (lang: Language) => {
     try {
+      setIsLoading(true);
       const translationModule = await import(`../translations/${lang}.ts`);
       setTranslations(translationModule.default);
     } catch (error) {
       console.error(`Failed to load translations for ${lang}:`, error);
       // Fallback to Portuguese if other language fails
       if (lang !== 'pt') {
-        const fallbackModule = await import('../translations/pt.ts');
-        setTranslations(fallbackModule.default);
+        try {
+          const fallbackModule = await import('../translations/pt.ts');
+          setTranslations(fallbackModule.default);
+        } catch (fallbackError) {
+          console.error('Failed to load fallback translations:', fallbackError);
+          // Set empty translations if everything fails
+          setTranslations({});
+        }
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const t = (key: string, params?: Record<string, string | number>): string => {
+    // If translations are loading, return the key as fallback
+    if (isLoading) {
+      return key;
+    }
+
     const keys = key.split('.');
     let value: any = translations;
     
@@ -74,6 +89,15 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     
     return value;
   };
+
+  // Show loading screen while translations are being loaded
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
