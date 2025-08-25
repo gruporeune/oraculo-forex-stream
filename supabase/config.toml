@@ -1,9 +1,9 @@
 project_id = "nzxidhlktjpzkxhofswx"
 
-[functions.create-payment]
+[functions.create-secretpay-payment]
 verify_jwt = true
 
-[functions.payment-webhook]
+[functions.secretpay-webhook]
 verify_jwt = false
 
 [functions.create-secretpay-withdrawal]

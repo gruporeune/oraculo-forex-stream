@@ -192,7 +192,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         userDocument: formData.cpf.replace(/\D/g, '')
       };
 
-      const { data, error } = await supabase.functions.invoke('create-payment', {
+      const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
         body: requestBody
       });
 
@@ -207,7 +207,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
       console.log('Payment created successfully:', data);
 
-      // Use the data directly from PayLatam
+      // Use the data directly from SecretPay
       const adaptedData = {
         success: data.success,
         transaction_id: data.data.transaction_id,

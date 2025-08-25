@@ -24,12 +24,13 @@ export function PendingPaymentsChecker() {
 
       console.log('Checking pending payments for user:', user.id);
 
-      // Get pending transactions with better error handling
+      // Get pending transactions
       const { data: pendingTransactions, error } = await supabase
         .from('payment_transactions')
         .select('id, external_id, plan_name, status, payment_provider, created_at')
         .eq('user_id', user.id)
         .eq('status', 'pending')
+        .eq('payment_provider', 'secretpay')
         .order('created_at', { ascending: false });
 
       console.log('Query result:', { pendingTransactions, error });
@@ -55,11 +56,19 @@ export function PendingPaymentsChecker() {
 
       console.log('Found pending transactions:', pendingTransactions.length);
 
-      // Check each pending transaction
+      // Check each pending transaction by querying database status
       let activatedPlans = 0;
       for (const transaction of pendingTransactions) {
-        // Transaction status is already checked in database, no need for external API call
-        console.log('Transaction already in database:', transaction.external_id, 'Status:', transaction.status);
+        // Re-check transaction status in database
+        const { data: updatedTransaction } = await supabase
+          .from('payment_transactions')
+          .select('status')
+          .eq('id', transaction.id)
+          .single();
+
+        if (updatedTransaction?.status === 'paid') {
+          activatedPlans++;
+        }
       }
 
       if (activatedPlans > 0) {
@@ -122,7 +131,7 @@ export function PendingPaymentsChecker() {
         return;
       }
 
-      // Check each recent transaction
+      // Check each recent transaction by database status
       let activatedPlans = 0;
       for (const transaction of recentTransactions) {
         if (transaction.status === 'paid') {

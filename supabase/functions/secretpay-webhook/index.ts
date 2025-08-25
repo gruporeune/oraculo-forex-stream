@@ -115,24 +115,26 @@ serve(async (req) => {
         console.error('Error updating user profile:', profileError)
       }
 
-      // Check if user plan already exists to prevent duplicate commissions
-      const { data: existingPlan } = await supabase
+      // Only insert user plan if it doesn't exist or user has less than 5 plans total
+      const { data: totalPlans } = await supabase
         .from('user_plans')
         .select('id')
         .eq('user_id', transaction.user_id)
-        .eq('plan_name', transaction.plan_name.toLowerCase())
-        .eq('is_active', true)
-        .single();
+        .eq('is_active', true);
 
-      // Only insert user plan if it doesn't exist (prevents duplicate commission processing)
-      if (!existingPlan) {
+      const totalPlanCount = totalPlans?.length || 0;
+
+      if (totalPlanCount < 5) {
         const { error: planError } = await supabase
           .from('user_plans')
           .insert({
             user_id: transaction.user_id,
             plan_name: transaction.plan_name.toLowerCase(),
             purchase_date: new Date().toISOString(),
-            is_active: true
+            is_active: true,
+            daily_earnings: 0,
+            daily_signals_used: 0,
+            auto_operations_completed_today: 0
           })
 
         if (planError) {
@@ -141,7 +143,7 @@ serve(async (req) => {
           console.log('User plan inserted successfully - commissions will be processed automatically')
         }
       } else {
-        console.log('User plan already exists - skipping commission processing to prevent duplicates')
+        console.log('User already has maximum number of plans (5)')
       }
 
       console.log('Plan activated successfully for user:', transaction.user_id)
