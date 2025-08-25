@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Clock, Target, Activity } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useI18n } from '@/lib/i18n';
 
 interface SignalsPageProps {
   user: any;
@@ -25,6 +26,7 @@ interface GeneratedSignal {
 }
 
 export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsPageProps) {
+  const { t } = useI18n();
   const [marketType, setMarketType] = useState('');
   const [selectedAsset, setSelectedAsset] = useState('');
   const [selectedExpiration, setSelectedExpiration] = useState('');
@@ -51,9 +53,9 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
   };
 
   const expirationTimes = [
-    { value: '1', label: '1 Minuto' },
-    { value: '5', label: '5 Minutos' },
-    { value: '15', label: '15 Minutos' }
+    { value: '1', label: t('signals.1.minute') },
+    { value: '5', label: t('signals.5.minutes') },
+    { value: '15', label: t('signals.15.minutes') }
   ];
 
   const [userPlans, setUserPlans] = useState<any[]>([]);
@@ -266,8 +268,8 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       loadRecentSignals();
 
       toast({
-        title: "Sinal gerado com sucesso!",
-        description: `${signalType} para ${selectedAsset} - Confiança: ${confidence}%`
+        title: t('signals.generated.success'),
+        description: `${signalType} para ${selectedAsset} - ${t('signals.confidence')}: ${confidence}%`
       });
 
       // Reset form
@@ -277,7 +279,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
 
     } catch (error: any) {
       toast({
-        title: "Erro",
+        title: t('common.error'),
         description: error.message,
         variant: "destructive"
       });
@@ -301,8 +303,8 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Gerador de Sinais</h2>
-        <p className="text-white/70">Gere sinais para opções binárias com alta precisão</p>
+        <h2 className="text-3xl font-bold text-white mb-2">{t('signals.title')}</h2>
+        <p className="text-white/70">{t('signals.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -311,31 +313,31 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Target className="w-5 h-5" />
-              Gerar Novo Sinal
+              {t('signals.generate.new')}
             </CardTitle>
             <p className="text-white/70 text-sm">
-              Sinais restantes: {remainingSignals}/{maxSignals} ({planNames})
+              {t('signals.remaining')}: {remainingSignals}/{maxSignals} ({planNames})
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="text-white/70 text-sm mb-2 block">Tipo de Mercado</label>
+              <label className="text-white/70 text-sm mb-2 block">{t('signals.market.type')}</label>
               <Select value={marketType} onValueChange={setMarketType}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Selecione o tipo de mercado" />
+                  <SelectValue placeholder={t('signals.select.market')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="real">Mercado Real</SelectItem>
-                  <SelectItem value="otc">Mercado OTC</SelectItem>
+                  <SelectItem value="real">{t('signals.market.real')}</SelectItem>
+                  <SelectItem value="otc">{t('signals.market.otc')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <label className="text-white/70 text-sm mb-2 block">Ativo Financeiro</label>
+              <label className="text-white/70 text-sm mb-2 block">{t('signals.financial.asset')}</label>
               <Select value={selectedAsset} onValueChange={setSelectedAsset} disabled={!marketType}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder={marketType ? "Selecione o par de moedas" : "Primeiro selecione o tipo de mercado"} />
+                  <SelectValue placeholder={marketType ? t('signals.select.pair') : t('signals.first.select.market')} />
                 </SelectTrigger>
                 <SelectContent>
                   {getCurrentAssets().map(asset => (
@@ -348,10 +350,10 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
             </div>
 
             <div>
-              <label className="text-white/70 text-sm mb-2 block">Tempo de Expiração</label>
+              <label className="text-white/70 text-sm mb-2 block">{t('signals.expiration.time')}</label>
               <Select value={selectedExpiration} onValueChange={setSelectedExpiration}>
                 <SelectTrigger className="bg-white/5 border-white/10 text-white">
-                  <SelectValue placeholder="Selecione o tempo de expiração" />
+                  <SelectValue placeholder={t('signals.select.expiration')} />
                 </SelectTrigger>
                 <SelectContent>
                   {expirationTimes.map(time => (
@@ -371,18 +373,18 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
               {isGenerating ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Gerando Sinal...
+                  {t('signals.generating')}
                 </div>
               ) : !canGenerate ? (
-                'Limite diário atingido'
+                t('signals.daily.limit')
               ) : (
-                'Gerar Sinal'
+                t('signals.generate')
               )}
             </Button>
 
             {!canGenerate && (
               <p className="text-yellow-400 text-sm text-center">
-                Upgrade seu plano para gerar mais sinais por dia
+                {t('signals.upgrade.plan')}
               </p>
             )}
           </CardContent>
@@ -393,13 +395,13 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Activity className="w-5 h-5" />
-              Estatísticas
+              {t('signals.statistics')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-white/70 text-sm">Sinais Usados Hoje</span>
+                <span className="text-white/70 text-sm">{t('signals.used.today')}</span>
                 <span className="text-white font-medium">{usedSignals}</span>
               </div>
               <div className="flex justify-between items-center">

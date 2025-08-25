@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { DashboardCards } from '@/components/DashboardCards';
 import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
+import { useI18n } from '@/lib/i18n';
 
 import { useToast } from '@/hooks/use-toast';
 import { Tilt } from '@/components/ui/tilt';
@@ -16,6 +17,7 @@ interface DashboardHomePageProps {
 }
 
 export default function DashboardHomePage({ user, profile, onProfileUpdate }: DashboardHomePageProps) {
+  const { t } = useI18n();
   const [userPlans, setUserPlans] = useState<any[]>([]);
   const { toast } = useToast();
 
@@ -77,10 +79,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
     >
       <div>
         <h2 className="text-3xl font-bold text-white mb-2">
-          Bem-vindo ao ORÁCULO! 🎉
+          {t('dashboard.welcome')} 🎉
         </h2>
         <p className="text-white/70">
-          Sua jornada para operar com inteligência artificial começa aqui.
+          {t('dashboard.subtitle')}
         </p>
       </div>
 
@@ -134,7 +136,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 <div className="space-y-1 text-center">
                   <h4 className="text-xs md:text-sm font-bold text-white">BullTec</h4>
                   <p className="text-purple-200 text-[10px] md:text-xs max-w-[100px]">
-                    Corretora oficial
+                    {t('dashboard.bulltec.official')}
                   </p>
                 </div>
                 <div className="absolute top-1 right-1">
@@ -183,7 +185,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   <div className="space-y-1 text-center">
                     <h4 className="text-xs md:text-sm font-bold text-white">Exnova</h4>
                     <p className="text-blue-200 text-[10px] md:text-xs max-w-[100px]">
-                      Trading premium
+                      {t('dashboard.exnova.premium')}
                     </p>
                   </div>
                   <div className="absolute top-1 right-1">
@@ -235,7 +237,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   <div className="space-y-1 text-center">
                     <h4 className="text-xs md:text-sm font-bold text-white">WhatsApp</h4>
                     <p className="text-green-200 text-[10px] md:text-xs max-w-[100px]">
-                      Grupo VIP
+                      {t('dashboard.whatsapp.vip')}
                     </p>
                   </div>
                   <div className="absolute top-1 right-1">
@@ -249,13 +251,13 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           {/* Texto ao lado */}
           <div className="flex-1 text-center md:text-left">
             <h3 className="text-xl md:text-3xl font-black text-white mb-2 tracking-tight leading-tight">
-              Corretoras oficiais com mais de{" "}
+              {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-                93% de precisão
+                {t('dashboard.brokers.title').split(' ').slice(5).join(' ')}
               </span>
             </h3>
             <p className="text-white/70 text-sm md:text-base font-medium">
-              Faça seu cadastro nas corretoras recomendadas pelo ORÁCULO
+              {t('dashboard.brokers.subtitle')}
             </p>
           </div>
         </div>

@@ -57,6 +57,57 @@ const translations = {
     'feature.early.access': 'Acesso antecipado a novos recursos',
     'feature.dedicated.analyst': 'Analista pessoal dedicado',
 
+    // Dashboard
+    'dashboard.title': 'Dashboard',
+    'dashboard.welcome': 'Bem-vindo ao ORÁCULO!',
+    'dashboard.subtitle': 'Sua jornada para operar com inteligência artificial começa aqui.',
+    'dashboard.your.plans': 'SEUS PLANOS',
+    'dashboard.your.signals': 'SEUS SINAIS',
+    'dashboard.daily.earnings': 'GANHO DO DIA',
+    'dashboard.today.commissions': 'COMISSÕES HOJE',
+    'dashboard.available.balance': 'SALDO DISPONÍVEL',
+    'dashboard.signals.per.day': 'sinais/dia',
+    'dashboard.available.today': 'Disponíveis hoje',
+    'dashboard.daily.profitability': 'Rentabilidade diária',
+    'dashboard.today.referrals': 'Indicações do dia',
+    'dashboard.withdraw': 'Sacar',
+    'dashboard.brokers.title': 'Corretoras oficiais com mais de 93% de precisão',
+    'dashboard.brokers.subtitle': 'Faça seu cadastro nas corretoras recomendadas pelo ORÁCULO',
+    'dashboard.bulltec.official': 'Corretora oficial',
+    'dashboard.exnova.premium': 'Trading premium',
+    'dashboard.whatsapp.vip': 'Grupo VIP',
+
+    // Signals
+    'signals.title': 'Gerador de Sinais',
+    'signals.subtitle': 'Gere sinais para opções binárias com alta precisão',
+    'signals.generate.new': 'Gerar Novo Sinal',
+    'signals.remaining': 'Sinais restantes',
+    'signals.market.type': 'Tipo de Mercado',
+    'signals.select.market': 'Selecione o tipo de mercado',
+    'signals.market.real': 'Mercado Real',
+    'signals.market.otc': 'Mercado OTC',
+    'signals.financial.asset': 'Ativo Financeiro',
+    'signals.select.pair': 'Selecione o par de moedas',
+    'signals.first.select.market': 'Primeiro selecione o tipo de mercado',
+    'signals.expiration.time': 'Tempo de Expiração',
+    'signals.select.expiration': 'Selecione o tempo de expiração',
+    'signals.1.minute': '1 Minuto',
+    'signals.5.minutes': '5 Minutos',
+    'signals.15.minutes': '15 Minutos',
+    'signals.generating': 'Gerando Sinal...',
+    'signals.daily.limit': 'Limite diário atingido',
+    'signals.generate': 'Gerar Sinal',
+    'signals.upgrade.plan': 'Upgrade seu plano para gerar mais sinais por dia',
+    'signals.statistics': 'Estatísticas',
+    'signals.used.today': 'Sinais Usados Hoje',
+    'signals.remaining.today': 'Sinais Restantes',
+    'signals.total.available': 'Total Disponível',
+    'signals.success.rate': 'Taxa de Sucesso',
+    'signals.recent': 'Sinais Recentes',
+    'signals.no.recent': 'Nenhum sinal gerado ainda',
+    'signals.generated.success': 'Sinal gerado com sucesso!',
+    'signals.confidence': 'Confiança',
+
     // Buttons
     'button.back': 'Voltar',
     'button.continue': 'Continuar',
@@ -73,43 +124,6 @@ const translations = {
     'payment.processing': 'Processando pagamento...',
     'payment.success': 'Pagamento realizado com sucesso!',
     'payment.failed': 'Falha no pagamento',
-
-    // Dashboard
-    'dashboard.title': 'Dashboard',
-    'dashboard.signals': 'Sinais',
-    'dashboard.earnings': 'Ganhos',
-    'dashboard.commissions': 'Comissões',
-    'dashboard.balance': 'Saldo Disponível',
-    'dashboard.withdraw': 'Sacar',
-
-    // Profile
-    'profile.title': 'Perfil',
-    'profile.personal.info': 'Informações Pessoais',
-    'profile.financial.info': 'Informações Financeiras',
-    'profile.referral.code': 'Código de Referência',
-
-    // Network/Referrals
-    'network.title': 'Rede de Referências',
-    'network.stats': 'Estatísticas da Rede',
-    'network.commissions': 'Comissões',
-    'network.referrals': 'Indicações',
-
-    // Signals
-    'signals.title': 'Sinais',
-    'signals.remaining': 'Restantes',
-    'signals.used': 'Utilizados',
-    'signals.success.rate': 'Taxa de Sucesso',
-
-    // Materials
-    'materials.title': 'Materiais',
-    'materials.extra': 'Materiais Extras',
-    'materials.download': 'Baixar',
-
-    // Withdrawals
-    'withdrawal.title': 'Saques',
-    'withdrawal.balance': 'Saldo Disponível',
-    'withdrawal.request': 'Solicitar Saque',
-    'withdrawal.history': 'Histórico de Saques',
 
     // Common
     'common.loading': 'Carregando...',
@@ -165,6 +179,57 @@ const translations = {
     'feature.early.access': 'Early access to new features',
     'feature.dedicated.analyst': 'Dedicated personal analyst',
 
+    // Dashboard
+    'dashboard.title': 'Dashboard',
+    'dashboard.welcome': 'Welcome to ORÁCULO!',
+    'dashboard.subtitle': 'Your journey to trade with artificial intelligence starts here.',
+    'dashboard.your.plans': 'YOUR PLANS',
+    'dashboard.your.signals': 'YOUR SIGNALS',
+    'dashboard.daily.earnings': 'DAILY EARNINGS',
+    'dashboard.today.commissions': 'TODAY\'S COMMISSIONS',
+    'dashboard.available.balance': 'AVAILABLE BALANCE',
+    'dashboard.signals.per.day': 'signals/day',
+    'dashboard.available.today': 'Available today',
+    'dashboard.daily.profitability': 'Daily profitability',
+    'dashboard.today.referrals': 'Today\'s referrals',
+    'dashboard.withdraw': 'Withdraw',
+    'dashboard.brokers.title': 'Official brokers with over 93% accuracy',
+    'dashboard.brokers.subtitle': 'Register with brokers recommended by ORÁCULO',
+    'dashboard.bulltec.official': 'Official broker',
+    'dashboard.exnova.premium': 'Premium trading',
+    'dashboard.whatsapp.vip': 'VIP Group',
+
+    // Signals
+    'signals.title': 'Signal Generator',
+    'signals.subtitle': 'Generate signals for binary options with high precision',
+    'signals.generate.new': 'Generate New Signal',
+    'signals.remaining': 'Remaining signals',
+    'signals.market.type': 'Market Type',
+    'signals.select.market': 'Select market type',
+    'signals.market.real': 'Real Market',
+    'signals.market.otc': 'OTC Market',
+    'signals.financial.asset': 'Financial Asset',
+    'signals.select.pair': 'Select currency pair',
+    'signals.first.select.market': 'First select market type',
+    'signals.expiration.time': 'Expiration Time',
+    'signals.select.expiration': 'Select expiration time',
+    'signals.1.minute': '1 Minute',
+    'signals.5.minutes': '5 Minutes',
+    'signals.15.minutes': '15 Minutes',
+    'signals.generating': 'Generating Signal...',
+    'signals.daily.limit': 'Daily limit reached',
+    'signals.generate': 'Generate Signal',
+    'signals.upgrade.plan': 'Upgrade your plan to generate more signals per day',
+    'signals.statistics': 'Statistics',
+    'signals.used.today': 'Signals Used Today',
+    'signals.remaining.today': 'Remaining Signals',
+    'signals.total.available': 'Total Available',
+    'signals.success.rate': 'Success Rate',
+    'signals.recent': 'Recent Signals',
+    'signals.no.recent': 'No signals generated yet',
+    'signals.generated.success': 'Signal generated successfully!',
+    'signals.confidence': 'Confidence',
+
     // Buttons
     'button.back': 'Back',
     'button.continue': 'Continue',
@@ -181,43 +246,6 @@ const translations = {
     'payment.processing': 'Processing payment...',
     'payment.success': 'Payment successful!',
     'payment.failed': 'Payment failed',
-
-    // Dashboard
-    'dashboard.title': 'Dashboard',
-    'dashboard.signals': 'Signals',
-    'dashboard.earnings': 'Earnings',
-    'dashboard.commissions': 'Commissions',
-    'dashboard.balance': 'Available Balance',
-    'dashboard.withdraw': 'Withdraw',
-
-    // Profile
-    'profile.title': 'Profile',
-    'profile.personal.info': 'Personal Information',
-    'profile.financial.info': 'Financial Information',
-    'profile.referral.code': 'Referral Code',
-
-    // Network/Referrals
-    'network.title': 'Referral Network',
-    'network.stats': 'Network Statistics',
-    'network.commissions': 'Commissions',
-    'network.referrals': 'Referrals',
-
-    // Signals
-    'signals.title': 'Signals',
-    'signals.remaining': 'Remaining',
-    'signals.used': 'Used',
-    'signals.success.rate': 'Success Rate',
-
-    // Materials
-    'materials.title': 'Materials',
-    'materials.extra': 'Extra Materials',
-    'materials.download': 'Download',
-
-    // Withdrawals
-    'withdrawal.title': 'Withdrawals',
-    'withdrawal.balance': 'Available Balance',
-    'withdrawal.request': 'Request Withdrawal',
-    'withdrawal.history': 'Withdrawal History',
 
     // Common
     'common.loading': 'Loading...',
@@ -273,6 +301,57 @@ const translations = {
     'feature.early.access': 'Acceso anticipado a nuevas funciones',
     'feature.dedicated.analyst': 'Analista personal dedicado',
 
+    // Dashboard
+    'dashboard.title': 'Panel',
+    'dashboard.welcome': '¡Bienvenido a ORÁCULO!',
+    'dashboard.subtitle': 'Tu viaje para operar con inteligencia artificial comienza aquí.',
+    'dashboard.your.plans': 'TUS PLANES',
+    'dashboard.your.signals': 'TUS SEÑALES',
+    'dashboard.daily.earnings': 'GANANCIAS DEL DÍA',
+    'dashboard.today.commissions': 'COMISIONES HOY',
+    'dashboard.available.balance': 'SALDO DISPONIBLE',
+    'dashboard.signals.per.day': 'señales/día',
+    'dashboard.available.today': 'Disponibles hoy',
+    'dashboard.daily.profitability': 'Rentabilidad diaria',
+    'dashboard.today.referrals': 'Referencias de hoy',
+    'dashboard.withdraw': 'Retirar',
+    'dashboard.brokers.title': 'Brokers oficiales con más del 93% de precisión',
+    'dashboard.brokers.subtitle': 'Regístrate en los brokers recomendados por ORÁCULO',
+    'dashboard.bulltec.official': 'Broker oficial',
+    'dashboard.exnova.premium': 'Trading premium',
+    'dashboard.whatsapp.vip': 'Grupo VIP',
+
+    // Signals
+    'signals.title': 'Generador de Señales',
+    'signals.subtitle': 'Genera señales para opciones binarias con alta precisión',
+    'signals.generate.new': 'Generar Nueva Señal',
+    'signals.remaining': 'Señales restantes',
+    'signals.market.type': 'Tipo de Mercado',
+    'signals.select.market': 'Selecciona tipo de mercado',
+    'signals.market.real': 'Mercado Real',
+    'signals.market.otc': 'Mercado OTC',
+    'signals.financial.asset': 'Activo Financiero',
+    'signals.select.pair': 'Selecciona par de divisas',
+    'signals.first.select.market': 'Primero selecciona el tipo de mercado',
+    'signals.expiration.time': 'Tiempo de Expiración',
+    'signals.select.expiration': 'Selecciona tiempo de expiración',
+    'signals.1.minute': '1 Minuto',
+    'signals.5.minutes': '5 Minutos',
+    'signals.15.minutes': '15 Minutos',
+    'signals.generating': 'Generando Señal...',
+    'signals.daily.limit': 'Límite diario alcanzado',
+    'signals.generate': 'Generar Señal',
+    'signals.upgrade.plan': 'Mejora tu plan para generar más señales por día',
+    'signals.statistics': 'Estadísticas',
+    'signals.used.today': 'Señales Usadas Hoy',
+    'signals.remaining.today': 'Señales Restantes',
+    'signals.total.available': 'Total Disponible',
+    'signals.success.rate': 'Tasa de Éxito',
+    'signals.recent': 'Señales Recientes',
+    'signals.no.recent': 'Aún no se han generado señales',
+    'signals.generated.success': '¡Señal generada exitosamente!',
+    'signals.confidence': 'Confianza',
+
     // Buttons
     'button.back': 'Volver',
     'button.continue': 'Continuar',
@@ -289,43 +368,6 @@ const translations = {
     'payment.processing': 'Procesando pago...',
     'payment.success': '¡Pago exitoso!',
     'payment.failed': 'Pago fallido',
-
-    // Dashboard
-    'dashboard.title': 'Panel',
-    'dashboard.signals': 'Señales',
-    'dashboard.earnings': 'Ganancias',
-    'dashboard.commissions': 'Comisiones',
-    'dashboard.balance': 'Saldo Disponible',
-    'dashboard.withdraw': 'Retirar',
-
-    // Profile
-    'profile.title': 'Perfil',
-    'profile.personal.info': 'Información Personal',
-    'profile.financial.info': 'Información Financiera',
-    'profile.referral.code': 'Código de Referencia',
-
-    // Network/Referrals
-    'network.title': 'Red de Referencias',
-    'network.stats': 'Estadísticas de Red',
-    'network.commissions': 'Comisiones',
-    'network.referrals': 'Referencias',
-
-    // Signals
-    'signals.title': 'Señales',
-    'signals.remaining': 'Restantes',
-    'signals.used': 'Utilizadas',
-    'signals.success.rate': 'Tasa de Éxito',
-
-    // Materials
-    'materials.title': 'Materiales',
-    'materials.extra': 'Materiales Extra',
-    'materials.download': 'Descargar',
-
-    // Withdrawals
-    'withdrawal.title': 'Retiros',
-    'withdrawal.balance': 'Saldo Disponible',
-    'withdrawal.request': 'Solicitar Retiro',
-    'withdrawal.history': 'Historial de Retiros',
 
     // Common
     'common.loading': 'Cargando...',
