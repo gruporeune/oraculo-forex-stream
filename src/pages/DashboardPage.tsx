@@ -4,6 +4,8 @@ import { User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { useI18n } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { useDailySignalsReset } from '@/hooks/useDailySignalsReset';
 import DashboardHomePage from './DashboardHomePage';
@@ -16,6 +18,7 @@ import WithdrawalPage from './WithdrawalPage';
 import PlansPage from './PlansPage';
 
 export default function DashboardPage() {
+  const { t } = useI18n();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
@@ -67,7 +70,7 @@ export default function DashboardPage() {
   if (!user) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Carregando...</div>
+        <div className="text-white">{t('common.loading')}</div>
       </div>
     );
   }
@@ -94,6 +97,7 @@ export default function DashboardPage() {
                 </div>
                 
                 <div className="flex items-center space-x-4">
+                  <LanguageSelector />
                   <div className="flex items-center space-x-2">
                     <User className="w-5 h-5" />
                     <span>{profile?.full_name || user.email}</span>
@@ -105,7 +109,7 @@ export default function DashboardPage() {
                     className="text-white/70 hover:text-white"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sair
+                    {t('nav.logout')}
                   </Button>
                 </div>
               </div>

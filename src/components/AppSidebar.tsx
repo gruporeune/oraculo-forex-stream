@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import { useI18n } from "@/lib/i18n"
 
 import {
   Sidebar,
@@ -15,21 +16,23 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-const items = [
-  { title: "Dashboard", url: "/dashboard", icon: Home },
-  { title: "Perfil", url: "/dashboard/profile", icon: User },
-  { title: "Rede", url: "/dashboard/network", icon: Network },
-  { title: "Sinais", url: "/dashboard/signals", icon: TrendingUp },
+const getItems = (t: (key: string) => string) => [
+  { title: t('nav.dashboard'), url: "/dashboard", icon: Home },
+  { title: t('nav.profile'), url: "/dashboard/profile", icon: User },
+  { title: t('nav.network'), url: "/dashboard/network", icon: Network },
+  { title: t('nav.signals'), url: "/dashboard/signals", icon: TrendingUp },
   { title: "Área de Membros", url: "/dashboard/members", icon: Users },
   { title: "Materiais Extras", url: "/dashboard/materials", icon: Package },
-  { title: "Planos", url: "/dashboard/plans", icon: CreditCard },
-  { title: "Saques", url: "/dashboard/withdrawals", icon: DollarSign },
+  { title: t('nav.plans'), url: "/dashboard/plans", icon: CreditCard },
+  { title: t('nav.withdrawal'), url: "/dashboard/withdrawals", icon: DollarSign },
 ]
 
 export function AppSidebar() {
+  const { t } = useI18n();
   const { open, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
+  const items = getItems(t);
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>

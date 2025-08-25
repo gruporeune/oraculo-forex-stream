@@ -14,15 +14,15 @@ const plans = [
     price: "$33 USD",
     priceInReals: "R$ 200",
     originalPrice: "$50 USD",
-    description: "Para resultados consistentes",
+    description: "plan.partner.description",
     icon: Star,
     features: [
-      "20 sinais por dia",
-      "0,5% lucro diário até 200%",
-      "Área de membros exclusiva",
-      "Suporte básico",
-      "Análises de mercado",
-      "Gestão de risco"
+      "20 feature.signals.day",
+      "0,5% feature.profit.daily",
+      "feature.members.area exclusiva",
+      "feature.support.basic",
+      "feature.market.analysis",
+      "feature.risk.management"
     ],
     popular: false,
     gradient: "from-green-600 to-green-400",
@@ -35,16 +35,16 @@ const plans = [
     price: "$100 USD",
     priceInReals: "R$ 600",
     originalPrice: "$150 USD",
-    description: "O plano dos profissionais",
+    description: "plan.master.description",
     icon: Crown,
     features: [
-      "100 sinais por dia",
-      "1% lucro diário até 200%",
-      "Área de membros VIP",
-      "Suporte prioritário",
-      "Análises técnicas avançadas",
-      "Webinars exclusivos",
-      "Relatórios personalizados"
+      "100 feature.signals.day",
+      "1% feature.profit.daily",
+      "feature.members.area VIP",
+      "feature.support.priority",
+      "feature.technical.analysis",
+      "feature.webinars",
+      "feature.reports"
     ],
     popular: true,
     gradient: "from-purple-600 to-purple-400",
@@ -57,17 +57,17 @@ const plans = [
     price: "$458 USD",
     priceInReals: "R$ 2.750",
     originalPrice: "$687 USD",
-    description: "Para traders de alto volume",
+    description: "plan.premium.description",
     icon: Gem,
     features: [
-      "500 sinais por dia",
-      "1,5% lucro diário até 200%",
-      "Área de membros Premium",
-      "Grupo VIP Telegram",
-      "Consultoria 1:1 mensal",
-      "Estratégias personalizadas",
-      "Acesso antecipado a novos recursos",
-      "Suporte 24/7"
+      "500 feature.signals.day",
+      "1,5% feature.profit.daily",
+      "feature.members.area Premium",
+      "feature.telegram.vip",
+      "feature.consultation mensal",
+      "feature.strategies",
+      "feature.early.access",
+      "feature.support.24_7"
     ],
     popular: false,
     gradient: "from-blue-600 to-blue-400",
@@ -80,17 +80,17 @@ const plans = [
     price: "$833 USD",
     priceInReals: "R$ 5.000",
     originalPrice: "$1250 USD",
-    description: "O máximo em trading automatizado",
+    description: "plan.platinum.description",
     icon: Diamond,
     features: [
-      "1000 sinais por dia",
-      "2% lucro diário até 200%",
-      "Área de membros Platinum",
-      "Consultoria 1:1 semanal",
+      "1000 feature.signals.day",
+      "2% feature.profit.daily",
+      "feature.members.area Platinum",
+      "feature.consultation semanal",
       "Estratégias VIP exclusivas",
-      "Acesso beta a novos recursos",
-      "Suporte prioritário 24/7",
-      "Analista pessoal dedicado"
+      "feature.early.access",
+      "feature.support.vip",
+      "feature.dedicated.analyst"
     ],
     popular: false,
     gradient: "from-slate-600 to-slate-400",
@@ -203,20 +203,24 @@ export default function PlansPage() {
                     </div>
                   </div>
                   <p className="text-white/70 text-sm mt-2">
-                    {plan.description}
+                    {t(plan.description)}
                   </p>
                 </div>
               </CardHeader>
               
               <CardContent className="space-y-6">
-                <div className="space-y-3">
-                  {plan.features.map((feature, i) => (
-                    <div key={i} className="flex items-center text-sm text-white/90">
-                      <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
+                 <div className="space-y-3">
+                   {plan.features.map((feature, i) => {
+                     // Handle translation keys within feature strings
+                     const translatedFeature = feature.replace(/feature\.[a-z.]+/g, (match) => t(match));
+                     return (
+                       <div key={i} className="flex items-center text-sm text-white/90">
+                         <Check className="w-4 h-4 text-green-400 mr-3 flex-shrink-0" />
+                         <span>{translatedFeature}</span>
+                       </div>
+                     );
+                   })}
+                 </div>
                 
                 <Button
                   className={`w-full font-semibold py-3 text-base transition-all duration-300 ${plan.buttonColor} text-white hover:scale-105`}

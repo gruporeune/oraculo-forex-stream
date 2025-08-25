@@ -33,6 +33,10 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
   // Get plan amount based on plan name
   const getPlanAmount = () => {
     switch (plan.name.toLowerCase()) {
+      case 'partner':
+        return 33;
+      case 'master':
+        return 100;
       case 'premium':
         return 458;
       case 'platinum':

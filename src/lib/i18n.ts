@@ -74,6 +74,43 @@ const translations = {
     'payment.success': 'Pagamento realizado com sucesso!',
     'payment.failed': 'Falha no pagamento',
 
+    // Dashboard
+    'dashboard.title': 'Dashboard',
+    'dashboard.signals': 'Sinais',
+    'dashboard.earnings': 'Ganhos',
+    'dashboard.commissions': 'Comissões',
+    'dashboard.balance': 'Saldo Disponível',
+    'dashboard.withdraw': 'Sacar',
+
+    // Profile
+    'profile.title': 'Perfil',
+    'profile.personal.info': 'Informações Pessoais',
+    'profile.financial.info': 'Informações Financeiras',
+    'profile.referral.code': 'Código de Referência',
+
+    // Network/Referrals
+    'network.title': 'Rede de Referências',
+    'network.stats': 'Estatísticas da Rede',
+    'network.commissions': 'Comissões',
+    'network.referrals': 'Indicações',
+
+    // Signals
+    'signals.title': 'Sinais',
+    'signals.remaining': 'Restantes',
+    'signals.used': 'Utilizados',
+    'signals.success.rate': 'Taxa de Sucesso',
+
+    // Materials
+    'materials.title': 'Materiais',
+    'materials.extra': 'Materiais Extras',
+    'materials.download': 'Baixar',
+
+    // Withdrawals
+    'withdrawal.title': 'Saques',
+    'withdrawal.balance': 'Saldo Disponível',
+    'withdrawal.request': 'Solicitar Saque',
+    'withdrawal.history': 'Histórico de Saques',
+
     // Common
     'common.loading': 'Carregando...',
     'common.error': 'Erro',
@@ -145,6 +182,43 @@ const translations = {
     'payment.success': 'Payment successful!',
     'payment.failed': 'Payment failed',
 
+    // Dashboard
+    'dashboard.title': 'Dashboard',
+    'dashboard.signals': 'Signals',
+    'dashboard.earnings': 'Earnings',
+    'dashboard.commissions': 'Commissions',
+    'dashboard.balance': 'Available Balance',
+    'dashboard.withdraw': 'Withdraw',
+
+    // Profile
+    'profile.title': 'Profile',
+    'profile.personal.info': 'Personal Information',
+    'profile.financial.info': 'Financial Information',
+    'profile.referral.code': 'Referral Code',
+
+    // Network/Referrals
+    'network.title': 'Referral Network',
+    'network.stats': 'Network Statistics',
+    'network.commissions': 'Commissions',
+    'network.referrals': 'Referrals',
+
+    // Signals
+    'signals.title': 'Signals',
+    'signals.remaining': 'Remaining',
+    'signals.used': 'Used',
+    'signals.success.rate': 'Success Rate',
+
+    // Materials
+    'materials.title': 'Materials',
+    'materials.extra': 'Extra Materials',
+    'materials.download': 'Download',
+
+    // Withdrawals
+    'withdrawal.title': 'Withdrawals',
+    'withdrawal.balance': 'Available Balance',
+    'withdrawal.request': 'Request Withdrawal',
+    'withdrawal.history': 'Withdrawal History',
+
     // Common
     'common.loading': 'Loading...',
     'common.error': 'Error',
@@ -215,6 +289,43 @@ const translations = {
     'payment.processing': 'Procesando pago...',
     'payment.success': '¡Pago exitoso!',
     'payment.failed': 'Pago fallido',
+
+    // Dashboard
+    'dashboard.title': 'Panel',
+    'dashboard.signals': 'Señales',
+    'dashboard.earnings': 'Ganancias',
+    'dashboard.commissions': 'Comisiones',
+    'dashboard.balance': 'Saldo Disponible',
+    'dashboard.withdraw': 'Retirar',
+
+    // Profile
+    'profile.title': 'Perfil',
+    'profile.personal.info': 'Información Personal',
+    'profile.financial.info': 'Información Financiera',
+    'profile.referral.code': 'Código de Referencia',
+
+    // Network/Referrals
+    'network.title': 'Red de Referencias',
+    'network.stats': 'Estadísticas de Red',
+    'network.commissions': 'Comisiones',
+    'network.referrals': 'Referencias',
+
+    // Signals
+    'signals.title': 'Señales',
+    'signals.remaining': 'Restantes',
+    'signals.used': 'Utilizadas',
+    'signals.success.rate': 'Tasa de Éxito',
+
+    // Materials
+    'materials.title': 'Materiales',
+    'materials.extra': 'Materiales Extra',
+    'materials.download': 'Descargar',
+
+    // Withdrawals
+    'withdrawal.title': 'Retiros',
+    'withdrawal.balance': 'Saldo Disponible',
+    'withdrawal.request': 'Solicitar Retiro',
+    'withdrawal.history': 'Historial de Retiros',
 
     // Common
     'common.loading': 'Cargando...',
