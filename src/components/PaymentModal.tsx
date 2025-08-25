@@ -335,22 +335,19 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
       console.log('Payment status check result:', data);
 
-      if (data?.status === 'paid') {
+      if (data?.status === 'paid' || data?.status === 'aprovado') {
         setIsPaymentConfirmed(true);
         toast({
           title: "Pagamento confirmado!",
           description: "Seu plano foi ativado com sucesso!",
         });
+      } else if (data?.status === 'pendente') {
+        // Payment is pending, continue checking - no need to show toast every time
+        console.log('Payment still pending, will check again in 3 seconds...');
       } else if (data?.status === 'failed') {
         toast({
           title: "Pagamento falhou",
           description: "O pagamento não foi processado. Tente novamente.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Pagamento pendente",
-          description: "O pagamento ainda não foi confirmado. Aguarde ou tente novamente em alguns instantes.",
           variant: "destructive"
         });
       }
