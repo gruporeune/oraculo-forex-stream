@@ -11,6 +11,7 @@ interface PaymentRequest {
   userEmail: string
   userName: string
   userDocument: string
+  userPhone: string
 }
 
 serve(async (req) => {
@@ -34,7 +35,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Get request data
-    const { plan, userEmail, userName, userDocument }: PaymentRequest = await req.json()
+    const { plan, userEmail, userName, userDocument, userPhone }: PaymentRequest = await req.json()
 
     console.log('Creating SecretPay payment:', { plan, userEmail, userName })
 
@@ -58,27 +59,37 @@ serve(async (req) => {
     const secretPayPayload = {
       amount: Math.round(amount * 100), // Amount in cents
       externalRef: externalId,
+      paymentMethod: "pix",
       postbackUrl: `${supabaseUrl}/functions/v1/secretpay-webhook`,
       customer: {
         name: userName,
         email: userEmail,
+        phone: userPhone?.replace(/\D/g, '') || '',
         document: {
           type: "CPF",
           number: userDocument.replace(/\D/g, '')
         }
       },
-      paymentMethod: "PIX"
+      items: [{
+        name: `Plano ${plan.charAt(0).toUpperCase() + plan.slice(1)}`,
+        value: Math.round(amount * 100),
+        quantity: 1,
+        tangible: false
+      }]
     }
 
     console.log('SecretPay payload:', secretPayPayload)
 
+    // Create Basic Auth credentials
+    const credentials = btoa(`${publicKey}:${privateKey}`)
+
     // Call SecretPay API to create PIX payment
-    const secretPayResponse = await fetch('https://api.secretpay.com.br/v1/payments', {
+    const secretPayResponse = await fetch('https://api.secretpay.com.br/v1/transactions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${publicKey}`,
-        'X-Secret': privateKey,
-        'Content-Type': 'application/json'
+        'Authorization': `Basic ${credentials}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify(secretPayPayload)
     })
@@ -116,8 +127,8 @@ serve(async (req) => {
           amount: amount,
           status: 'pending',
           payment_provider: 'secretpay',
-          qr_code: secretPayData.pixQrCode || secretPayData.qrCode,
-          qr_code_text: secretPayData.pixQrCode || secretPayData.qrCode,
+          qr_code: secretPayData.pix?.qrCodeImage || secretPayData.pixQRCode || secretPayData.qrCode,
+          qr_code_text: secretPayData.pix?.qrCode || secretPayData.pixQRCode || secretPayData.qrCode,
           transaction_data: secretPayData
         })
 
@@ -132,8 +143,8 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         data: {
-          qr_code: secretPayData.pixQrCode || secretPayData.qrCode,
-          qr_code_text: secretPayData.pixQrCode || secretPayData.qrCode,
+          qr_code: secretPayData.pix?.qrCodeImage || secretPayData.pixQRCode || secretPayData.qrCode,
+          qr_code_text: secretPayData.pix?.qrCode || secretPayData.pixQRCode || secretPayData.qrCode,
           transaction_id: secretPayData.id || secretPayData.transactionId,
           external_id: externalId,
           amount: amount,

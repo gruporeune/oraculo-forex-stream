@@ -40,7 +40,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    cpf: ''
+    cpf: '',
+    phone: ''
   });
   const { toast } = useToast();
 
@@ -93,10 +94,10 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
   const createPayment = async () => {
     // Validar campos obrigatórios básicos
-    if (!formData.name.trim() || !formData.email.trim() || !formData.cpf.trim()) {
+    if (!formData.name.trim() || !formData.email.trim() || !formData.cpf.trim() || !formData.phone.trim()) {
       toast({
         title: "Erro",
-        description: "Nome, email e CPF são obrigatórios",
+        description: "Todos os campos são obrigatórios",
         variant: "destructive"
       });
       return;
@@ -189,7 +190,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         plan: plan.name.toLowerCase(),
         userEmail: formData.email,
         userName: formData.name,
-        userDocument: formData.cpf.replace(/\D/g, '')
+        userDocument: formData.cpf.replace(/\D/g, ''),
+        userPhone: formData.phone.replace(/\D/g, '')
       };
 
       const { data, error } = await supabase.functions.invoke('create-secretpay-payment', {
@@ -309,7 +311,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
     setFormData({ 
       name: '', 
       email: '', 
-      cpf: ''
+      cpf: '',
+      phone: ''
     });
     setIsLoading(false);
     setIsCopied(false);
@@ -382,6 +385,18 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                     className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
                     placeholder="000.000.000-00"
                     maxLength={14}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-white">Telefone *</label>
+                  <input
+                    type="text"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({...formData, phone: formatPhone(e.target.value)})}
+                    className="w-full mt-1 px-3 py-2 bg-black/50 border border-purple-500/30 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-white"
+                    placeholder="(00) 90000-0000"
+                    maxLength={15}
                   />
                 </div>
               </div>
