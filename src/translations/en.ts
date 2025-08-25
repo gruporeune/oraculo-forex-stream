@@ -200,5 +200,32 @@ export default {
     pt: 'Português',
     en: 'English',
     es: 'Español'
+  },
+  withdrawal: {
+    title: 'Withdrawal Requests',
+    newRequest: 'New Request',
+    amount: 'Amount',
+    pixKey: 'PIX Key',
+    usdtWallet: 'USDT Wallet',
+    status: 'Status',
+    pending: 'Pending',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    processing: 'Processing',
+    completed: 'Completed',
+    withdrawalType: 'Withdrawal Type',
+    pix: 'PIX',
+    usdt: 'USDT',
+    requestWithdrawal: 'Request Withdrawal'
+  },
+  materials: {
+    title: 'Extra Materials',
+    subtitle: 'Exclusive resources and content to optimize your operations',
+    category: 'Category',
+    allCategories: 'All Categories',
+    download: 'Download',
+    view: 'View',
+    noMaterials: 'No materials available',
+    loadingMaterials: 'Loading materials...'
   }
 };

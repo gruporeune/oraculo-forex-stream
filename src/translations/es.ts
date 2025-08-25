@@ -200,5 +200,32 @@ export default {
     pt: 'Português',
     en: 'English',
     es: 'Español'
+  },
+  withdrawal: {
+    title: 'Solicitudes de Retiro',
+    newRequest: 'Nueva Solicitud',
+    amount: 'Cantidad',
+    pixKey: 'Clave PIX',
+    usdtWallet: 'Cartera USDT',
+    status: 'Estado',
+    pending: 'Pendiente',
+    approved: 'Aprobado',
+    rejected: 'Rechazado',
+    processing: 'Procesando',
+    completed: 'Completado',
+    withdrawalType: 'Tipo de Retiro',
+    pix: 'PIX',
+    usdt: 'USDT',
+    requestWithdrawal: 'Solicitar Retiro'
+  },
+  materials: {
+    title: 'Materiales Extra',
+    subtitle: 'Recursos y contenido exclusivo para optimizar tus operaciones',
+    category: 'Categoría',
+    allCategories: 'Todas las Categorías',
+    download: 'Descargar',
+    view: 'Ver',
+    noMaterials: 'No hay materiales disponibles',
+    loadingMaterials: 'Cargando materiales...'
   }
 };

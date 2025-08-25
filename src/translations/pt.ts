@@ -200,5 +200,32 @@ export default {
     pt: 'Português',
     en: 'English',
     es: 'Español'
+  },
+  withdrawal: {
+    title: 'Solicitações de Saque',
+    newRequest: 'Nova Solicitação',
+    amount: 'Valor',
+    pixKey: 'Chave PIX',
+    usdtWallet: 'Carteira USDT',
+    status: 'Status',
+    pending: 'Pendente',
+    approved: 'Aprovado',
+    rejected: 'Rejeitado',
+    processing: 'Processando',
+    completed: 'Concluído',
+    withdrawalType: 'Tipo de Saque',
+    pix: 'PIX',
+    usdt: 'USDT',
+    requestWithdrawal: 'Solicitar Saque'
+  },
+  materials: {
+    title: 'Materiais Extras',
+    subtitle: 'Recursos e conteúdos exclusivos para otimizar suas operações',
+    category: 'Categoria',
+    allCategories: 'Todas as Categorias',
+    download: 'Baixar',
+    view: 'Visualizar',
+    noMaterials: 'Nenhum material disponível',
+    loadingMaterials: 'Carregando materiais...'
   }
 };

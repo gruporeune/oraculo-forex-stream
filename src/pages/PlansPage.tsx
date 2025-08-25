@@ -6,98 +6,105 @@ import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
 import { PaymentModal } from '@/components/PaymentModal';
 import { USDTPaymentModal } from '@/components/USDTPaymentModal';
 import { PaymentMethodModal } from '@/components/PaymentMethodModal';
-
-const plans = [
-  {
-    name: "PARTNER",
-    price: "R$ 200",
-    originalPrice: "R$ 299",
-    description: "Para resultados consistentes",
-    icon: Star,
-    features: [
-      "20 sinais por dia",
-      "0,5% lucro diário até 200%",
-      "Área de membros exclusiva",
-      "Suporte básico",
-      "Análises de mercado",
-      "Gestão de risco"
-    ],
-    popular: false,
-    gradient: "from-green-600 to-green-400",
-    borderColor: "border-green-500/50",
-    buttonColor: "bg-green-600 hover:bg-green-700",
-    paymentType: "pix"
-  },
-  {
-    name: "MASTER",
-    price: "R$ 600",
-    originalPrice: "R$ 899",
-    description: "O plano dos profissionais",
-    icon: Crown,
-    features: [
-      "100 sinais por dia",
-      "1% lucro diário até 200%",
-      "Área de membros VIP",
-      "Suporte prioritário",
-      "Análises técnicas avançadas",
-      "Webinars exclusivos",
-      "Relatórios personalizados"
-    ],
-    popular: true,
-    gradient: "from-purple-600 to-purple-400",
-    borderColor: "border-purple-500/50",
-    buttonColor: "bg-purple-600 hover:bg-purple-700",
-    paymentType: "pix"
-  },
-  {
-    name: "PREMIUM",
-    price: "$458 USD",
-    priceInReals: "R$ 2.750",
-    originalPrice: "$687 USD",
-    description: "Para traders de alto volume",
-    icon: Gem,
-    features: [
-      "500 sinais por dia",
-      "1,5% lucro diário até 200%",
-      "Área de membros Premium",
-      "Grupo VIP Telegram",
-      "Consultoria 1:1 mensal",
-      "Estratégias personalizadas",
-      "Acesso antecipado a novos recursos",
-      "Suporte 24/7"
-    ],
-    popular: false,
-    gradient: "from-blue-600 to-blue-400",
-    borderColor: "border-blue-500/50",
-    buttonColor: "bg-blue-600 hover:bg-blue-700",
-    paymentType: "both" // Premium can pay with both PIX or USDT
-  },
-  {
-    name: "PLATINUM",
-    price: "$833 USD",
-    priceInReals: "R$ 5.000",
-    originalPrice: "$1250 USD",
-    description: "O máximo em trading automatizado",
-    icon: Diamond,
-    features: [
-      "1000 sinais por dia",
-      "2% lucro diário até 200%",
-      "Área de membros Platinum",
-      "Consultoria 1:1 semanal",
-      "Estratégias VIP exclusivas",
-      "Acesso beta a novos recursos",
-      "Suporte prioritário 24/7",
-      "Analista pessoal dedicado"
-    ],
-    popular: false,
-    gradient: "from-slate-600 to-slate-400",
-    borderColor: "border-slate-500/50",
-    buttonColor: "bg-slate-600 hover:bg-slate-700",
-    paymentType: "both" // Platinum can pay with both PIX or USDT
-  }
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function PlansPage() {
+  const { t } = useLanguage();
+
+  const plans = [
+    {
+      name: "PARTNER",
+      price: "R$ 200",
+      priceUSD: "$33 USD",
+      originalPrice: "R$ 299",
+      originalPriceUSD: "$50 USD",
+      description: t('plans.planTypes.partner.description'),
+      icon: Star,
+      features: [
+        `20 ${t('plans.features.dailySignals')}`,
+        `0,5% ${t('plans.features.dailyProfit')}`,
+        t('plans.features.exclusiveMembers'),
+        t('plans.features.basicSupport'),
+        t('plans.features.marketAnalysis'),
+        t('plans.features.riskManagement')
+      ],
+      popular: false,
+      gradient: "from-green-600 to-green-400",
+      borderColor: "border-green-500/50",
+      buttonColor: "bg-green-600 hover:bg-green-700",
+      paymentType: "both"
+    },
+    {
+      name: "MASTER",
+      price: "R$ 600",
+      priceUSD: "$100 USD",
+      originalPrice: "R$ 899",
+      originalPriceUSD: "$150 USD",
+      description: t('plans.planTypes.master.description'),
+      icon: Crown,
+      features: [
+        `100 ${t('plans.features.dailySignals')}`,
+        `1% ${t('plans.features.dailyProfit')}`,
+        t('plans.features.vipMembers'),
+        t('plans.features.prioritySupport'),
+        t('plans.features.advancedAnalysis'),
+        t('plans.features.exclusiveWebinars'),
+        t('plans.features.customReports')
+      ],
+      popular: true,
+      gradient: "from-purple-600 to-purple-400",
+      borderColor: "border-purple-500/50",
+      buttonColor: "bg-purple-600 hover:bg-purple-700",
+      paymentType: "both"
+    },
+    {
+      name: "PREMIUM",
+      price: "$458 USD",
+      priceInReals: "R$ 2.750",
+      originalPrice: "$687 USD",
+      description: t('plans.planTypes.premium.description'),
+      icon: Gem,
+      features: [
+        `500 ${t('plans.features.dailySignals')}`,
+        `1,5% ${t('plans.features.dailyProfit')}`,
+        t('plans.features.premiumMembers'),
+        t('plans.features.vipTelegram'),
+        t('plans.features.monthlyConsulting'),
+        t('plans.features.customStrategies'),
+        t('plans.features.earlyAccess'),
+        t('plans.features.support247')
+      ],
+      popular: false,
+      gradient: "from-blue-600 to-blue-400",
+      borderColor: "border-blue-500/50",
+      buttonColor: "bg-blue-600 hover:bg-blue-700",
+      paymentType: "both"
+    },
+    {
+      name: "PLATINUM",
+      price: "$833 USD",
+      priceInReals: "R$ 5.000",
+      originalPrice: "$1250 USD",
+      description: t('plans.planTypes.platinum.description'),
+      icon: Diamond,
+      features: [
+        `1000 ${t('plans.features.dailySignals')}`,
+        `2% ${t('plans.features.dailyProfit')}`,
+        t('plans.features.platinumMembers'),
+        t('plans.features.weeklyConsulting'),
+        t('plans.features.vipStrategies'),
+        t('plans.features.betaAccess'),
+        t('plans.features.prioritySupport247'),
+        t('plans.features.personalAnalyst')
+      ],
+      popular: false,
+      gradient: "from-slate-600 to-slate-400",
+      borderColor: "border-slate-500/50",
+      buttonColor: "bg-slate-600 hover:bg-slate-700",
+      paymentType: "both"
+    }
+  ];
+
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
@@ -137,25 +144,25 @@ export default function PlansPage() {
     >
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-4">
-          Escolha Seu{" "}
+          {t('plans.title')}{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
-            Plano
+            {t('plans.planWord')}
           </span>
         </h1>
         <p className="text-white/70 text-lg max-w-2xl mx-auto mb-6">
-          Cada plano foi desenvolvido para maximizar seus lucros no mercado de opções binárias com nossa IA avançada.
+          {t('plans.subtitle')}
         </p>
         
         {/* Important Notice */}
         <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4 max-w-4xl mx-auto">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <Star className="w-5 h-5 text-yellow-400" />
-            <h3 className="text-yellow-400 font-bold text-lg">IMPORTANTE</h3>
+            <h3 className="text-yellow-400 font-bold text-lg">{t('plans.important')}</h3>
             <Star className="w-5 h-5 text-yellow-400" />
           </div>
           <p className="text-white/90 text-base">
-            Você pode adquirir até <span className="font-bold text-yellow-400">5 contas por plano</span>, sendo necessário <span className="font-bold text-yellow-400">comprar uma por vez</span>. 
-            Após a confirmação do pagamento, você poderá adquirir contas adicionais do mesmo plano.
+            {t('plans.multipleAccounts')} <span className="font-bold text-yellow-400">{t('plans.accountsPerPlan')}</span>, {t('plans.buyOneAtTime')} <span className="font-bold text-yellow-400">{t('plans.oneAtATime')}</span>. 
+            {t('plans.afterPayment')}
           </p>
         </div>
       </div>
@@ -172,7 +179,7 @@ export default function PlansPage() {
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-bold px-4 py-2 rounded-full">
-                  MAIS POPULAR
+                  {t('plans.mostPopular')}
                 </div>
               </div>
             )}
@@ -190,6 +197,11 @@ export default function PlansPage() {
                     <div className="text-3xl font-bold text-white">
                       {plan.price}
                     </div>
+                    {plan.priceUSD && (
+                      <div className="text-lg font-semibold text-blue-400">
+                        {plan.priceUSD}
+                      </div>
+                    )}
                     {plan.priceInReals && (
                       <div className="text-lg font-semibold text-yellow-400">
                         {plan.priceInReals}
@@ -197,6 +209,9 @@ export default function PlansPage() {
                     )}
                     <div className="text-sm text-white/50 line-through">
                       {plan.originalPrice}
+                      {plan.originalPriceUSD && (
+                        <div>{plan.originalPriceUSD}</div>
+                      )}
                     </div>
                   </div>
                   <p className="text-white/70 text-sm mt-2">
@@ -219,12 +234,12 @@ export default function PlansPage() {
                   className={`w-full font-semibold py-3 text-base transition-all duration-300 ${plan.buttonColor} text-white hover:scale-105`}
                   onClick={() => handlePurchase(plan)}
                 >
-                  ASSINAR AGORA
+                  {t('plans.subscribeNow')}
                 </Button>
                 
                 <div className="text-center">
                   <p className="text-xs text-white/50">
-                    Pagamento único • Acesso imediato
+                    {t('plans.singlePayment')} • {t('plans.immediateAccess')}
                   </p>
                 </div>
               </CardContent>

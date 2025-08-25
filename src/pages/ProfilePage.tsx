@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, Mail, Phone, Upload, Key } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProfilePageProps {
   user: any;
@@ -20,13 +21,14 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
   const [passwordData, setPasswordData] = useState({ current: '', new: '', confirm: '' });
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordData.new !== passwordData.confirm) {
       toast({
-        title: "Erro",
-        description: "Nova senha e confirmação não coincidem",
+        title: t('common.error'),
+        description: t('profile.passwordMismatch'),
         variant: "destructive"
       });
       return;
@@ -41,8 +43,8 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
       if (error) throw error;
 
       toast({
-        title: "Sucesso",
-        description: "Senha atualizada com sucesso"
+        title: t('common.success'),
+        description: t('profile.passwordChanged')
       });
       setPasswordData({ current: '', new: '', confirm: '' });
     } catch (error: any) {
@@ -88,8 +90,8 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
 
       onProfileUpdate();
       toast({
-        title: "Sucesso",
-        description: "Foto de perfil atualizada"
+        title: t('common.success'),
+        description: t('profile.photoUpdated')
       });
     } catch (error: any) {
       toast({
@@ -110,8 +112,8 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Perfil</h2>
-        <p className="text-white/70">Gerencie suas informações pessoais</p>
+        <h2 className="text-3xl font-bold text-white mb-2">{t('profile.title')}</h2>
+        <p className="text-white/70">{t('profile.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -120,7 +122,7 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <User className="w-5 h-5" />
-              Informações Pessoais
+              {t('profile.personalInfo')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -141,22 +143,22 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
                 />
                 <Button variant="outline" className="border-white/20 text-white">
                   <Upload className="w-4 h-4 mr-2" />
-                  Alterar Foto
+                  {t('profile.changePhoto')}
                 </Button>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label className="text-white/70">Nome Completo</Label>
+                <Label className="text-white/70">{t('profile.fullName')}</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <User className="w-4 h-4 text-white/40" />
-                  <span className="text-white">{profile?.full_name || 'Não informado'}</span>
+                  <span className="text-white">{profile?.full_name || t('profile.notInformed')}</span>
                 </div>
               </div>
 
               <div>
-                <Label className="text-white/70">E-mail</Label>
+                <Label className="text-white/70">{t('profile.email')}</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <Mail className="w-4 h-4 text-white/40" />
                   <span className="text-white">{user.email}</span>
@@ -164,14 +166,14 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
               </div>
 
               <div>
-                <Label className="text-white/70">Plano Atual</Label>
+                <Label className="text-white/70">{t('profile.currentPlan')}</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-white uppercase font-medium">{profile?.plan || 'FREE'}</span>
                 </div>
               </div>
 
               <div>
-                <Label className="text-white/70">Código de Indicação</Label>
+                <Label className="text-white/70">{t('profile.referralCode')}</Label>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-purple-400 font-mono">{profile?.referral_code}</span>
                   <Button 
@@ -179,10 +181,10 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
                     variant="outline"
                     onClick={() => {
                       navigator.clipboard.writeText(profile?.referral_code || '');
-                      toast({ title: "Código copiado!" });
+                      toast({ title: t('profile.codeCopied') });
                     }}
                   >
-                    Copiar
+                    {t('common.copy')}
                   </Button>
                 </div>
               </div>
@@ -195,13 +197,13 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <Key className="w-5 h-5" />
-              Alterar Senha
+              {t('profile.changePassword')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <Label className="text-white/70">Nova Senha</Label>
+                <Label className="text-white/70">{t('profile.newPassword')}</Label>
                 <Input
                   type="password"
                   value={passwordData.new}
@@ -213,7 +215,7 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
               </div>
 
               <div>
-                <Label className="text-white/70">Confirmar Nova Senha</Label>
+                <Label className="text-white/70">{t('profile.confirmPassword')}</Label>
                 <Input
                   type="password"
                   value={passwordData.confirm}
@@ -229,7 +231,7 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
                 disabled={isLoading}
                 className="w-full bg-purple-600 hover:bg-purple-700"
               >
-                {isLoading ? 'Atualizando...' : 'Alterar Senha'}
+                {isLoading ? t('profile.updating') : t('profile.changePassword')}
               </Button>
             </form>
           </CardContent>
