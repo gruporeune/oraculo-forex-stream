@@ -26,8 +26,15 @@ serve(async (req) => {
     const publicKey = Deno.env.get('SECRETPAY_PUBLIC_KEY')!
     const privateKey = Deno.env.get('SECRETPAY_PRIVATE_KEY')!
 
+    console.log('SecretPay credentials check:', { 
+      hasPublicKey: !!publicKey, 
+      hasPrivateKey: !!privateKey,
+      publicKeyLength: publicKey?.length || 0,
+      privateKeyLength: privateKey?.length || 0
+    })
+
     if (!publicKey || !privateKey) {
-      console.error('SecretPay credentials not configured')
+      console.error('SecretPay credentials not configured:', { publicKey: !!publicKey, privateKey: !!privateKey })
       throw new Error('SecretPay credentials not configured')
     }
 
@@ -92,6 +99,12 @@ serve(async (req) => {
         'Accept': 'application/json'
       },
       body: JSON.stringify(secretPayPayload)
+    })
+
+    console.log('SecretPay API call completed:', {
+      status: secretPayResponse.status,
+      statusText: secretPayResponse.statusText,
+      headers: Object.fromEntries(secretPayResponse.headers.entries())
     })
 
     console.log('SecretPay response status:', secretPayResponse.status)
