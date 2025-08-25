@@ -124,13 +124,11 @@ export type Database = {
       }
       payment_transactions: {
         Row: {
-          abacate_payment_id: string | null
           amount: number
           created_at: string
           external_id: string
           id: string
           paid_at: string | null
-          paylatam_transaction_id: string | null
           payment_provider: string | null
           plan_name: string
           qr_code: string | null
@@ -141,13 +139,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          abacate_payment_id?: string | null
           amount: number
           created_at?: string
           external_id: string
           id?: string
           paid_at?: string | null
-          paylatam_transaction_id?: string | null
           payment_provider?: string | null
           plan_name: string
           qr_code?: string | null
@@ -158,13 +154,11 @@ export type Database = {
           user_id: string
         }
         Update: {
-          abacate_payment_id?: string | null
           amount?: number
           created_at?: string
           external_id?: string
           id?: string
           paid_at?: string | null
-          paylatam_transaction_id?: string | null
           payment_provider?: string | null
           plan_name?: string
           qr_code?: string | null

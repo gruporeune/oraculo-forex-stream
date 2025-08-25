@@ -6,106 +6,117 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface PayLatamWebhook {
-  external_id: string
-  status: string
-  transaction_id: string
-  amount: number
-  paid_at?: string
-}
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    console.log('🎣 SecretPay webhook received')
+    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-
-    // Initialize Supabase client with service role
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-    // Parse webhook data
-    const webhookData: PayLatamWebhook = await req.json()
-    
-    console.log('PayLatam webhook received:', webhookData)
+    const webhookData = await req.json()
+    console.log('📋 Webhook data:', JSON.stringify(webhookData, null, 2))
+
+    // Extract external reference from webhook
+    const externalRef = webhookData.data?.externalRef || webhookData.externalRef
+    const status = webhookData.data?.status || webhookData.status
+
+    if (!externalRef) {
+      console.error('❌ No external reference found in webhook')
+      return new Response('No external reference found', { status: 400 })
+    }
+
+    console.log('🔍 Looking for transaction:', externalRef, 'with status:', status)
 
     // Find the payment transaction
     const { data: transaction, error: fetchError } = await supabase
       .from('payment_transactions')
       .select('*')
-      .eq('external_id', webhookData.external_id)
+      .eq('external_id', externalRef)
+      .eq('payment_provider', 'secretpay')
       .single()
 
     if (fetchError || !transaction) {
-      console.error('Transaction not found:', webhookData.external_id, fetchError)
+      console.error('❌ Transaction not found:', externalRef, fetchError)
       return new Response('Transaction not found', { status: 404 })
     }
+
+    // Map SecretPay status to our internal status
+    let internalStatus = 'pending'
+    if (status === 'paid' || status === 'approved' || status === 'completed') {
+      internalStatus = 'paid'
+    } else if (status === 'failed' || status === 'cancelled' || status === 'refunded') {
+      internalStatus = 'failed'
+    }
+
+    console.log(`📊 Updating transaction ${externalRef}: ${transaction.status} → ${internalStatus}`)
 
     // Update transaction status
     const { error: updateError } = await supabase
       .from('payment_transactions')
       .update({
-        status: webhookData.status,
-        paid_at: webhookData.paid_at || null,
+        status: internalStatus,
+        paid_at: internalStatus === 'paid' ? new Date().toISOString() : null,
         updated_at: new Date().toISOString()
       })
-      .eq('external_id', webhookData.external_id)
+      .eq('external_id', externalRef)
 
     if (updateError) {
-      console.error('Error updating transaction:', updateError)
+      console.error('❌ Error updating transaction:', updateError)
       return new Response('Error updating transaction', { status: 500 })
     }
 
     // If payment is approved, activate the plan
-    if (webhookData.status === 'approved' || webhookData.status === 'paid') {
-      console.log('Payment approved, activating plan:', transaction.plan_name, 'for user:', transaction.user_id)
+    if (internalStatus === 'paid') {
+      console.log('💰 Payment approved! Activating plan:', transaction.plan_name)
 
       // Update user profile with new plan
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          plan: transaction.plan_name,
+          plan: transaction.plan_name.toLowerCase(),
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.user_id)
 
       if (profileError) {
-        console.error('Error updating user profile:', profileError)
+        console.error('❌ Error updating profile:', profileError)
       }
 
-      // Check if user plan already exists to prevent duplicate commissions
-      const { data: existingPlan } = await supabase
+      // Check if user already has 5 plans (maximum allowed)
+      const { data: userPlans } = await supabase
         .from('user_plans')
         .select('id')
         .eq('user_id', transaction.user_id)
-        .eq('plan_name', transaction.plan_name)
         .eq('is_active', true)
-        .single();
 
-      // Only insert user plan if it doesn't exist (prevents duplicate commission processing)
-      if (!existingPlan) {
+      const planCount = userPlans?.length || 0
+
+      if (planCount < 5) {
+        // Create user plan record
         const { error: planError } = await supabase
           .from('user_plans')
           .insert({
             user_id: transaction.user_id,
-            plan_name: transaction.plan_name,
+            plan_name: transaction.plan_name.toLowerCase(),
             purchase_date: new Date().toISOString(),
             is_active: true
           })
 
         if (planError) {
-          console.error('Error creating user plan record:', planError)
+          console.error('❌ Error creating user plan:', planError)
         } else {
-          console.log('User plan inserted successfully - commissions will be processed automatically')
+          console.log('✅ User plan created - referral commissions will be processed automatically')
         }
       } else {
-        console.log('User plan already exists - skipping commission processing to prevent duplicates')
+        console.log('⚠️ User already has maximum number of plans (5)')
       }
 
-      console.log('Plan activated successfully for user:', transaction.user_id)
+      console.log('✅ Plan activated successfully!')
     }
 
     return new Response('Webhook processed successfully', {
@@ -114,7 +125,7 @@ serve(async (req) => {
     })
 
   } catch (error) {
-    console.error('Webhook processing error:', error)
+    console.error('❌ Webhook processing error:', error)
     return new Response('Webhook processing failed', {
       headers: corsHeaders,
       status: 500

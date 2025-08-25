@@ -1,22 +1,13 @@
 project_id = "nzxidhlktjpzkxhofswx"
 
 [functions.create-payment]
-verify_jwt = true
+verify_jwt = false
 
-[functions.create-secretpay-payment]
-verify_jwt = true
-
-[functions.check-secretpay-payment]
-verify_jwt = true
-
-[functions.create-secretpay-withdrawal]
-verify_jwt = true
+[functions.test-secretpay]
+verify_jwt = false
 
 [functions.payment-webhook]
 verify_jwt = false
 
-[functions.secretpay-webhook]
-verify_jwt = false
-
-[functions.secretpay-withdrawal-webhook]
+[functions.fix-duplicate-commissions]
 verify_jwt = false

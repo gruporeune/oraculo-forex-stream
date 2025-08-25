@@ -24,7 +24,7 @@ export function PendingPaymentsChecker() {
 
       console.log('Checking pending payments for user:', user.id);
 
-      // Get pending SecretPay transactions with better error handling
+      // Get pending transactions
       const { data: pendingTransactions, error } = await supabase
         .from('payment_transactions')
         .select('id, external_id, plan_name, status, payment_provider, created_at')
@@ -56,25 +56,18 @@ export function PendingPaymentsChecker() {
 
       console.log('Found pending transactions:', pendingTransactions.length);
 
-      // Check each pending transaction
+      // Check each pending transaction by querying database status
       let activatedPlans = 0;
       for (const transaction of pendingTransactions) {
-        try {
-          console.log('Checking transaction:', transaction.external_id);
-          const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
-            body: {
-              payment_id: transaction.external_id,
-              user_id: user.id
-            }
-          });
+        // Re-check transaction status in database
+        const { data: updatedTransaction } = await supabase
+          .from('payment_transactions')
+          .select('status')
+          .eq('id', transaction.id)
+          .single();
 
-          console.log('Function response:', { data, error });
-
-          if (!error && data?.status === 'paid') {
-            activatedPlans++;
-          }
-        } catch (error) {
-          console.error('Error checking transaction:', transaction.external_id, error);
+        if (updatedTransaction?.status === 'paid') {
+          activatedPlans++;
         }
       }
 
@@ -138,25 +131,11 @@ export function PendingPaymentsChecker() {
         return;
       }
 
-      // Check each recent transaction
+      // Check each recent transaction by database status
       let activatedPlans = 0;
       for (const transaction of recentTransactions) {
-        if (transaction.status === 'pending' && transaction.payment_provider === 'secretpay') {
-          try {
-            console.log('Checking recent transaction:', transaction.external_id);
-            const { data, error } = await supabase.functions.invoke('check-secretpay-payment', {
-              body: {
-                payment_id: transaction.external_id,
-                user_id: userId
-              }
-            });
-
-            if (!error && data?.status === 'paid') {
-              activatedPlans++;
-            }
-          } catch (error) {
-            console.error('Error checking recent transaction:', transaction.external_id, error);
-          }
+        if (transaction.status === 'paid') {
+          activatedPlans++;
         }
       }
 

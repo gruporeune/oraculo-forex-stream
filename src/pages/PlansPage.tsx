@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
-import { PaymentModal } from '@/components/PaymentModal';
-import { USDTPaymentModal } from '@/components/USDTPaymentModal';
+import { SimplePaymentModal } from '@/components/SimplePaymentModal';
 
 const plans = [
   {
@@ -49,27 +48,6 @@ const plans = [
     paymentType: "pix"
   },
   {
-    name: "INTERNATIONAL",
-    price: "$100 USD",
-    originalPrice: "$150 USD",
-    description: "Para traders internacionais",
-    icon: Crown,
-    features: [
-      "100 sinais por dia",
-      "1% lucro diário até 200%",
-      "Área de membros VIP",
-      "Suporte prioritário",
-      "Análises técnicas avançadas",
-      "Webinars exclusivos",
-      "Relatórios personalizados"
-    ],
-    popular: false,
-    gradient: "from-cyan-600 to-blue-400",
-    borderColor: "border-cyan-500/50",
-    buttonColor: "bg-cyan-600 hover:bg-cyan-700",
-    paymentType: "usdt"
-  },
-  {
     name: "PREMIUM",
     price: "$458 USD",
     priceInReals: "R$ 2.750",
@@ -90,7 +68,7 @@ const plans = [
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700",
-    paymentType: "usdt"
+    paymentType: "both" // Premium can pay with both PIX or USDT
   },
   {
     name: "PLATINUM",
@@ -113,22 +91,17 @@ const plans = [
     gradient: "from-slate-600 to-slate-400",
     borderColor: "border-slate-500/50",
     buttonColor: "bg-slate-600 hover:bg-slate-700",
-    paymentType: "usdt"
+    paymentType: "both" // Platinum can pay with both PIX or USDT
   }
 ];
 
 export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
 
   const handlePurchase = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
-    if (plan.paymentType === 'usdt') {
-      setIsUSDTModalOpen(true);
-    } else {
-      setIsPaymentModalOpen(true);
-    }
+    setIsPaymentModalOpen(true);
   };
 
   return (
@@ -163,7 +136,7 @@ export default function PlansPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
@@ -236,26 +209,16 @@ export default function PlansPage() {
         ))}
       </div>
 
-      {/* Payment Modals */}
+      {/* Payment Modal */}
       {selectedPlan && (
-        <>
-          <PaymentModal
-            isOpen={isPaymentModalOpen}
-            onClose={() => {
-              setIsPaymentModalOpen(false);
-              setSelectedPlan(null);
-            }}
-            plan={selectedPlan}
-          />
-          <USDTPaymentModal
-            isOpen={isUSDTModalOpen}
-            onClose={() => {
-              setIsUSDTModalOpen(false);
-              setSelectedPlan(null);
-            }}
-            plan={selectedPlan}
-          />
-        </>
+        <SimplePaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setSelectedPlan(null);
+          }}
+          plan={selectedPlan}
+        />
       )}
 
     </motion.div>
