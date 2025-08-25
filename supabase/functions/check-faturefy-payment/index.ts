@@ -34,6 +34,7 @@ serve(async (req) => {
     console.log('Checking payment status for:', payment_id);
 
     // Call Faturefy status check API
+    console.log('Making request to Faturefy API with payment_id:', payment_id);
     const statusResponse = await fetch(`https://api.faturefy.site/checkout/status_checkout/${payment_id}`, {
       method: 'GET',
       headers: {
@@ -42,6 +43,8 @@ serve(async (req) => {
       }
     });
 
+    console.log('Faturefy API response status:', statusResponse.status);
+    
     if (!statusResponse.ok) {
       const errorText = await statusResponse.text();
       console.error('Faturefy status API error:', statusResponse.status, errorText);
@@ -56,6 +59,9 @@ serve(async (req) => {
 
     const statusData = await statusResponse.json();
     console.log('Faturefy status response:', JSON.stringify(statusData, null, 2));
+    
+    // Log the exact status value for debugging
+    console.log('Status from Faturefy:', statusData.status, 'Type:', typeof statusData.status);
 
     // Get the payment transaction from our database
     const { data: transaction, error: transactionError } = await supabase
