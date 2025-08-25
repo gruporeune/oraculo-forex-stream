@@ -3,7 +3,9 @@ import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
-import { SimplePaymentModal } from '@/components/SimplePaymentModal';
+import { PaymentModal } from '@/components/PaymentModal';
+import { USDTPaymentModal } from '@/components/USDTPaymentModal';
+import { PaymentMethodModal } from '@/components/PaymentMethodModal';
 
 const plans = [
   {
@@ -98,10 +100,32 @@ const plans = [
 export default function PlansPage() {
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
+  const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
 
   const handlePurchase = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
-    setIsPaymentModalOpen(true);
+    
+    if (plan.paymentType === 'both') {
+      // Premium and Platinum - show method selection
+      setIsPaymentMethodModalOpen(true);
+    } else if (plan.paymentType === 'usdt') {
+      // International - direct USDT
+      setIsUSDTModalOpen(true);
+    } else {
+      // Partner and Master - direct PIX
+      setIsPaymentModalOpen(true);
+    }
+  };
+
+  const handlePaymentMethodSelect = (method: 'pix' | 'usdt') => {
+    setIsPaymentMethodModalOpen(false);
+    
+    if (method === 'pix') {
+      setIsPaymentModalOpen(true);
+    } else {
+      setIsUSDTModalOpen(true);
+    }
   };
 
   return (
@@ -209,16 +233,35 @@ export default function PlansPage() {
         ))}
       </div>
 
-      {/* Payment Modal */}
+      {/* Payment Modals */}
       {selectedPlan && (
-        <SimplePaymentModal
-          isOpen={isPaymentModalOpen}
-          onClose={() => {
-            setIsPaymentModalOpen(false);
-            setSelectedPlan(null);
-          }}
-          plan={selectedPlan}
-        />
+        <>
+          <PaymentMethodModal
+            isOpen={isPaymentMethodModalOpen}
+            onClose={() => {
+              setIsPaymentMethodModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            onSelectPaymentMethod={handlePaymentMethodSelect}
+            plan={selectedPlan}
+          />
+          <PaymentModal
+            isOpen={isPaymentModalOpen}
+            onClose={() => {
+              setIsPaymentModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            plan={selectedPlan}
+          />
+          <USDTPaymentModal
+            isOpen={isUSDTModalOpen}
+            onClose={() => {
+              setIsUSDTModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            plan={selectedPlan}
+          />
+        </>
       )}
 
     </motion.div>

@@ -24,13 +24,13 @@ export function PendingPaymentsChecker() {
 
       console.log('Checking pending payments for user:', user.id);
 
-      // Get pending transactions
+      // Get pending Faturefy transactions with better error handling
       const { data: pendingTransactions, error } = await supabase
         .from('payment_transactions')
         .select('id, external_id, plan_name, status, payment_provider, created_at')
         .eq('user_id', user.id)
         .eq('status', 'pending')
-        .eq('payment_provider', 'secretpay')
+        .eq('payment_provider', 'faturefy')
         .order('created_at', { ascending: false });
 
       console.log('Query result:', { pendingTransactions, error });
@@ -56,18 +56,25 @@ export function PendingPaymentsChecker() {
 
       console.log('Found pending transactions:', pendingTransactions.length);
 
-      // Check each pending transaction by querying database status
+      // Check each pending transaction
       let activatedPlans = 0;
       for (const transaction of pendingTransactions) {
-        // Re-check transaction status in database
-        const { data: updatedTransaction } = await supabase
-          .from('payment_transactions')
-          .select('status')
-          .eq('id', transaction.id)
-          .single();
+        try {
+          console.log('Checking transaction:', transaction.external_id);
+          const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
+            body: {
+              payment_id: transaction.external_id,
+              user_id: user.id
+            }
+          });
 
-        if (updatedTransaction?.status === 'paid') {
-          activatedPlans++;
+          console.log('Function response:', { data, error });
+
+          if (!error && data?.status === 'paid') {
+            activatedPlans++;
+          }
+        } catch (error) {
+          console.error('Error checking transaction:', transaction.external_id, error);
         }
       }
 
@@ -131,11 +138,25 @@ export function PendingPaymentsChecker() {
         return;
       }
 
-      // Check each recent transaction by database status
+      // Check each recent transaction
       let activatedPlans = 0;
       for (const transaction of recentTransactions) {
-        if (transaction.status === 'paid') {
-          activatedPlans++;
+        if (transaction.status === 'pending' && transaction.payment_provider === 'faturefy') {
+          try {
+            console.log('Checking recent transaction:', transaction.external_id);
+            const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
+              body: {
+                payment_id: transaction.external_id,
+                user_id: userId
+              }
+            });
+
+            if (!error && data?.status === 'paid') {
+              activatedPlans++;
+            }
+          } catch (error) {
+            console.error('Error checking recent transaction:', transaction.external_id, error);
+          }
         }
       }
 
