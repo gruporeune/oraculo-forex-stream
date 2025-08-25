@@ -75,7 +75,7 @@ serve(async (req) => {
 
     // Prepare SecretPay payload for PIX payment
     const secretPayPayload = {
-      amount: Math.round(amount * 100), // Amount in cents
+      amount: Math.round(amount * 100),
       externalRef: externalId,
       paymentMethod: "pix",
       postbackUrl: `${supabaseUrl}/functions/v1/secretpay-webhook`,
