@@ -11,72 +11,96 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🧪 TESTE SIMPLES SecretPay')
+    console.log('🧪 TESTE SecretPay - FORMATO OFICIAL')
     
     const publicKey = Deno.env.get('SECRETPAY_PUBLIC_KEY')
     const privateKey = Deno.env.get('SECRETPAY_PRIVATE_KEY')
     
     console.log('🔑 Chaves:', {
-      public: publicKey ? 'OK' : 'FALTANDO',
-      private: privateKey ? 'OK' : 'FALTANDO'
+      public: publicKey ? `${publicKey.substring(0, 10)}...` : 'FALTANDO',
+      private: privateKey ? `${privateKey.substring(0, 10)}...` : 'FALTANDO'
     })
 
     if (!publicKey || !privateKey) {
-      throw new Error('Chaves não encontradas')
+      throw new Error('Chaves SecretPay não encontradas')
     }
 
-    // Payload mínimo para teste
+    const requestData = await req.json()
+    console.log('📥 Dados recebidos:', requestData)
+
+    // PAYLOAD OFICIAL DA SECRETPAY (baseado na documentação oficial)
     const payload = {
-      amount: 20000,
-      externalRef: `test_${Date.now()}`,
-      paymentMethod: "pix",
-      customer: {
-        name: "Teste User",
-        email: "teste@teste.com",
-        phone: "11999999999",
-        document: {
-          type: "CPF",
-          number: "12345678901"
+      amount: 20000, // Valor em centavos (R$ 200.00)
+      paymentMethod: "pix", // Método de pagamento
+      items: [
+        {
+          name: "Plano Partner",
+          unitPrice: 20000, // Preço unitário em centavos
+          quantity: 1,
+          tangible: false // Produto digital
         }
+      ],
+      customer: {
+        name: requestData.userName || "Teste User",
+        email: requestData.userEmail || "teste@teste.com",
+        phone: requestData.userPhone || "11999999999",
+        document: (requestData.userDocument || "12345678901").replace(/\D/g, '')
       },
-      items: [{
-        name: "Teste",
-        value: 20000,
-        quantity: 1
-      }]
+      postbackUrl: "https://nzxidhlktjpzkxhofswx.supabase.co/functions/v1/payment-webhook",
+      externalRef: `test_${Date.now()}`
     }
 
-    console.log('📦 Payload:', JSON.stringify(payload, null, 2))
+    console.log('📦 Payload OFICIAL:', JSON.stringify(payload, null, 2))
 
     const credentials = btoa(`${publicKey}:${privateKey}`)
+    console.log('🔐 Auth header:', `Basic ${credentials.substring(0, 20)}...`)
     
     const response = await fetch('https://api.secretpay.com.br/v1/transactions', {
       method: 'POST',
       headers: {
         'Authorization': `Basic ${credentials}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify(payload)
     })
 
-    console.log('📊 Status:', response.status)
+    console.log('📊 Status da resposta:', response.status)
+    console.log('📊 Headers da resposta:', Object.fromEntries(response.headers.entries()))
     
-    const result = await response.text()
-    console.log('📄 Resposta:', result)
+    const responseText = await response.text()
+    console.log('📄 Corpo da resposta:', responseText)
+
+    let responseJson = null
+    try {
+      responseJson = JSON.parse(responseText)
+    } catch (e) {
+      console.log('⚠️ Resposta não é JSON válido')
+    }
 
     return new Response(JSON.stringify({
       success: response.ok,
       status: response.status,
-      data: result
+      responseText: responseText,
+      responseJson: responseJson,
+      testInfo: {
+        payloadSent: payload,
+        credentialsUsed: {
+          publicKey: publicKey ? `${publicKey.substring(0, 10)}...` : 'MISSING',
+          privateKey: privateKey ? `${privateKey.substring(0, 10)}...` : 'MISSING'
+        }
+      }
     }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 200
     })
 
   } catch (error) {
     console.error('💥 Erro:', error)
     return new Response(JSON.stringify({
       success: false,
-      error: error.message
+      error: error.message,
+      stack: error.stack
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500
