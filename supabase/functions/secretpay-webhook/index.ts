@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -6,12 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface PayLatamWebhook {
-  external_id: string
+interface SecretPayWebhookData {
+  id: number
   status: string
-  transaction_id: string
   amount: number
-  paid_at?: string
+  externalRef: string
+  customer: {
+    name: string
+    email: string
+    document: {
+      type: string
+      number: string
+    }
+  }
+  paymentMethod: string
+  paidAt?: string
+  createdAt: string
+}
+
+interface SecretPayWebhook {
+  id: string
+  type: string
+  url: string
+  objectId: string
+  data: SecretPayWebhookData
 }
 
 serve(async (req) => {
@@ -28,46 +47,66 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
     // Parse webhook data
-    const webhookData: PayLatamWebhook = await req.json()
+    const webhookData: SecretPayWebhook = await req.json()
     
-    console.log('PayLatam webhook received:', webhookData)
+    console.log('SecretPay webhook received:', webhookData)
 
-    // Find the payment transaction
+    // Extract transaction data from webhook
+    const transactionData = webhookData.data
+    const externalRef = transactionData.externalRef
+
+    // Find the payment transaction using external_id
     const { data: transaction, error: fetchError } = await supabase
       .from('payment_transactions')
       .select('*')
-      .eq('external_id', webhookData.external_id)
+      .eq('external_id', externalRef)
       .single()
 
     if (fetchError || !transaction) {
-      console.error('Transaction not found:', webhookData.external_id, fetchError)
-      return new Response('Transaction not found', { status: 404 })
+      console.error('Transaction not found:', externalRef, fetchError)
+      return new Response('Transaction not found', { 
+        status: 404,
+        headers: corsHeaders 
+      })
     }
+
+    // Map SecretPay status to our internal status
+    let internalStatus = 'pending'
+    if (transactionData.status === 'paid' || transactionData.status === 'approved') {
+      internalStatus = 'paid'
+    } else if (transactionData.status === 'failed' || transactionData.status === 'cancelled' || transactionData.status === 'refunded') {
+      internalStatus = 'failed'
+    }
+
+    console.log(`Updating transaction ${externalRef} status from ${transaction.status} to ${internalStatus}`)
 
     // Update transaction status
     const { error: updateError } = await supabase
       .from('payment_transactions')
       .update({
-        status: webhookData.status,
-        paid_at: webhookData.paid_at || null,
+        status: internalStatus,
+        paid_at: internalStatus === 'paid' ? (transactionData.paidAt || new Date().toISOString()) : null,
         updated_at: new Date().toISOString()
       })
-      .eq('external_id', webhookData.external_id)
+      .eq('external_id', externalRef)
 
     if (updateError) {
       console.error('Error updating transaction:', updateError)
-      return new Response('Error updating transaction', { status: 500 })
+      return new Response('Error updating transaction', { 
+        status: 500,
+        headers: corsHeaders 
+      })
     }
 
     // If payment is approved, activate the plan
-    if (webhookData.status === 'approved' || webhookData.status === 'paid') {
+    if (internalStatus === 'paid') {
       console.log('Payment approved, activating plan:', transaction.plan_name, 'for user:', transaction.user_id)
 
       // Update user profile with new plan
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          plan: transaction.plan_name,
+          plan: transaction.plan_name.toLowerCase(),
           updated_at: new Date().toISOString()
         })
         .eq('id', transaction.user_id)
@@ -81,7 +120,7 @@ serve(async (req) => {
         .from('user_plans')
         .select('id')
         .eq('user_id', transaction.user_id)
-        .eq('plan_name', transaction.plan_name)
+        .eq('plan_name', transaction.plan_name.toLowerCase())
         .eq('is_active', true)
         .single();
 
@@ -91,7 +130,7 @@ serve(async (req) => {
           .from('user_plans')
           .insert({
             user_id: transaction.user_id,
-            plan_name: transaction.plan_name,
+            plan_name: transaction.plan_name.toLowerCase(),
             purchase_date: new Date().toISOString(),
             is_active: true
           })

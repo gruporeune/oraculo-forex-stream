@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, TrendingUp, DollarSign, Zap, Target, Users, Star, AlertTriangle, Bot, Signal, ArrowUp, ArrowDown, MessageCircle } from "lucide-react";
+import { Play, TrendingUp, DollarSign, Zap, Target, Users, Star, AlertTriangle, Bot, Signal, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { OracleHero } from "@/components/ui/artificial-hero";
 
@@ -403,22 +403,6 @@ export default function ConversionLandingPage() {
                       <Users className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
                       <span className="hidden sm:inline">QUERO ACESSO IMEDIATO - GRÁTIS</span>
                       <span className="sm:hidden">ACESSO GRÁTIS</span>
-                    </a>
-                  </Button>
-                  
-                  <Button 
-                    asChild
-                    className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-4 md:py-6 text-base md:text-lg font-semibold rounded-xl shadow-xl transform transition-all hover:scale-105 border-2 border-green-400/50"
-                  >
-                    <a 
-                      href="https://chat.whatsapp.com/Dils2U8F6kw37VHgv9RJ3H?mode=ac_t" 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="flex items-center justify-center"
-                    >
-                      <MessageCircle className="w-5 h-5 md:w-6 md:h-6 mr-2 md:mr-3" />
-                      <span className="hidden sm:inline">Fale agora com o suporte real via whatsapp</span>
-                      <span className="sm:hidden">Suporte WhatsApp</span>
                     </a>
                   </Button>
                   
