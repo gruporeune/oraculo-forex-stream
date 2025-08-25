@@ -4,6 +4,8 @@ import { User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useDailySignalsReset } from '@/hooks/useDailySignalsReset';
 import DashboardHomePage from './DashboardHomePage';
@@ -19,6 +21,7 @@ export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   // Use the daily signals reset hook
   useDailySignalsReset(user?.id);
@@ -94,6 +97,7 @@ export default function DashboardPage() {
                 </div>
                 
                 <div className="flex items-center space-x-4">
+                  <LanguageSelector />
                   <div className="flex items-center space-x-2">
                     <User className="w-5 h-5" />
                     <span>{profile?.full_name || user.email}</span>
@@ -105,7 +109,7 @@ export default function DashboardPage() {
                     className="text-white/70 hover:text-white"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sair
+                    {t('navigation.logout')}
                   </Button>
                 </div>
               </div>
