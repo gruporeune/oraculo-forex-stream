@@ -20,7 +20,7 @@ const planDetails = {
   },
   partner: {
     name: "PARTNER", 
-    price: "$20",
+    price: "$33",
     icon: Check,
     color: "text-cyber-green",
     borderColor: "border-cyber-green",

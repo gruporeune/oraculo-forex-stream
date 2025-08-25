@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { CreditCard, Coins } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useI18n } from '@/lib/i18n';
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
@@ -17,12 +18,14 @@ interface PaymentMethodModalProps {
 }
 
 export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, plan }: PaymentMethodModalProps) => {
+  const { t } = useI18n();
+  
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[400px] bg-black/95 border border-purple-500/50 text-white">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold">
-            Escolha o método de pagamento
+            {t('payment.method.title')}
           </DialogTitle>
         </DialogHeader>
 
@@ -59,7 +62,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div className="text-left">
-                  <div className="font-bold">PIX</div>
+                  <div className="font-bold">{t('payment.method.pix')}</div>
                   <div className="text-sm text-white/70">
                     {plan.priceInReals || plan.price} - Pagamento instantâneo
                   </div>
@@ -81,7 +84,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
                   <Coins className="w-6 h-6" />
                 </div>
                 <div className="text-left">
-                  <div className="font-bold">USDT (TRC20)</div>
+                  <div className="font-bold">{t('payment.method.usdt')}</div>
                   <div className="text-sm text-white/70">
                     {plan.price} - Criptomoeda
                   </div>

@@ -6,12 +6,14 @@ import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
 import { PaymentModal } from '@/components/PaymentModal';
 import { USDTPaymentModal } from '@/components/USDTPaymentModal';
 import { PaymentMethodModal } from '@/components/PaymentMethodModal';
+import { useI18n } from '@/lib/i18n';
 
 const plans = [
   {
     name: "PARTNER",
-    price: "R$ 200",
-    originalPrice: "R$ 299",
+    price: "$33 USD",
+    priceInReals: "R$ 200",
+    originalPrice: "$50 USD",
     description: "Para resultados consistentes",
     icon: Star,
     features: [
@@ -26,12 +28,13 @@ const plans = [
     gradient: "from-green-600 to-green-400",
     borderColor: "border-green-500/50",
     buttonColor: "bg-green-600 hover:bg-green-700",
-    paymentType: "pix"
+    paymentType: "both"
   },
   {
     name: "MASTER",
-    price: "R$ 600",
-    originalPrice: "R$ 899",
+    price: "$100 USD",
+    priceInReals: "R$ 600",
+    originalPrice: "$150 USD",
     description: "O plano dos profissionais",
     icon: Crown,
     features: [
@@ -47,7 +50,7 @@ const plans = [
     gradient: "from-purple-600 to-purple-400",
     borderColor: "border-purple-500/50",
     buttonColor: "bg-purple-600 hover:bg-purple-700",
-    paymentType: "pix"
+    paymentType: "both"
   },
   {
     name: "PREMIUM",
@@ -98,6 +101,7 @@ const plans = [
 ];
 
 export default function PlansPage() {
+  const { t } = useI18n();
   const [selectedPlan, setSelectedPlan] = useState<typeof plans[0] | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
@@ -107,13 +111,13 @@ export default function PlansPage() {
     setSelectedPlan(plan);
     
     if (plan.paymentType === 'both') {
-      // Premium and Platinum - show method selection
+      // Partner, Master, Premium and Platinum - show method selection
       setIsPaymentMethodModalOpen(true);
     } else if (plan.paymentType === 'usdt') {
       // International - direct USDT
       setIsUSDTModalOpen(true);
     } else {
-      // Partner and Master - direct PIX
+      // Direct PIX only
       setIsPaymentModalOpen(true);
     }
   };
@@ -137,25 +141,24 @@ export default function PlansPage() {
     >
       <div className="text-center mb-8">
         <h1 className="text-4xl font-bold text-white mb-4">
-          Escolha Seu{" "}
+          {t('plans.title')}{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
-            Plano
+            
           </span>
         </h1>
         <p className="text-white/70 text-lg max-w-2xl mx-auto mb-6">
-          Cada plano foi desenvolvido para maximizar seus lucros no mercado de opções binárias com nossa IA avançada.
+          {t('plans.subtitle')}
         </p>
         
         {/* Important Notice */}
         <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg p-4 max-w-4xl mx-auto">
           <div className="flex items-center justify-center space-x-2 mb-2">
             <Star className="w-5 h-5 text-yellow-400" />
-            <h3 className="text-yellow-400 font-bold text-lg">IMPORTANTE</h3>
+            <h3 className="text-yellow-400 font-bold text-lg">{t('plans.important')}</h3>
             <Star className="w-5 h-5 text-yellow-400" />
           </div>
           <p className="text-white/90 text-base">
-            Você pode adquirir até <span className="font-bold text-yellow-400">5 contas por plano</span>, sendo necessário <span className="font-bold text-yellow-400">comprar uma por vez</span>. 
-            Após a confirmação do pagamento, você poderá adquirir contas adicionais do mesmo plano.
+            {t('plans.important.text')}
           </p>
         </div>
       </div>
@@ -172,7 +175,7 @@ export default function PlansPage() {
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                 <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-bold px-4 py-2 rounded-full">
-                  MAIS POPULAR
+                  {t('plans.popular')}
                 </div>
               </div>
             )}
@@ -219,12 +222,12 @@ export default function PlansPage() {
                   className={`w-full font-semibold py-3 text-base transition-all duration-300 ${plan.buttonColor} text-white hover:scale-105`}
                   onClick={() => handlePurchase(plan)}
                 >
-                  ASSINAR AGORA
+                  {t('plans.subscribe')}
                 </Button>
                 
                 <div className="text-center">
                   <p className="text-xs text-white/50">
-                    Pagamento único • Acesso imediato
+                    {t('plans.payment.single')}
                   </p>
                 </div>
               </CardContent>

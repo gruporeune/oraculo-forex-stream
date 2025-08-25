@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { motion } from "framer-motion";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useI18n } from "@/lib/i18n";
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { t } = useI18n();
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -50,10 +53,7 @@ export function Header() {
             >
               Como Começar
             </button>
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <span className="w-4 h-3 bg-gradient-to-r from-green-500 to-blue-500 rounded-sm"></span>
-              <span>Português</span>
-            </div>
+            <LanguageSelector />
           </nav>
 
           {/* CTA Buttons */}
@@ -109,6 +109,9 @@ export function Header() {
               >
                 Como Começar
               </button>
+              <div className="flex items-center justify-between pt-2">
+                <LanguageSelector />
+              </div>
               <div className="flex flex-col space-y-2 pt-4">
                 <Button 
                   variant="ghost" 
