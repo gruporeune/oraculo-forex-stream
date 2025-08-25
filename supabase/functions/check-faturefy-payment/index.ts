@@ -112,17 +112,14 @@ serve(async (req) => {
 
       // Only create new plan if user doesn't have 5 already
       if (planCount < 5) {
-        // Create user plan with proper ON CONFLICT handling
+        // Create user plan - use insert since we already checked for duplicates
         const { error: planError } = await supabase
           .from('user_plans')
-          .upsert({
+          .insert({
             user_id: user_id,
             plan_name: transaction.plan_name,
             is_active: true,
             purchase_date: new Date().toISOString()
-          }, {
-            onConflict: 'user_id,plan_name',
-            ignoreDuplicates: false
           });
 
         if (planError) {
