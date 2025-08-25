@@ -18,7 +18,20 @@ export default {
     filter: 'Filter',
     submit: 'Submit',
     update: 'Update',
-    language: 'Language'
+    language: 'Language',
+    availableToday: 'Available today',
+    dailyProfitability: 'Daily profitability',
+    todaysReferrals: 'Today\'s referrals',
+    withdraw: 'Withdraw',
+    signalsPerDay: 'signals/day',
+    totalAccumulated: 'Total accumulated',
+    last30Days: 'Last 30 days',
+    noHistoryYet: 'No earnings history yet',
+    earningsWillAppear: 'Your daily earnings will appear here after operations',
+    totalProfit: 'Total Profit',
+    commissions: 'Commissions',
+    dailyTotal: 'Daily Total',
+    earnsByPlan: 'Earnings by Plan'
   },
   navigation: {
     dashboard: 'Dashboard',
@@ -39,7 +52,14 @@ export default {
     brokerDescription: 'Register with the brokers recommended by ORACLE',
     officialBroker: 'Official broker',
     premiumTrading: 'Premium trading',
-    vipGroup: 'VIP Group'
+    vipGroup: 'VIP Group',
+    cards: {
+      yourPlans: 'YOUR PLANS',
+      yourSignals: 'YOUR SIGNALS',
+      dailyEarnings: 'DAILY EARNINGS',
+      dailyCommissions: 'TODAY\'S COMMISSIONS',
+      availableBalance: 'AVAILABLE BALANCE'
+    }
   },
   profile: {
     title: 'Profile',
@@ -90,6 +110,33 @@ export default {
       '5': '5 Minutes',
       '15': '15 Minutes'
     }
+  },
+  network: {
+    title: 'Referral Network',
+    subtitle: 'Manage your network and track your commissions',
+    totalReferrals: 'Total Referrals',
+    totalCommissions: 'Total Commissions',
+    dailyCommissions: 'Today\'s Commissions',
+    directReferrals: 'Direct referrals (Level 1)',
+    accumulatedEarnings: 'Accumulated earnings',
+    dailyEarnings: 'Daily earnings',
+    referralLink: 'Your Referral Link',
+    directReferralsList: 'Your Direct Referrals (Level 1)',
+    indirectReferralsList: 'Your Indirect Network (Levels 2 and 3)',
+    loadingReferrals: 'Loading referrals...',
+    noDirectReferrals: 'No direct referrals yet',
+    shareLink: 'Share your link to start earning commissions',
+    noIndirectReferrals: 'No indirect network yet',
+    firstCommission: 'First commission',
+    referredOn: 'Referred on',
+    referredBy: 'Referred by',
+    linkCopied: 'Link copied!',
+    linkCopiedDescription: 'Your referral link has been copied to the clipboard',
+    commissionLevels: 'Share this link and earn commissions on up to 3 levels: 10% on 1st level, 3% on 2nd level and 2% on 3rd level.'
+  },
+  earnings: {
+    title: 'Earnings History',
+    loadingHistory: 'Loading history...'
   },
   plans: {
     title: 'Choose Your',

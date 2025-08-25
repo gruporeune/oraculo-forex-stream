@@ -18,7 +18,20 @@ export default {
     filter: 'Filtrar',
     submit: 'Enviar',
     update: 'Actualizar',
-    language: 'Idioma'
+    language: 'Idioma',
+    availableToday: 'Disponibles hoy',
+    dailyProfitability: 'Rentabilidad diaria',
+    todaysReferrals: 'Referidos de hoy',
+    withdraw: 'Retirar',
+    signalsPerDay: 'señales/día',
+    totalAccumulated: 'Total acumulado',
+    last30Days: 'Últimos 30 días',
+    noHistoryYet: 'Sin historial de ganancias aún',
+    earningsWillAppear: 'Tus ganancias diarias aparecerán aquí después de las operaciones',
+    totalProfit: 'Beneficio Total',
+    commissions: 'Comisiones',
+    dailyTotal: 'Total Diario',
+    earnsByPlan: 'Ganancias por Plan'
   },
   navigation: {
     dashboard: 'Panel',
@@ -39,7 +52,14 @@ export default {
     brokerDescription: 'Regístrate en los brokers recomendados por ORÁCULO',
     officialBroker: 'Broker oficial',
     premiumTrading: 'Trading premium',
-    vipGroup: 'Grupo VIP'
+    vipGroup: 'Grupo VIP',
+    cards: {
+      yourPlans: 'TUS PLANES',
+      yourSignals: 'TUS SEÑALES',
+      dailyEarnings: 'GANANCIA DEL DÍA',
+      dailyCommissions: 'COMISIONES HOY',
+      availableBalance: 'SALDO DISPONIBLE'
+    }
   },
   profile: {
     title: 'Perfil',
@@ -90,6 +110,33 @@ export default {
       '5': '5 Minutos',
       '15': '15 Minutos'
     }
+  },
+  network: {
+    title: 'Red de Referidos',
+    subtitle: 'Gestiona tu red y rastrea tus comisiones',
+    totalReferrals: 'Total de Referidos',
+    totalCommissions: 'Comisiones Totales',
+    dailyCommissions: 'Comisiones Hoy',
+    directReferrals: 'Referidos directos (Nivel 1)',
+    accumulatedEarnings: 'Ganancias acumuladas',
+    dailyEarnings: 'Ganancias diarias',
+    referralLink: 'Tu Enlace de Referido',
+    directReferralsList: 'Tus Referidos Directos (Nivel 1)',
+    indirectReferralsList: 'Tu Red Indirecta (Niveles 2 y 3)',
+    loadingReferrals: 'Cargando referidos...',
+    noDirectReferrals: 'Sin referidos directos aún',
+    shareLink: 'Comparte tu enlace para comenzar a ganar comisiones',
+    noIndirectReferrals: 'Sin red indirecta aún',
+    firstCommission: 'Primera comisión',
+    referredOn: 'Referido el',
+    referredBy: 'Referido por',
+    linkCopied: '¡Enlace copiado!',
+    linkCopiedDescription: 'Tu enlace de referido ha sido copiado al portapapeles',
+    commissionLevels: 'Comparte este enlace y gana comisiones en hasta 3 niveles: 10% en el 1er nivel, 3% en el 2do nivel y 2% en el 3er nivel.'
+  },
+  earnings: {
+    title: 'Historial de Ganancias',
+    loadingHistory: 'Cargando historial...'
   },
   plans: {
     title: 'Elige Tu',

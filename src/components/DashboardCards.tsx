@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DollarSign, TrendingUp, Users, Wallet, Package } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DashboardCardsProps {
   profile: any;
@@ -9,6 +10,7 @@ interface DashboardCardsProps {
 }
 
 export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCardsProps) {
+  const { t } = useLanguage();
   const planLimits = {
     free: { signals: 5, dailyEarnings: 0 },
     partner: { signals: 20, dailyEarnings: 0.10 },
@@ -66,12 +68,12 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Package className="w-4 h-4" />
-            SEUS PLANOS
+            {t('dashboard.cards.yourPlans')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-lg font-bold text-white">{getPlanCounts()}</div>
-          <p className="text-xs text-white/70">{totalSignals} sinais/dia</p>
+          <p className="text-xs text-white/70">{totalSignals} {t('common.signalsPerDay')}</p>
         </CardContent>
       </Card>
 
@@ -80,12 +82,12 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
-            SEUS SINAIS
+            {t('dashboard.cards.yourSignals')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">{remainingSignals}/{totalSignals}</div>
-          <p className="text-xs text-white/70">Disponíveis hoje</p>
+          <p className="text-xs text-white/70">{t('common.availableToday')}</p>
         </CardContent>
       </Card>
 
@@ -94,14 +96,14 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <DollarSign className="w-4 h-4" />
-            GANHO DO DIA
+            {t('dashboard.cards.dailyEarnings')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.daily_earnings || 0)}
           </div>
-          <p className="text-xs text-white/70">Rentabilidade diária</p>
+          <p className="text-xs text-white/70">{t('common.dailyProfitability')}</p>
         </CardContent>
       </Card>
 
@@ -110,14 +112,14 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-4 h-4" />
-            COMISSÕES HOJE
+            {t('dashboard.cards.dailyCommissions')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.daily_referral_commissions || 0)}
           </div>
-          <p className="text-xs text-white/70">Indicações do dia</p>
+          <p className="text-xs text-white/70">{t('common.todaysReferrals')}</p>
         </CardContent>
       </Card>
 
@@ -126,7 +128,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Wallet className="w-4 h-4" />
-            SALDO DISPONÍVEL
+            {t('dashboard.cards.availableBalance')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -138,7 +140,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
             onClick={onWithdraw}
             className="mt-2 w-full bg-yellow-600 hover:bg-yellow-700 text-black"
           >
-            Sacar
+            {t('common.withdraw')}
           </Button>
         </CardContent>
       </Card>
