@@ -30,12 +30,23 @@ serve(async (req) => {
       hasPublicKey: !!publicKey, 
       hasPrivateKey: !!privateKey,
       publicKeyLength: publicKey?.length || 0,
-      privateKeyLength: privateKey?.length || 0
+      privateKeyLength: privateKey?.length || 0,
+      publicKeyPreview: publicKey ? `${publicKey.substring(0, 10)}...` : 'null',
+      privateKeyPreview: privateKey ? `${privateKey.substring(0, 10)}...` : 'null'
     })
 
     if (!publicKey || !privateKey) {
       console.error('SecretPay credentials not configured:', { publicKey: !!publicKey, privateKey: !!privateKey })
       throw new Error('SecretPay credentials not configured')
+    }
+
+    // Test credential format
+    if (!publicKey.startsWith('pk_') || !privateKey.startsWith('sk_')) {
+      console.error('Invalid SecretPay credential format:', { 
+        publicKeyStart: publicKey.substring(0, 3),
+        privateKeyStart: privateKey.substring(0, 3)
+      })
+      throw new Error('Invalid SecretPay credential format')
     }
 
     // Initialize Supabase client
@@ -85,10 +96,11 @@ serve(async (req) => {
       }]
     }
 
-    console.log('SecretPay payload:', secretPayPayload)
+    console.log('SecretPay payload:', JSON.stringify(secretPayPayload, null, 2))
 
     // Create Basic Auth credentials
     const credentials = btoa(`${publicKey}:${privateKey}`)
+    console.log('Basic Auth credentials created (length):', credentials.length)
 
     // Call SecretPay API to create PIX payment
     const secretPayResponse = await fetch('https://api.secretpay.com.br/v1/transactions', {
