@@ -85,7 +85,7 @@ serve(async (req) => {
       const planCount = existingPlans?.length || 0;
 
       if (planCount < 5) {
-        // Add new plan to user_plans
+        // Add new plan to user_plans (allows multiple plans of same type)
         const { error: planError } = await supabase
           .from('user_plans')
           .insert({
