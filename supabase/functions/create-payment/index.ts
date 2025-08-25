@@ -67,26 +67,22 @@ serve(async (req) => {
     // Generate unique external ID
     const externalId = `${plan}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 
-    // SecretPay payload - simple structure for PIX
+    // SecretPay payload - correct structure for PIX
     const payload = {
-      amount: Math.round(amount * 100), // Amount in cents
-      externalRef: externalId,
-      paymentMethod: "pix",
-      postbackUrl: `${supabaseUrl}/functions/v1/payment-webhook`,
+      amount: amount * 100, // Amount in cents
+      external_reference: externalId,
+      payment_method: "pix",
+      postback_url: `${supabaseUrl}/functions/v1/payment-webhook`,
       customer: {
         name: userName,
         email: userEmail,
-        phone: userPhone || '',
-        document: {
-          type: "CPF",
-          number: userDocument
-        }
+        phone: userPhone,
+        document: userDocument.replace(/\D/g, '') // Remove formatting
       },
       items: [{
         name: `Plano ${plan.charAt(0).toUpperCase() + plan.slice(1)}`,
-        value: Math.round(amount * 100),
-        quantity: 1,
-        tangible: false
+        amount: amount * 100,
+        quantity: 1
       }]
     }
 
