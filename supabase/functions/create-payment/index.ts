@@ -22,14 +22,22 @@ serve(async (req) => {
   try {
     console.log('🚀 Creating SecretPay payment...')
     
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    const publicKey = Deno.env.get('SECRETPAY_PUBLIC_KEY')!
-    const privateKey = Deno.env.get('SECRETPAY_PRIVATE_KEY')!
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const publicKey = Deno.env.get('SECRETPAY_PUBLIC_KEY')
+    const privateKey = Deno.env.get('SECRETPAY_PRIVATE_KEY')
+
+    console.log('🔍 Environment check:', {
+      supabaseUrl: supabaseUrl ? 'SET' : 'NOT SET',
+      supabaseServiceKey: supabaseServiceKey ? 'SET' : 'NOT SET',
+      publicKey: publicKey ? `SET (${publicKey.substring(0, 6)}...)` : 'NOT SET',
+      privateKey: privateKey ? `SET (${privateKey.substring(0, 6)}...)` : 'NOT SET'
+    })
 
     // Validate credentials
     if (!publicKey || !privateKey) {
       console.error('❌ SecretPay credentials not configured')
+      console.error('❌ Available env vars:', Object.keys(Deno.env.toObject()).filter(key => key.includes('SECRET')))
       throw new Error('Credenciais SecretPay não configuradas')
     }
 
