@@ -5,24 +5,27 @@ import { motion } from "framer-motion";
 const videos = [
   {
     title: "Como o ORÁCULO Transformou Minha Vida",
-    thumbnail: "/placeholder.svg",
+    thumbnail: "https://img.youtube.com/vi/6qO1AWwVrgk/maxresdefault.jpg",
     duration: "5:42",
     views: "12.4K",
-    author: "Maria Silva"
+    author: "Maria Silva",
+    url: "https://youtu.be/6qO1AWwVrgk?si=HxBkqSs73wqW-vgN"
   },
   {
     title: "R$ 50.000 em 3 Meses com o ORÁCULO",
-    thumbnail: "/placeholder.svg", 
+    thumbnail: "https://img.youtube.com/vi/qtIpqwZ7j8A/maxresdefault.jpg", 
     duration: "8:15",
     views: "23.7K",
-    author: "João Santos"
+    author: "João Santos",
+    url: "https://youtu.be/qtIpqwZ7j8A"
   },
   {
     title: "Demonstração ao Vivo - 10 Trades Vencedores",
     thumbnail: "/placeholder.svg",
     duration: "12:30",
     views: "45.2K", 
-    author: "Equipe ORÁCULO"
+    author: "Equipe ORÁCULO",
+    url: "#"
   }
 ];
 
@@ -55,7 +58,10 @@ export function VideoSection() {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 cursor-pointer group">
+              <Card 
+                className="glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 cursor-pointer group"
+                onClick={() => video.url !== "#" && window.open(video.url, '_blank')}
+              >
                 <div className="relative overflow-hidden rounded-t-lg">
                   <img 
                     src={video.thumbnail} 
