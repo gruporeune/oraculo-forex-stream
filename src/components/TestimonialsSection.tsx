@@ -1,4 +1,48 @@
 import { motion } from "framer-motion";
+import { Play } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
+
+const VideoModal = ({ youtubeId, open, onOpenChange, title }: { youtubeId: string | null; open: boolean; onOpenChange: (open: boolean) => void; title: string | null }) => {
+  if (!youtubeId) return null;
+  const videoSrc = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-black border-gray-800 p-0 max-w-4xl w-full aspect-video">
+        <iframe
+          src={videoSrc}
+          title={title || "Video"}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full rounded-lg"
+        ></iframe>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const videoTestimonials = [
+  {
+    title: "Depoimento #1",
+    thumbnail: "https://img.youtube.com/vi/6qO1AWwVrgk/maxresdefault.jpg",
+    youtubeId: "6qO1AWwVrgk",
+    description: "Finalmente um sistema que funciona de verdade!"
+  },
+  {
+    title: "Depoimento #2", 
+    thumbnail: "https://img.youtube.com/vi/qtIpqwZ7j8A/maxresdefault.jpg",
+    youtubeId: "qtIpqwZ7j8A",
+    description: "Finalmente um sistema que funciona de verdade!"
+  },
+  {
+    title: "Depoimento #3",
+    thumbnail: "/lovable-uploads/892048e8-dfe9-47b0-8259-f7b6b585171d.png",
+    youtubeId: null,
+    description: "Finalmente um sistema que funciona de verdade!",
+    comingSoon: true
+  }
+];
 
 const testimonials = [
   {
@@ -59,9 +103,95 @@ const testimonials = [
 
 
 export function TestimonialsSection() {
+  const [modalVideo, setModalVideo] = useState<{ id: string | null; title: string | null }>({ id: null, title: null });
+
+  const handlePlay = (youtubeId: string, title: string) => {
+    setModalVideo({ id: youtubeId, title });
+  };
+
   return (
     <section className="py-20 px-4">
+      <VideoModal
+        youtubeId={modalVideo.id}
+        title={modalVideo.title}
+        open={!!modalVideo.id}
+        onOpenChange={(isOpen) => !isOpen && setModalVideo({ id: null, title: null })}
+      />
+      
       <div className="max-w-7xl mx-auto">
+        {/* Video Testimonials Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-gradient-primary mb-6">
+            Resultados Reais dos Nossos Usuários
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Veja os depoimentos reais de quem já está lucrando com o ORÁCULO.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          {videoTestimonials.map((video, index) => (
+            <motion.div
+              key={video.title}
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: index * 0.1 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <div 
+                className={`glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 rounded-2xl overflow-hidden ${!video.comingSoon ? 'cursor-pointer group' : ''}`}
+                onClick={() => !video.comingSoon && video.youtubeId && handlePlay(video.youtubeId, video.title)}
+              >
+                <div className="relative overflow-hidden">
+                  <img 
+                    src={video.thumbnail} 
+                    alt={video.title}
+                    className={`w-full h-48 object-cover ${!video.comingSoon ? 'group-hover:scale-105' : ''} transition-transform duration-300`}
+                  />
+                  {!video.comingSoon ? (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/20 transition-all duration-300">
+                      <div className="w-16 h-16 rounded-full bg-gold/90 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-6 h-6 text-black ml-1" fill="currentColor" />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="w-16 h-16 rounded-full bg-gray-600 flex items-center justify-center mx-auto mb-2">
+                          <Play className="w-6 h-6 text-gray-400 ml-1" fill="currentColor" />
+                        </div>
+                        <span className="text-white text-sm">(Em breve)</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-6">
+                  <h3 className="text-lg font-bold text-foreground mb-2">
+                    {video.title}
+                  </h3>
+                  <div className="flex items-center justify-center mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="text-gold text-lg">★</span>
+                    ))}
+                  </div>
+                  <p className="text-center text-muted-foreground italic">
+                    "{video.description}"
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Text Testimonials Section */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}

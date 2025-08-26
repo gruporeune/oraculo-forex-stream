@@ -176,7 +176,7 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
               ></iframe>
               <div className="p-4">
                 <h3 className="text-white font-semibold mb-2">Como o ORÁCULO Transformou Minha Vida</h3>
-                <p className="text-gray-400 text-sm">Maria Silva - 12.4K visualizações</p>
+                <p className="text-gray-400 text-sm">Danilo - 12.4K visualizações</p>
               </div>
             </div>
             <div className="bg-gray-800 rounded-lg overflow-hidden">
@@ -190,7 +190,7 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
               ></iframe>
               <div className="p-4">
                 <h3 className="text-white font-semibold mb-2">R$ 50.000 em 3 Meses com o ORÁCULO</h3>
-                <p className="text-gray-400 text-sm">João Santos - 23.7K visualizações</p>
+                <p className="text-gray-400 text-sm">Melque Junior - 23.7K visualizações</p>
               </div>
             </div>
           </div>
