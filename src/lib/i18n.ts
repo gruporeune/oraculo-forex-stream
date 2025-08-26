@@ -76,6 +76,8 @@ const translations = {
     'dashboard.bulltec.official': 'Corretora oficial',
     'dashboard.exnova.premium': 'Trading premium',
     'dashboard.whatsapp.vip': 'Grupo VIP',
+    'dashboard.video.title': 'Veja o ORÁCULO em Ação',
+    'dashboard.video.subtitle': 'Assista como nossa IA gera sinais vencedores',
 
     // Signals
     'signals.title': 'Gerador de Sinais',
@@ -198,6 +200,8 @@ const translations = {
     'dashboard.bulltec.official': 'Official broker',
     'dashboard.exnova.premium': 'Premium trading',
     'dashboard.whatsapp.vip': 'VIP Group',
+    'dashboard.video.title': 'See ORÁCULO in Action',
+    'dashboard.video.subtitle': 'Watch how our AI generates winning signals',
 
     // Signals
     'signals.title': 'Signal Generator',
@@ -320,6 +324,8 @@ const translations = {
     'dashboard.bulltec.official': 'Broker oficial',
     'dashboard.exnova.premium': 'Trading premium',
     'dashboard.whatsapp.vip': 'Grupo VIP',
+    'dashboard.video.title': 'Mira ORÁCULO en Acción',
+    'dashboard.video.subtitle': 'Ve cómo nuestra IA genera señales ganadoras',
 
     // Signals
     'signals.title': 'Generador de Señales',
