@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Play } from "lucide-react";
 import { motion } from "framer-motion";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useState } from "react";
 
 const videos = [
   {
@@ -9,7 +11,7 @@ const videos = [
     duration: "5:42",
     views: "12.4K",
     author: "Maria Silva",
-    url: "https://youtu.be/6qO1AWwVrgk?si=HxBkqSs73wqW-vgN"
+    youtubeId: "6qO1AWwVrgk"
   },
   {
     title: "R$ 50.000 em 3 Meses com o ORÁCULO",
@@ -17,21 +19,45 @@ const videos = [
     duration: "8:15",
     views: "23.7K",
     author: "João Santos",
-    url: "https://youtu.be/qtIpqwZ7j8A"
-  },
-  {
-    title: "Demonstração ao Vivo - 10 Trades Vencedores",
-    thumbnail: "/placeholder.svg",
-    duration: "12:30",
-    views: "45.2K", 
-    author: "Equipe ORÁCULO",
-    url: "#"
+    youtubeId: "qtIpqwZ7j8A"
   }
 ];
 
+const VideoModal = ({ youtubeId, open, onOpenChange, title }: { youtubeId: string | null; open: boolean; onOpenChange: (open: boolean) => void; title: string | null }) => {
+  if (!youtubeId) return null;
+  const videoSrc = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`;
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="bg-black border-gray-800 p-0 max-w-4xl w-full aspect-video">
+        <iframe
+          src={videoSrc}
+          title={title || "Video"}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full rounded-lg"
+        ></iframe>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 export function VideoSection() {
+  const [modalVideo, setModalVideo] = useState<{ id: string | null; title: string | null }>({ id: null, title: null });
+
+  const handlePlay = (youtubeId: string, title: string) => {
+    setModalVideo({ id: youtubeId, title });
+  };
+
   return (
     <section className="py-20 px-4">
+      <VideoModal
+        youtubeId={modalVideo.id}
+        title={modalVideo.title}
+        open={!!modalVideo.id}
+        onOpenChange={(isOpen) => !isOpen && setModalVideo({ id: null, title: null })}
+      />
+      
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -49,7 +75,7 @@ export function VideoSection() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {videos.map((video, index) => (
             <motion.div
               key={video.title}
@@ -60,7 +86,7 @@ export function VideoSection() {
             >
               <Card 
                 className="glass-card border-gold/20 hover:border-gold/50 hover:shadow-glow transition-all duration-300 cursor-pointer group"
-                onClick={() => video.url !== "#" && window.open(video.url, '_blank')}
+                onClick={() => handlePlay(video.youtubeId, video.title)}
               >
                 <div className="relative overflow-hidden rounded-t-lg">
                   <img 
