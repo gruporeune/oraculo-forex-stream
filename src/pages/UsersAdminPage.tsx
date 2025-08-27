@@ -1,0 +1,436 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Users, Plus, Edit, Save, LogOut, Search, DollarSign } from "lucide-react";
+import { toast } from "sonner";
+
+interface UserProfile {
+  id: string;
+  full_name: string | null;
+  plan: string;
+  available_balance: number;
+  daily_earnings: number;
+  daily_commissions: number;
+  updated_at: string;
+  phone: string | null;
+}
+
+interface UserPlan {
+  id: string;
+  user_id: string;
+  plan_name: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export default function UsersAdminPage() {
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [userPlans, setUserPlans] = useState<UserPlan[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [editingUser, setEditingUser] = useState<{
+    plan: string;
+    available_balance: number;
+    daily_earnings: number;
+  } | null>(null);
+  const [newPlan, setNewPlan] = useState("");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    checkAdminAuth();
+    loadUsers();
+    loadUserPlans();
+  }, []);
+
+  useEffect(() => {
+    // Filter users based on search term
+    if (searchTerm) {
+      const filtered = users.filter(user => 
+        user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.phone?.includes(searchTerm)
+      );
+      setFilteredUsers(filtered);
+    } else {
+      setFilteredUsers(users);
+    }
+  }, [searchTerm, users]);
+
+  const checkAdminAuth = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      navigate('/users-admin/login');
+      return;
+    }
+
+    const { data: adminData } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+    
+    if (!adminData) {
+      navigate('/users-admin/login');
+    }
+  };
+
+  const loadUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          plan,
+          available_balance,
+          daily_earnings,
+          daily_commissions,
+          updated_at,
+          phone
+        `)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar usuários: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loadUserPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('user_plans')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUserPlans(data || []);
+    } catch (error: any) {
+      toast.error("Erro ao carregar planos: " + error.message);
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!selectedUser || !editingUser) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          plan: editingUser.plan,
+          available_balance: editingUser.available_balance,
+          daily_earnings: editingUser.daily_earnings
+        })
+        .eq('id', selectedUser.id);
+
+      if (error) throw error;
+
+      toast.success("Usuário atualizado com sucesso!");
+      setSelectedUser(null);
+      setEditingUser(null);
+      loadUsers();
+    } catch (error: any) {
+      toast.error("Erro ao atualizar usuário: " + error.message);
+    }
+  };
+
+  const handleAddPlan = async () => {
+    if (!selectedUser || !newPlan) return;
+
+    try {
+      // Check if user already has 5 plans of this type
+      const existingPlans = userPlans.filter(
+        plan => plan.user_id === selectedUser.id && 
+        plan.plan_name === newPlan && 
+        plan.is_active
+      );
+
+      if (existingPlans.length >= 5) {
+        toast.error("Usuário já possui o máximo de 5 planos deste tipo");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('user_plans')
+        .insert({
+          user_id: selectedUser.id,
+          plan_name: newPlan,
+          is_active: true
+        });
+
+      if (error) throw error;
+
+      toast.success("Plano adicionado com sucesso!");
+      setNewPlan("");
+      loadUserPlans();
+    } catch (error: any) {
+      toast.error("Erro ao adicionar plano: " + error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/users-admin/login');
+  };
+
+  const getPlanBadgeColor = (plan: string) => {
+    switch (plan) {
+      case 'free': return 'bg-gray-500';
+      case 'partner': return 'bg-blue-500';
+      case 'master': return 'bg-purple-500';
+      case 'premium': return 'bg-gold-500';
+      case 'platinum': return 'bg-slate-800';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getUserPlansCount = (userId: string) => {
+    return userPlans.filter(plan => plan.user_id === userId && plan.is_active);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-xl">Carregando...</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-900 text-white">
+      <div className="container mx-auto p-6">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div className="flex items-center gap-3">
+            <Users className="w-8 h-8 text-purple-400" />
+            <h1 className="text-3xl font-bold">Painel de Usuários</h1>
+          </div>
+          <Button onClick={handleLogout} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+            <LogOut className="w-4 h-4 mr-2" />
+            Sair
+          </Button>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Total de Usuários</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">{users.length}</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Usuários Ativos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-400">
+                {users.filter(u => u.plan !== 'free').length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Planos Ativos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-400">
+                {userPlans.filter(p => p.is_active).length}
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-slate-800 border-slate-700">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-gray-400">Saldo Total</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-400">
+                R$ {users.reduce((sum, user) => sum + (user.available_balance || 0), 0).toFixed(2)}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Search */}
+        <div className="mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Buscar por nome, ID ou telefone..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 bg-slate-800 border-slate-700 text-white"
+            />
+          </div>
+        </div>
+
+        {/* Users Table */}
+        <Card className="bg-slate-800 border-slate-700">
+          <CardHeader>
+            <CardTitle>Usuários Cadastrados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow className="border-slate-700">
+                  <TableHead className="text-gray-300">Nome</TableHead>
+                  <TableHead className="text-gray-300">Plano Principal</TableHead>
+                  <TableHead className="text-gray-300">Planos Extras</TableHead>
+                  <TableHead className="text-gray-300">Saldo Disponível</TableHead>
+                  <TableHead className="text-gray-300">Ganho Hoje</TableHead>
+                  <TableHead className="text-gray-300">Última Atualização</TableHead>
+                  <TableHead className="text-gray-300">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredUsers.map((user) => {
+                  const extraPlans = getUserPlansCount(user.id);
+                  return (
+                    <TableRow key={user.id} className="border-slate-700">
+                      <TableCell className="text-white">
+                        <div>
+                          <div className="font-medium">{user.full_name || 'Sem nome'}</div>
+                          <div className="text-xs text-gray-400">{user.id.substring(0, 8)}...</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={`${getPlanBadgeColor(user.plan)} text-white`}>
+                          {user.plan.toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-gray-300">
+                          {extraPlans.length > 0 ? `${extraPlans.length} planos extras` : 'Nenhum'}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-green-400 font-medium">
+                        R$ {(user.available_balance || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-yellow-400 font-medium">
+                        R$ {(user.daily_earnings || 0).toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-gray-300">
+                        {new Date(user.updated_at).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setEditingUser({
+                                  plan: user.plan,
+                                  available_balance: user.available_balance || 0,
+                                  daily_earnings: user.daily_earnings || 0
+                                });
+                              }}
+                            >
+                              <Edit className="w-4 h-4 mr-1" />
+                              Editar
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="bg-slate-800 border-slate-700 text-white">
+                            <DialogHeader>
+                              <DialogTitle>Gerenciar Usuário: {user.full_name || 'Sem nome'}</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Plano Principal</Label>
+                                <Select 
+                                  value={editingUser?.plan} 
+                                  onValueChange={(value) => setEditingUser(prev => prev ? {...prev, plan: value} : null)}
+                                >
+                                  <SelectTrigger className="bg-slate-700 border-slate-600">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-700 border-slate-600">
+                                    <SelectItem value="free">Free</SelectItem>
+                                    <SelectItem value="partner">Partner</SelectItem>
+                                    <SelectItem value="master">Master</SelectItem>
+                                    <SelectItem value="premium">Premium</SelectItem>
+                                    <SelectItem value="platinum">Platinum</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              
+                              <div>
+                                <Label>Saldo Disponível (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={editingUser?.available_balance || 0}
+                                  onChange={(e) => setEditingUser(prev => prev ? {...prev, available_balance: parseFloat(e.target.value) || 0} : null)}
+                                  className="bg-slate-700 border-slate-600"
+                                />
+                              </div>
+                              
+                              <div>
+                                <Label>Ganho do Dia (R$)</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  value={editingUser?.daily_earnings || 0}
+                                  onChange={(e) => setEditingUser(prev => prev ? {...prev, daily_earnings: parseFloat(e.target.value) || 0} : null)}
+                                  className="bg-slate-700 border-slate-600"
+                                />
+                              </div>
+
+                              <div className="border-t border-slate-600 pt-4">
+                                <Label>Adicionar Novo Plano</Label>
+                                <div className="flex gap-2 mt-2">
+                                  <Select value={newPlan} onValueChange={setNewPlan}>
+                                    <SelectTrigger className="bg-slate-700 border-slate-600">
+                                      <SelectValue placeholder="Selecionar plano" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-700 border-slate-600">
+                                      <SelectItem value="partner">Partner</SelectItem>
+                                      <SelectItem value="master">Master</SelectItem>
+                                      <SelectItem value="premium">Premium</SelectItem>
+                                      <SelectItem value="platinum">Platinum</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <Button onClick={handleAddPlan} size="sm" className="bg-green-600 hover:bg-green-700">
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="flex gap-2">
+                                <Button onClick={handleUpdateUser} className="bg-purple-600 hover:bg-purple-700">
+                                  <Save className="w-4 h-4 mr-2" />
+                                  Salvar Alterações
+                                </Button>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

@@ -14,6 +14,8 @@ import ConversionLandingPage from "./pages/ConversionLandingPage";
 import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 import AdminLoginPage from "./pages/AdminLoginPage";
+import UsersAdminLoginPage from "./pages/UsersAdminLoginPage";
+import UsersAdminPage from "./pages/UsersAdminPage";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,8 @@ const App = () => (
             </AdminProtectedRoute>
           } />
           <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/users-admin/login" element={<UsersAdminLoginPage />} />
+          <Route path="/users-admin" element={<UsersAdminPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/register/:plan" element={<RegisterPageOld />} />

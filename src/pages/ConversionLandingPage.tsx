@@ -349,28 +349,56 @@ export default function ConversionLandingPage() {
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center mb-12 px-4">
               🎥 <span className="text-purple-400">Resultados Reais</span> dos Nossos Usuários
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <Card key={i} className="bg-slate-900/80 border-purple-500/30 backdrop-blur-sm">
-                  <CardContent className="p-6 text-center">
-                    <div className="w-full h-48 bg-gradient-to-br from-purple-900/40 to-cyan-900/40 rounded-lg flex items-center justify-center mb-4 border-2 border-dashed border-purple-500/30">
-                      <div className="text-center">
-                        <Play className="w-12 h-12 text-purple-400 mx-auto mb-2" />
-                        <p className="text-sm text-purple-300">Depoimento #{i}</p>
-                        <p className="text-xs text-gray-400">(Em breve)</p>
-                      </div>
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+              <Card className="bg-slate-900/80 border-purple-500/30 backdrop-blur-sm">
+                <CardContent className="p-0">
+                  <div className="aspect-video w-full">
+                    <iframe
+                      className="w-full h-full rounded-t-lg"
+                      src="https://www.youtube.com/embed/6qO1AWwVrgk"
+                      title="Como o ORÁCULO Transformou Minha Vida"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="p-6 text-center">
                     <div className="flex justify-center mb-2">
                       {[...Array(5)].map((_, i) => (
                         <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
                       ))}
                     </div>
-                    <p className="text-sm text-gray-300">
-                      "Finalmente um sistema que funciona de verdade!"
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
+                    <h3 className="text-lg font-semibold text-white mb-2">Como o ORÁCULO Transformou Minha Vida</h3>
+                    <p className="text-sm text-purple-300 mb-1">Danilo</p>
+                    <p className="text-xs text-gray-400">12.4K visualizações</p>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-slate-900/80 border-purple-500/30 backdrop-blur-sm">
+                <CardContent className="p-0">
+                  <div className="aspect-video w-full">
+                    <iframe
+                      className="w-full h-full rounded-t-lg"
+                      src="https://www.youtube.com/embed/qtIpqwZ7j8A"
+                      title="R$ 50.000 em 3 Meses com o ORÁCULO"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                  <div className="p-6 text-center">
+                    <div className="flex justify-center mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                      ))}
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">R$ 50.000 em 3 Meses com o ORÁCULO</h3>
+                    <p className="text-sm text-purple-300 mb-1">Melque Junior</p>
+                    <p className="text-xs text-gray-400">23.7K visualizações</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>

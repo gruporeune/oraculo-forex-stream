@@ -161,40 +161,6 @@ const MembersAreaPage = ({ user, profile }: MembersAreaPageProps) => {
       </header>
 
       <main className="p-4 md:p-8">
-        {/* Testimonials Section */}
-        <div className="mb-12">
-          <h2 className="text-xl md:text-2xl font-bold text-white mb-4 text-shadow">DEPOIMENTOS DOS NOSSOS USUÁRIOS</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div className="bg-gray-800 rounded-lg overflow-hidden">
-              <iframe
-                className="w-full h-64 md:h-72"
-                src="https://www.youtube.com/embed/6qO1AWwVrgk"
-                title="Como o ORÁCULO Transformou Minha Vida"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-              <div className="p-4">
-                <h3 className="text-white font-semibold mb-2">Como o ORÁCULO Transformou Minha Vida</h3>
-                <p className="text-gray-400 text-sm">Danilo - 12.4K visualizações</p>
-              </div>
-            </div>
-            <div className="bg-gray-800 rounded-lg overflow-hidden">
-              <iframe
-                className="w-full h-64 md:h-72"
-                src="https://www.youtube.com/embed/qtIpqwZ7j8A"
-                title="R$ 50.000 em 3 Meses com o ORÁCULO"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-              <div className="p-4">
-                <h3 className="text-white font-semibold mb-2">R$ 50.000 em 3 Meses com o ORÁCULO</h3>
-                <p className="text-gray-400 text-sm">Melque Junior - 23.7K visualizações</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <VideoCategoryRow title="INTRODUÇÃO DE BINÁRIAS" videos={courses.introducao} onPlay={handlePlay} />
         <VideoCategoryRow title="ANALISE GRAFICA" videos={courses.analise} onPlay={handlePlay} />
