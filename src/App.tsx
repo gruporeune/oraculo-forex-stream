@@ -36,7 +36,11 @@ const App = () => (
           } />
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/users-admin/login" element={<UsersAdminLoginPage />} />
-          <Route path="/users-admin" element={<UsersAdminPage />} />
+          <Route path="/users-admin" element={
+            <AdminProtectedRoute>
+              <UsersAdminPage />
+            </AdminProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/register/:plan" element={<RegisterPageOld />} />
