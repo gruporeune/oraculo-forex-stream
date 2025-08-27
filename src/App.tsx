@@ -13,6 +13,7 @@ import DashboardPage from "./pages/DashboardPage";
 import ConversionLandingPage from "./pages/ConversionLandingPage";
 import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import UsersAdminProtectedRoute from "./components/UsersAdminProtectedRoute";
 import AdminLoginPage from "./pages/AdminLoginPage";
 import UsersAdminLoginPage from "./pages/UsersAdminLoginPage";
 import UsersAdminPage from "./pages/UsersAdminPage";
@@ -37,9 +38,9 @@ const App = () => (
           <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/users-admin/login" element={<UsersAdminLoginPage />} />
           <Route path="/users-admin" element={
-            <AdminProtectedRoute>
+            <UsersAdminProtectedRoute>
               <UsersAdminPage />
-            </AdminProtectedRoute>
+            </UsersAdminProtectedRoute>
           } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
