@@ -127,22 +127,29 @@ export default function UsersAdminPage() {
     if (!selectedUser || !editingUser) return;
 
     try {
+      console.log("Atualizando usuário:", selectedUser.id, editingUser);
+      
       const { error } = await supabase
         .from('profiles')
         .update({
           plan: editingUser.plan,
           available_balance: editingUser.available_balance,
-          daily_earnings: editingUser.daily_earnings
+          daily_earnings: editingUser.daily_earnings,
+          updated_at: new Date().toISOString()
         })
         .eq('id', selectedUser.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro detalhado:", error);
+        throw error;
+      }
 
       toast.success("Usuário atualizado com sucesso!");
       setSelectedUser(null);
       setEditingUser(null);
       loadUsers();
     } catch (error: any) {
+      console.error("Erro ao atualizar usuário:", error);
       toast.error("Erro ao atualizar usuário: " + error.message);
     }
   };
@@ -151,6 +158,8 @@ export default function UsersAdminPage() {
     if (!selectedUser || !newPlan) return;
 
     try {
+      console.log("Adicionando plano:", newPlan, "para usuário:", selectedUser.id);
+      
       // Check if user already has 5 plans of this type
       const existingPlans = userPlans.filter(
         plan => plan.user_id === selectedUser.id && 
@@ -163,20 +172,28 @@ export default function UsersAdminPage() {
         return;
       }
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('user_plans')
         .insert({
           user_id: selectedUser.id,
           plan_name: newPlan,
-          is_active: true
-        });
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro detalhado ao adicionar plano:", error);
+        throw error;
+      }
 
+      console.log("Plano adicionado com sucesso:", data);
       toast.success("Plano adicionado com sucesso!");
       setNewPlan("");
       loadUserPlans();
     } catch (error: any) {
+      console.error("Erro ao adicionar plano:", error);
       toast.error("Erro ao adicionar plano: " + error.message);
     }
   };
