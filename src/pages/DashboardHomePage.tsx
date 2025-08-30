@@ -101,9 +101,9 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         className="text-center mb-8"
       >
         {/* Video and Banners Row */}
-        <div className="flex flex-col xl:flex-row items-center justify-center gap-6 xl:gap-8 max-w-7xl mx-auto px-4 mb-8">
+        <div className="flex flex-col lg:flex-row items-start justify-center gap-4 lg:gap-6 max-w-6xl mx-auto px-4 mb-8">
           {/* YouTube Video Section */}
-          <div className="flex-shrink-0 w-full xl:w-auto">
+          <div className="flex-shrink-0 w-full lg:w-auto">
             <Tilt
               rotationFactor={6}
               isRevese
@@ -126,8 +126,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-4 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20">
-                <div className="aspect-video w-full max-w-md lg:max-w-lg xl:max-w-xl rounded-xl overflow-hidden bg-black">
+              <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-3 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20">
+                <div className="aspect-video w-full max-w-sm rounded-xl overflow-hidden bg-black">
                   <iframe
                     src="https://www.youtube.com/embed/tV-a0H0gw1g?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0"
                     className="w-full h-full"
@@ -136,15 +136,15 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                     allowFullScreen
                   />
                 </div>
-                <div className="mt-4 text-center">
-                  <h4 className="text-lg md:text-xl font-bold text-white mb-2">
+                <div className="mt-3 text-center">
+                  <h4 className="text-base font-bold text-white mb-1">
                     {t('dashboard.video.title')}
                   </h4>
-                  <p className="text-red-200 text-sm md:text-base">
+                  <p className="text-red-200 text-sm">
                     {t('dashboard.video.subtitle')}
                   </p>
                 </div>
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-2 right-2">
                   <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
@@ -152,7 +152,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </div>
 
           {/* Banners Section */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4">
             {/* Banner 1 - Apresentação */}
             <Tilt
               rotationFactor={4}
@@ -169,7 +169,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             >
               <Spotlight
                 className="z-10 from-purple-500/50 via-purple-500/20 to-purple-500/10 blur-3xl"
-                size={300}
+                size={200}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
@@ -180,7 +180,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 <img 
                   src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
                   alt="Oráculo - Apresentação de Negócios"
-                  className="w-full max-w-sm lg:max-w-md rounded-xl object-cover"
+                  className="w-[328px] h-[366px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>
@@ -201,7 +201,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             >
               <Spotlight
                 className="z-10 from-yellow-500/50 via-yellow-500/20 to-yellow-500/10 blur-3xl"
-                size={300}
+                size={200}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
@@ -212,7 +212,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 <img 
                   src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
                   alt="Oráculo - Pré Lançamento IA Financeira"
-                  className="w-full max-w-sm lg:max-w-md rounded-xl object-cover"
+                  className="w-[328px] h-[366px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>

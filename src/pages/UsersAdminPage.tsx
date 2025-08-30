@@ -198,6 +198,29 @@ export default function UsersAdminPage() {
     }
   };
 
+  const handleRemovePlan = async (planId: string) => {
+    try {
+      console.log("Removendo plano:", planId);
+      
+      const { error } = await supabase
+        .from('user_plans')
+        .update({ is_active: false })
+        .eq('id', planId);
+
+      if (error) {
+        console.error("Erro detalhado ao remover plano:", error);
+        throw error;
+      }
+
+      console.log("Plano removido com sucesso");
+      toast.success("Plano removido com sucesso!");
+      loadUserPlans();
+    } catch (error: any) {
+      console.error("Erro ao remover plano:", error);
+      toast.error("Erro ao remover plano: " + error.message);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/users-admin/login');
@@ -370,22 +393,28 @@ export default function UsersAdminPage() {
                             </DialogHeader>
                             <div className="space-y-4">
                               <div>
-                                <Label>Plano Principal</Label>
-                                <Select 
-                                  value={editingUser?.plan} 
-                                  onValueChange={(value) => setEditingUser(prev => prev ? {...prev, plan: value} : null)}
-                                >
-                                  <SelectTrigger className="bg-slate-700 border-slate-600">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-slate-700 border-slate-600">
-                                    <SelectItem value="free">Free</SelectItem>
-                                    <SelectItem value="partner">Partner</SelectItem>
-                                    <SelectItem value="master">Master</SelectItem>
-                                    <SelectItem value="premium">Premium</SelectItem>
-                                    <SelectItem value="platinum">Platinum</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                                <Label>Planos Ativos do Usuário</Label>
+                                <div className="bg-slate-700 rounded-lg p-3 mb-4">
+                                  {getUserPlansCount(selectedUser?.id || '').length > 0 ? (
+                                    <div className="space-y-2">
+                                      {getUserPlansCount(selectedUser?.id || '').map((plan) => (
+                                        <div key={plan.id} className="flex items-center justify-between bg-slate-600 rounded-lg p-2">
+                                          <span className="text-white font-medium">{plan.plan_name.toUpperCase()}</span>
+                                          <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            onClick={() => handleRemovePlan(plan.id)}
+                                            className="bg-red-600 hover:bg-red-700 text-white"
+                                          >
+                                            Remover
+                                          </Button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <p className="text-gray-400 text-sm">Nenhum plano ativo</p>
+                                  )}
+                                </div>
                               </div>
                               
                               <div>
