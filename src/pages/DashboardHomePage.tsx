@@ -93,17 +93,18 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         onWithdraw={handleWithdraw}
       />
 
-      {/* Broker Recommendation Section */}
+      {/* Video and Banners Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
-        className="text-center mb-8"
+        className="mb-8"
       >
-        {/* Video and Banners Row */}
-        <div className="flex flex-col lg:flex-row items-start justify-center gap-4 lg:gap-6 max-w-6xl mx-auto px-4 mb-8">
-          {/* YouTube Video Section */}
-          <div className="flex-shrink-0 w-full lg:w-auto">
+        {/* Video and Banners Row - Horizontally Aligned */}
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 max-w-7xl mx-auto px-4 mb-8">
+          
+          {/* YouTube Video Section - Left */}
+          <div className="flex-shrink-0">
             <Tilt
               rotationFactor={6}
               isRevese
@@ -118,8 +119,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               className="group relative rounded-2xl"
             >
               <Spotlight
-                className="z-10 from-red-500/50 via-red-500/20 to-red-500/10 blur-3xl"
-                size={400}
+                className="z-10 from-red-500/50 via-red-500/20 to-red-500/10 blur-2xl"
+                size={300}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
@@ -127,7 +128,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 }}
               />
               <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-3 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20">
-                <div className="aspect-video w-full max-w-sm rounded-xl overflow-hidden bg-black">
+                <div className="aspect-video w-[280px] rounded-xl overflow-hidden bg-black">
                   <iframe
                     src="https://www.youtube.com/embed/tV-a0H0gw1g?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0"
                     className="w-full h-full"
@@ -137,10 +138,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   />
                 </div>
                 <div className="mt-3 text-center">
-                  <h4 className="text-base font-bold text-white mb-1">
+                  <h4 className="text-sm font-bold text-white mb-1">
                     {t('dashboard.video.title')}
                   </h4>
-                  <p className="text-red-200 text-sm">
+                  <p className="text-red-200 text-xs">
                     {t('dashboard.video.subtitle')}
                   </p>
                 </div>
@@ -151,9 +152,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             </Tilt>
           </div>
 
-          {/* Banners Section */}
-          <div className="flex flex-col gap-4">
-            {/* Banner 1 - Apresentação */}
+          {/* Banner 1 - Center */}
+          <div className="flex-shrink-0">
             <Tilt
               rotationFactor={4}
               isRevese
@@ -168,7 +168,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               className="group relative rounded-2xl cursor-pointer"
             >
               <Spotlight
-                className="z-10 from-purple-500/50 via-purple-500/20 to-purple-500/10 blur-3xl"
+                className="z-10 from-purple-500/50 via-purple-500/20 to-purple-500/10 blur-2xl"
                 size={200}
                 springOptions={{
                   stiffness: 26.7,
@@ -180,12 +180,14 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 <img 
                   src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
                   alt="Oráculo - Apresentação de Negócios"
-                  className="w-[328px] h-[366px] rounded-xl object-cover"
+                  className="w-[240px] h-[268px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>
+          </div>
 
-            {/* Banner 2 - Pré Lançamento */}
+          {/* Banner 2 - Right */}
+          <div className="flex-shrink-0">
             <Tilt
               rotationFactor={4}
               isRevese
@@ -200,7 +202,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               className="group relative rounded-2xl cursor-pointer"
             >
               <Spotlight
-                className="z-10 from-yellow-500/50 via-yellow-500/20 to-yellow-500/10 blur-3xl"
+                className="z-10 from-yellow-500/50 via-yellow-500/20 to-yellow-500/10 blur-2xl"
                 size={200}
                 springOptions={{
                   stiffness: 26.7,
@@ -212,7 +214,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 <img 
                   src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
                   alt="Oráculo - Pré Lançamento IA Financeira"
-                  className="w-[328px] h-[366px] rounded-xl object-cover"
+                  className="w-[240px] h-[268px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>
