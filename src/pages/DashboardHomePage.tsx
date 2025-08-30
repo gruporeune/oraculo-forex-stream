@@ -101,7 +101,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         className="mb-8"
       >
         {/* Video and Banners Row - Horizontally Aligned */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-6 max-w-7xl mx-auto px-4 mb-8">
+        <div className="flex flex-col lg:flex-row items-center justify-center gap-4 max-w-7xl mx-auto px-4 mb-8">
           
           {/* YouTube Video Section - Left */}
           <div className="flex-shrink-0">
@@ -120,15 +120,15 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             >
               <Spotlight
                 className="z-10 from-red-500/50 via-red-500/20 to-red-500/10 blur-2xl"
-                size={300}
+                size={200}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-3 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20">
-                <div className="aspect-video w-[280px] rounded-xl overflow-hidden bg-black">
+              <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-2 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20">
+                <div className="aspect-video w-[220px] rounded-xl overflow-hidden bg-black">
                   <iframe
                     src="https://www.youtube.com/embed/tV-a0H0gw1g?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0"
                     className="w-full h-full"
@@ -137,22 +137,22 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                     allowFullScreen
                   />
                 </div>
-                <div className="mt-3 text-center">
-                  <h4 className="text-sm font-bold text-white mb-1">
+                <div className="mt-2 text-center">
+                  <h4 className="text-xs font-bold text-white mb-1">
                     {t('dashboard.video.title')}
                   </h4>
-                  <p className="text-red-200 text-xs">
+                  <p className="text-red-200 text-[10px]">
                     {t('dashboard.video.subtitle')}
                   </p>
                 </div>
-                <div className="absolute top-2 right-2">
-                  <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+                <div className="absolute top-1 right-1">
+                  <div className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </Tilt>
           </div>
 
-          {/* Banner 1 - Center */}
+          {/* Banner 1 */}
           <div className="flex-shrink-0">
             <Tilt
               rotationFactor={4}
@@ -169,24 +169,58 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             >
               <Spotlight
                 className="z-10 from-purple-500/50 via-purple-500/20 to-purple-500/10 blur-2xl"
-                size={200}
+                size={180}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-purple-900/80 via-purple-800/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2 hover:border-purple-400/50 transition-all duration-500 shadow-2xl shadow-purple-500/20">
+              <div className="relative bg-gradient-to-br from-purple-900/80 via-purple-800/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-1.5 hover:border-purple-400/50 transition-all duration-500 shadow-2xl shadow-purple-500/20">
                 <img 
                   src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
                   alt="Oráculo - Apresentação de Negócios"
-                  className="w-[240px] h-[268px] rounded-xl object-cover"
+                  className="w-[180px] h-[202px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>
           </div>
 
-          {/* Banner 2 - Right */}
+          {/* Banner 2 - New Live Banner (Middle) */}
+          <div className="flex-shrink-0">
+            <Tilt
+              rotationFactor={4}
+              isRevese
+              style={{
+                transformOrigin: 'center center',
+              }}
+              springOptions={{
+                stiffness: 26.7,
+                damping: 4.1,
+                mass: 0.2,
+              }}
+              className="group relative rounded-2xl cursor-pointer"
+            >
+              <Spotlight
+                className="z-10 from-orange-500/50 via-orange-500/20 to-orange-500/10 blur-2xl"
+                size={180}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+              />
+              <div className="relative bg-gradient-to-br from-orange-900/80 via-orange-800/80 to-orange-700/80 backdrop-blur-xl border border-orange-500/30 rounded-2xl p-1.5 hover:border-orange-400/50 transition-all duration-500 shadow-2xl shadow-orange-500/20">
+                <img 
+                  src="/lovable-uploads/6e492c19-3b63-4df9-b2ad-3d7b885d4b18.png"
+                  alt="Oráculo - Live Especial Operações Binárias"
+                  className="w-[180px] h-[202px] rounded-xl object-cover"
+                />
+              </div>
+            </Tilt>
+          </div>
+
+          {/* Banner 3 - Right */}
           <div className="flex-shrink-0">
             <Tilt
               rotationFactor={4}
@@ -203,18 +237,18 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             >
               <Spotlight
                 className="z-10 from-yellow-500/50 via-yellow-500/20 to-yellow-500/10 blur-2xl"
-                size={200}
+                size={180}
                 springOptions={{
                   stiffness: 26.7,
                   damping: 4.1,
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-yellow-900/80 via-yellow-800/80 to-yellow-700/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-2 hover:border-yellow-400/50 transition-all duration-500 shadow-2xl shadow-yellow-500/20">
+              <div className="relative bg-gradient-to-br from-yellow-900/80 via-yellow-800/80 to-yellow-700/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-1.5 hover:border-yellow-400/50 transition-all duration-500 shadow-2xl shadow-yellow-500/20">
                 <img 
                   src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
                   alt="Oráculo - Pré Lançamento IA Financeira"
-                  className="w-[240px] h-[268px] rounded-xl object-cover"
+                  className="w-[180px] h-[202px] rounded-xl object-cover"
                 />
               </div>
             </Tilt>
