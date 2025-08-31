@@ -130,7 +130,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-3 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20 h-full flex flex-col">
                 <div className="aspect-video w-full rounded-xl overflow-hidden bg-black flex-1">
                   <iframe
-                    src="https://www.youtube.com/embed/tV-a0H0gw1g?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0"
+                    src="https://www.youtube.com/embed/EVBbuArKeUA?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0"
                     className="w-full h-full"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
@@ -298,9 +298,9 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           {/* Headline aligned with video (col-span-2) */}
           <div className="col-span-2 text-center">
             <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
-              {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
+              Corretoras oficiais com mais de<br />
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-                {t('dashboard.brokers.title').split(' ').slice(5).join(' ')}
+                93% de precisão
               </span>
             </h3>
             <p className="text-white/70 text-base font-medium">
@@ -312,7 +312,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         </div>
 
         {/* Broker Cards Section - Grid aligned with banners above */}
-        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-6">
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-2">
           {/* Empty space to align with video */}
           <div className="col-span-2"></div>
           
