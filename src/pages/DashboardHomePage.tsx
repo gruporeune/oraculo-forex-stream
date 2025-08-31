@@ -293,21 +293,26 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </p>
         </div>
 
-        {/* Headline between banners and broker cards - Aligned with 3 columns */}
-        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-8 lg:mb-4">
-          {/* Empty space to align with video */}
-          <div className="col-span-2"></div>
-          {/* Headline aligned with the 3 banners/cards */}
-          <div className="col-span-3 text-center">
-            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
-              Corretoras oficiais com mais de<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-                93% de precisão
-              </span>
-            </h3>
-            <p className="text-white/70 text-base font-medium">
-              {t('dashboard.brokers.subtitle')}
-            </p>
+        {/* Headline between banners and broker cards - Perfectly aligned with 3-column grid */}
+        <div className="hidden lg:block lg:mt-8 lg:mb-4">
+          {/* Container that matches the exact width of the 3 banners/cards */}
+          <div className="grid grid-cols-5 gap-6">
+            {/* Empty space matching the video section */}
+            <div className="col-span-2"></div>
+            {/* Content area that matches exactly the 3 banners width */}
+            <div className="col-span-3">
+              <div className="text-center">
+                <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
+                  Corretoras oficiais com mais de<br />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+                    93% de precisão
+                  </span>
+                </h3>
+                <p className="text-white/70 text-base font-medium">
+                  {t('dashboard.brokers.subtitle')}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -417,6 +417,19 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
                 <span className="text-green-400 font-medium">99%</span>
               </div>
             </div>
+            
+            {/* Video section */}
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                <iframe
+                  src="https://www.youtube.com/embed/WgpfDudiJw8?autoplay=1&mute=0&controls=1&showinfo=0&rel=0&modestbranding=1"
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
