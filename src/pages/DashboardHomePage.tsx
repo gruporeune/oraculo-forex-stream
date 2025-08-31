@@ -165,7 +165,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 damping: 4.1,
                 mass: 0.2,
               }}
-              className="group relative rounded-2xl cursor-pointer h-full"
+              className="group relative rounded-2xl cursor-pointer"
             >
               <Spotlight
                 className="z-10 from-green-500/50 via-green-500/20 to-green-500/10 blur-2xl"
@@ -176,11 +176,11 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-green-900/80 via-green-800/80 to-green-700/80 backdrop-blur-xl border border-green-500/30 rounded-2xl p-2 hover:border-green-400/50 transition-all duration-500 shadow-2xl shadow-green-500/20 h-full flex items-center justify-center">
+              <div className="relative bg-gradient-to-br from-green-900/80 via-green-800/80 to-green-700/80 backdrop-blur-xl border border-green-500/30 rounded-2xl p-3 hover:border-green-400/50 transition-all duration-500 shadow-2xl shadow-green-500/20">
                 <img 
                   src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
                   alt="Oráculo - Apresentação de Negócios"
-                  className="w-full h-auto max-h-[160px] rounded-xl object-cover"
+                  className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
             </Tilt>
@@ -199,7 +199,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 damping: 4.1,
                 mass: 0.2,
               }}
-              className="group relative rounded-2xl cursor-pointer h-full"
+              className="group relative rounded-2xl cursor-pointer"
             >
               <Spotlight
                 className="z-10 from-purple-500/50 via-purple-500/20 to-purple-500/10 blur-2xl"
@@ -210,11 +210,11 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-purple-900/80 via-purple-800/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2 hover:border-purple-400/50 transition-all duration-500 shadow-2xl shadow-purple-500/20 h-full flex items-center justify-center">
+              <div className="relative bg-gradient-to-br from-purple-900/80 via-purple-800/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-3 hover:border-purple-400/50 transition-all duration-500 shadow-2xl shadow-purple-500/20">
                 <img 
                   src="/lovable-uploads/6e492c19-3b63-4df9-b2ad-3d7b885d4b18.png"
                   alt="Oráculo - Live Especial Operações Binárias"
-                  className="w-full h-auto max-h-[160px] rounded-xl object-cover"
+                  className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
             </Tilt>
@@ -233,7 +233,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 damping: 4.1,
                 mass: 0.2,
               }}
-              className="group relative rounded-2xl cursor-pointer h-full"
+              className="group relative rounded-2xl cursor-pointer"
             >
               <Spotlight
                 className="z-10 from-yellow-500/50 via-yellow-500/20 to-yellow-500/10 blur-2xl"
@@ -244,11 +244,11 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   mass: 0.2,
                 }}
               />
-              <div className="relative bg-gradient-to-br from-yellow-900/80 via-yellow-800/80 to-yellow-700/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-2 hover:border-yellow-400/50 transition-all duration-500 shadow-2xl shadow-yellow-500/20 h-full flex items-center justify-center">
+              <div className="relative bg-gradient-to-br from-yellow-900/80 via-yellow-800/80 to-yellow-700/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-3 hover:border-yellow-400/50 transition-all duration-500 shadow-2xl shadow-yellow-500/20">
                 <img 
                   src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
                   alt="Oráculo - Pré Lançamento IA Financeira"
-                  className="w-full h-auto max-h-[160px] rounded-xl object-cover"
+                  className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
             </Tilt>
@@ -261,30 +261,111 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
             <img 
               src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
               alt="Banner 1"
-              className="w-full h-full rounded-lg object-cover border border-green-500/30"
+              className="w-full h-full rounded-lg object-contain border border-green-500/30"
             />
           </div>
           <div className="w-16 h-20">
             <img 
               src="/lovable-uploads/6e492c19-3b63-4df9-b2ad-3d7b885d4b18.png"
               alt="Banner 2"
-              className="w-full h-full rounded-lg object-cover border border-purple-500/30"
+              className="w-full h-full rounded-lg object-contain border border-purple-500/30"
             />
           </div>
           <div className="w-16 h-20">
             <img 
               src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
               alt="Banner 3"
-              className="w-full h-full rounded-lg object-cover border border-yellow-500/30"
+              className="w-full h-full rounded-lg object-contain border border-yellow-500/30"
             />
           </div>
         </div>
 
-        {/* Broker Cards Section - Moved below */}
-        <div className="flex flex-col items-center gap-6">
-          <div className="flex flex-row items-center justify-center gap-3 md:gap-6">
-            {/* Logo Card with Tilt Effect */}
-            <div className="flex-shrink-0">
+        {/* Headline moved below video */}
+        <div className="lg:hidden mt-6 text-center">
+          <h3 className="text-lg font-black text-white mb-2 tracking-tight leading-tight">
+            {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+              {t('dashboard.brokers.title').split(' ').slice(5).join(' ')}
+            </span>
+          </h3>
+          <p className="text-white/70 text-sm font-medium">
+            {t('dashboard.brokers.subtitle')}
+          </p>
+        </div>
+
+        {/* Desktop: Headline below video */}
+        <div className="hidden lg:block mt-4">
+          <div className="text-center">
+            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
+              {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+                {t('dashboard.brokers.title').split(' ').slice(5).join(' ')}
+              </span>
+            </h3>
+            <p className="text-white/70 text-base font-medium">
+              {t('dashboard.brokers.subtitle')}
+            </p>
+          </div>
+        </div>
+
+        {/* Broker Cards Section - Grid aligned with banners above */}
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-6">
+          {/* Empty space to align with video */}
+          <div className="col-span-2"></div>
+          
+          {/* BullTec Card - Aligns with first banner */}
+          <div className="col-span-1 flex justify-center">
+            <Tilt
+              rotationFactor={8}
+              isRevese
+              style={{
+                transformOrigin: 'center center',
+              }}
+              springOptions={{
+                stiffness: 26.7,
+                damping: 4.1,
+                mass: 0.2,
+              }}
+              className="group relative rounded-lg"
+            >
+              <Spotlight
+                className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
+                size={120}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+              />
+              <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                <div className="flex items-center justify-center mb-2">
+                  <img 
+                    src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
+                    alt="BullTec" 
+                    className="h-12 w-auto object-contain"
+                  />
+                </div>
+                <div className="space-y-1 text-center">
+                  <h4 className="text-xs font-bold text-white">BullTec</h4>
+                  <p className="text-purple-200 text-[10px] max-w-[100px] mx-auto">
+                    {t('dashboard.bulltec.official')}
+                  </p>
+                </div>
+                <div className="absolute top-1 right-1">
+                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </Tilt>
+          </div>
+
+          {/* Exnova Card - Aligns with second banner */}
+          <div className="col-span-1 flex justify-center">
+            <a 
+              href="https://exnova.com/lp/start-trading/?aff=206811&aff_model=revenue&afftrack="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
               <Tilt
                 rotationFactor={8}
                 isRevese
@@ -299,26 +380,24 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                 className="group relative rounded-lg"
               >
                 <Spotlight
-                  className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
-                  size={200}
+                  className="z-10 from-blue-500/50 via-blue-500/20 to-blue-500/10 blur-2xl"
+                  size={120}
                   springOptions={{
                     stiffness: 26.7,
                     damping: 4.1,
                     mass: 0.2,
                   }}
                 />
-                <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                <div className="relative bg-gradient-to-br from-blue-600/80 to-blue-500/80 backdrop-blur-xl border border-blue-400/30 rounded-xl p-3 hover:border-blue-300/50 transition-all duration-300 cursor-pointer">
                   <div className="flex items-center justify-center mb-2">
-                    <img 
-                      src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                      alt="BullTec" 
-                      className="h-12 w-auto object-contain md:h-16"
-                    />
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-lg">EX</span>
+                    </div>
                   </div>
                   <div className="space-y-1 text-center">
-                    <h4 className="text-xs md:text-sm font-bold text-white">BullTec</h4>
-                    <p className="text-purple-200 text-[10px] md:text-xs max-w-[100px]">
-                      {t('dashboard.bulltec.official')}
+                    <h4 className="text-xs font-bold text-white">Exnova</h4>
+                    <p className="text-blue-200 text-[10px] max-w-[100px] mx-auto">
+                      {t('dashboard.exnova.premium')}
                     </p>
                   </div>
                   <div className="absolute top-1 right-1">
@@ -326,122 +405,209 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
                   </div>
                 </div>
               </Tilt>
-            </div>
-
-            {/* Exnova Card */}
-            <div className="flex-shrink-0">
-              <a 
-                href="https://exnova.com/lp/start-trading/?aff=206811&aff_model=revenue&afftrack="
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Tilt
-                  rotationFactor={8}
-                  isRevese
-                  style={{
-                    transformOrigin: 'center center',
-                  }}
-                  springOptions={{
-                    stiffness: 26.7,
-                    damping: 4.1,
-                    mass: 0.2,
-                  }}
-                  className="group relative rounded-lg"
-                >
-                  <Spotlight
-                    className="z-10 from-blue-500/50 via-blue-500/20 to-blue-500/10 blur-2xl"
-                    size={200}
-                    springOptions={{
-                      stiffness: 26.7,
-                      damping: 4.1,
-                      mass: 0.2,
-                    }}
-                  />
-                  <div className="relative bg-gradient-to-br from-blue-600/80 to-blue-500/80 backdrop-blur-xl border border-blue-400/30 rounded-xl p-3 hover:border-blue-300/50 transition-all duration-300 cursor-pointer">
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center">
-                        <span className="text-blue-600 font-bold text-lg md:text-xl">EX</span>
-                      </div>
-                    </div>
-                    <div className="space-y-1 text-center">
-                      <h4 className="text-xs md:text-sm font-bold text-white">Exnova</h4>
-                      <p className="text-blue-200 text-[10px] md:text-xs max-w-[100px]">
-                        {t('dashboard.exnova.premium')}
-                      </p>
-                    </div>
-                    <div className="absolute top-1 right-1">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    </div>
-                  </div>
-                </Tilt>
-              </a>
-            </div>
-
-            {/* WhatsApp Card */}
-            <div className="flex-shrink-0">
-              <a 
-                href="https://chat.whatsapp.com/Dils2U8F6kw37VHgv9RJ3H?mode=ems_wa_c"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block"
-              >
-                <Tilt
-                  rotationFactor={8}
-                  isRevese
-                  style={{
-                    transformOrigin: 'center center',
-                  }}
-                  springOptions={{
-                    stiffness: 26.7,
-                    damping: 4.1,
-                    mass: 0.2,
-                  }}
-                  className="group relative rounded-lg"
-                >
-                  <Spotlight
-                    className="z-10 from-green-500/50 via-green-500/20 to-green-500/10 blur-2xl"
-                    size={200}
-                    springOptions={{
-                      stiffness: 26.7,
-                      damping: 4.1,
-                      mass: 0.2,
-                    }}
-                  />
-                  <div className="relative bg-gradient-to-br from-green-600/80 to-green-500/80 backdrop-blur-xl border border-green-400/30 rounded-xl p-3 hover:border-green-300/50 transition-all duration-300 cursor-pointer">
-                    <div className="flex items-center justify-center mb-2">
-                      <div className="w-12 h-12 md:w-16 md:h-16 bg-white rounded-xl flex items-center justify-center">
-                        <svg className="w-8 h-8 md:w-10 md:h-10 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.386z"/>
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="space-y-1 text-center">
-                      <h4 className="text-xs md:text-sm font-bold text-white">WhatsApp</h4>
-                      <p className="text-green-200 text-[10px] md:text-xs max-w-[100px]">
-                        {t('dashboard.whatsapp.vip')}
-                      </p>
-                    </div>
-                    <div className="absolute top-1 right-1">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                    </div>
-                  </div>
-                </Tilt>
-              </a>
-            </div>
+            </a>
           </div>
 
-          {/* Texto explicativo - Moved below */}
-          <div className="text-center">
-            <h3 className="text-xl md:text-3xl font-black text-white mb-2 tracking-tight leading-tight">
-              {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-                {t('dashboard.brokers.title').split(' ').slice(5).join(' ')}
-              </span>
-            </h3>
-            <p className="text-white/70 text-sm md:text-base font-medium">
-              {t('dashboard.brokers.subtitle')}
-            </p>
+          {/* WhatsApp Card - Aligns with third banner */}
+          <div className="col-span-1 flex justify-center">
+            <a 
+              href="https://chat.whatsapp.com/Dils2U8F6kw37VHgv9RJ3H?mode=ems_wa_c"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Tilt
+                rotationFactor={8}
+                isRevese
+                style={{
+                  transformOrigin: 'center center',
+                }}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+                className="group relative rounded-lg"
+              >
+                <Spotlight
+                  className="z-10 from-green-500/50 via-green-500/20 to-green-500/10 blur-2xl"
+                  size={120}
+                  springOptions={{
+                    stiffness: 26.7,
+                    damping: 4.1,
+                    mass: 0.2,
+                  }}
+                />
+                <div className="relative bg-gradient-to-br from-green-600/80 to-green-500/80 backdrop-blur-xl border border-green-400/30 rounded-xl p-3 hover:border-green-300/50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                      <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.386z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-center">
+                    <h4 className="text-xs font-bold text-white">WhatsApp</h4>
+                    <p className="text-green-200 text-[10px] max-w-[100px] mx-auto">
+                      {t('dashboard.whatsapp.vip')}
+                    </p>
+                  </div>
+                  <div className="absolute top-1 right-1">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </Tilt>
+            </a>
+          </div>
+        </div>
+
+        {/* Mobile: Broker Cards in centered row */}
+        <div className="lg:hidden mt-6 flex justify-center items-center gap-3">
+          {/* BullTec Card */}
+          <div className="flex-shrink-0">
+            <Tilt
+              rotationFactor={8}
+              isRevese
+              style={{
+                transformOrigin: 'center center',
+              }}
+              springOptions={{
+                stiffness: 26.7,
+                damping: 4.1,
+                mass: 0.2,
+              }}
+              className="group relative rounded-lg"
+            >
+              <Spotlight
+                className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
+                size={100}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+              />
+              <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
+                <div className="flex items-center justify-center mb-2">
+                  <img 
+                    src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
+                    alt="BullTec" 
+                    className="h-12 w-auto object-contain"
+                  />
+                </div>
+                <div className="space-y-1 text-center">
+                  <h4 className="text-xs font-bold text-white">BullTec</h4>
+                  <p className="text-purple-200 text-[10px] max-w-[80px]">
+                    {t('dashboard.bulltec.official')}
+                  </p>
+                </div>
+                <div className="absolute top-1 right-1">
+                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                </div>
+              </div>
+            </Tilt>
+          </div>
+
+          {/* Exnova Card */}
+          <div className="flex-shrink-0">
+            <a 
+              href="https://exnova.com/lp/start-trading/?aff=206811&aff_model=revenue&afftrack="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Tilt
+                rotationFactor={8}
+                isRevese
+                style={{
+                  transformOrigin: 'center center',
+                }}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+                className="group relative rounded-lg"
+              >
+                <Spotlight
+                  className="z-10 from-blue-500/50 via-blue-500/20 to-blue-500/10 blur-2xl"
+                  size={100}
+                  springOptions={{
+                    stiffness: 26.7,
+                    damping: 4.1,
+                    mass: 0.2,
+                  }}
+                />
+                <div className="relative bg-gradient-to-br from-blue-600/80 to-blue-500/80 backdrop-blur-xl border border-blue-400/30 rounded-xl p-3 hover:border-blue-300/50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                      <span className="text-blue-600 font-bold text-lg">EX</span>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-center">
+                    <h4 className="text-xs font-bold text-white">Exnova</h4>
+                    <p className="text-blue-200 text-[10px] max-w-[80px]">
+                      {t('dashboard.exnova.premium')}
+                    </p>
+                  </div>
+                  <div className="absolute top-1 right-1">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </Tilt>
+            </a>
+          </div>
+
+          {/* WhatsApp Card */}
+          <div className="flex-shrink-0">
+            <a 
+              href="https://chat.whatsapp.com/Dils2U8F6kw37VHgv9RJ3H?mode=ems_wa_c"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block"
+            >
+              <Tilt
+                rotationFactor={8}
+                isRevese
+                style={{
+                  transformOrigin: 'center center',
+                }}
+                springOptions={{
+                  stiffness: 26.7,
+                  damping: 4.1,
+                  mass: 0.2,
+                }}
+                className="group relative rounded-lg"
+              >
+                <Spotlight
+                  className="z-10 from-green-500/50 via-green-500/20 to-green-500/10 blur-2xl"
+                  size={100}
+                  springOptions={{
+                    stiffness: 26.7,
+                    damping: 4.1,
+                    mass: 0.2,
+                  }}
+                />
+                <div className="relative bg-gradient-to-br from-green-600/80 to-green-500/80 backdrop-blur-xl border border-green-400/30 rounded-xl p-3 hover:border-green-300/50 transition-all duration-300 cursor-pointer">
+                  <div className="flex items-center justify-center mb-2">
+                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center">
+                      <svg className="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.386z"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-center">
+                    <h4 className="text-xs font-bold text-white">WhatsApp</h4>
+                    <p className="text-green-200 text-[10px] max-w-[80px]">
+                      {t('dashboard.whatsapp.vip')}
+                    </p>
+                  </div>
+                  <div className="absolute top-1 right-1">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+              </Tilt>
+            </a>
           </div>
         </div>
       </motion.div>
