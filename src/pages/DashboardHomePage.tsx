@@ -293,9 +293,10 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </p>
         </div>
 
-        {/* Desktop: Headline below video */}
-        <div className="hidden lg:block mt-4">
-          <div className="text-center">
+        {/* Desktop: Headline below video - Aligned with video width */}
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-4">
+          {/* Headline aligned with video (col-span-2) */}
+          <div className="col-span-2 text-center">
             <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
               {t('dashboard.brokers.title').split(' ')[0]} {t('dashboard.brokers.title').split(' ')[1]} {t('dashboard.brokers.title').split(' ')[2]} {t('dashboard.brokers.title').split(' ')[3]} {t('dashboard.brokers.title').split(' ')[4]}{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
@@ -306,6 +307,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               {t('dashboard.brokers.subtitle')}
             </p>
           </div>
+          {/* Empty space for alignment with banners */}
+          <div className="col-span-3"></div>
         </div>
 
         {/* Broker Cards Section - Grid aligned with banners above */}
