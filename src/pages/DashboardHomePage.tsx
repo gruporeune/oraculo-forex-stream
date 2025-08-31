@@ -293,22 +293,17 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </p>
         </div>
 
-        {/* Desktop: Headline below video - Aligned with video width */}
-        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-4">
-          {/* Headline aligned with video (col-span-2) */}
-          <div className="col-span-2 text-center">
-            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
-              Corretoras oficiais com mais de<br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-                93% de precisão
-              </span>
-            </h3>
-            <p className="text-white/70 text-base font-medium">
-              {t('dashboard.brokers.subtitle')}
-            </p>
-          </div>
-          {/* Empty space for alignment with banners */}
-          <div className="col-span-3"></div>
+        {/* Headline between banners and broker cards */}
+        <div className="text-center mt-8 mb-4">
+          <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
+            Corretoras oficiais com mais de<br />
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+              93% de precisão
+            </span>
+          </h3>
+          <p className="text-white/70 text-base font-medium">
+            {t('dashboard.brokers.subtitle')}
+          </p>
         </div>
 
         {/* Broker Cards Section - No gap, directly below banners */}
