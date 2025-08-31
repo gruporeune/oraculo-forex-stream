@@ -293,15 +293,33 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </p>
         </div>
 
-        {/* Headline between banners and broker cards */}
-        <div className="text-center mt-8 mb-4">
-          <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
+        {/* Headline between banners and broker cards - Aligned with 3 columns */}
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-8 lg:mb-4">
+          {/* Empty space to align with video */}
+          <div className="col-span-2"></div>
+          {/* Headline aligned with the 3 banners/cards */}
+          <div className="col-span-3 text-center">
+            <h3 className="text-xl md:text-2xl font-black text-white mb-2 tracking-tight leading-tight">
+              Corretoras oficiais com mais de<br />
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
+                93% de precisão
+              </span>
+            </h3>
+            <p className="text-white/70 text-base font-medium">
+              {t('dashboard.brokers.subtitle')}
+            </p>
+          </div>
+        </div>
+
+        {/* Mobile headline */}
+        <div className="lg:hidden text-center mt-8 mb-4">
+          <h3 className="text-lg font-black text-white mb-2 tracking-tight leading-tight">
             Corretoras oficiais com mais de<br />
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
               93% de precisão
             </span>
           </h3>
-          <p className="text-white/70 text-base font-medium">
+          <p className="text-white/70 text-sm font-medium">
             {t('dashboard.brokers.subtitle')}
           </p>
         </div>
