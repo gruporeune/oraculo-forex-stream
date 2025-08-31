@@ -312,7 +312,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         </div>
 
         {/* Broker Cards Section - Grid aligned with banners above */}
-        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-2">
+        <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6 lg:mt-0">
           {/* Empty space to align with video */}
           <div className="col-span-2"></div>
           
