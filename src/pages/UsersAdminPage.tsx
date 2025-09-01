@@ -9,18 +9,23 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Users, Plus, Edit, Save, LogOut, Search, DollarSign } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Users, Plus, Edit, Save, LogOut, Search, DollarSign, User, Calendar, Filter } from "lucide-react";
 import { toast } from "sonner";
+import AdminNetworkGraph from "@/components/AdminNetworkGraph";
 
 interface UserProfile {
   id: string;
   full_name: string | null;
+  username: string | null;
   plan: string;
   available_balance: number;
   daily_earnings: number;
   daily_commissions: number;
   updated_at: string;
   phone: string | null;
+  referred_by: string | null;
+  referrer_username?: string | null;
 }
 
 interface UserPlan {
@@ -36,6 +41,7 @@ export default function UsersAdminPage() {
   const [userPlans, setUserPlans] = useState<UserPlan[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editingUser, setEditingUser] = useState<{
@@ -44,6 +50,7 @@ export default function UsersAdminPage() {
     daily_earnings: number;
   } | null>(null);
   const [newPlan, setNewPlan] = useState("");
+  const [mainNetworkUser, setMainNetworkUser] = useState<UserProfile | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,18 +60,28 @@ export default function UsersAdminPage() {
   }, []);
 
   useEffect(() => {
-    // Filter users based on search term
+    // Filter users based on search term and date
+    let filtered = users;
+    
     if (searchTerm) {
-      const filtered = users.filter(user => 
+      filtered = filtered.filter(user => 
         user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.phone?.includes(searchTerm)
       );
-      setFilteredUsers(filtered);
-    } else {
-      setFilteredUsers(users);
     }
-  }, [searchTerm, users]);
+    
+    if (dateFilter) {
+      const filterDate = new Date(dateFilter);
+      filtered = filtered.filter(user => {
+        const userDate = new Date(user.updated_at);
+        return userDate.toDateString() === filterDate.toDateString();
+      });
+    }
+    
+    setFilteredUsers(filtered);
+  }, [searchTerm, dateFilter, users]);
 
   const checkAdminAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -91,17 +108,51 @@ export default function UsersAdminPage() {
         .select(`
           id,
           full_name,
+          username,
           plan,
           available_balance,
           daily_earnings,
           daily_commissions,
           updated_at,
-          phone
+          phone,
+          referred_by
         `)
         .order('updated_at', { ascending: false });
 
       if (error) throw error;
-      setUsers(data || []);
+      
+      // Load referrer usernames
+      const usersWithReferrers = await Promise.all(
+        (data || []).map(async (user) => {
+          if (user.referred_by) {
+            const { data: referrerData } = await supabase
+              .from('profiles')
+              .select('username')
+              .eq('id', user.referred_by)
+              .single();
+            
+            return {
+              ...user,
+              referrer_username: referrerData?.username || null
+            };
+          }
+          return { ...user, referrer_username: null };
+        })
+      );
+      
+      setUsers(usersWithReferrers);
+      
+      // Load main network user - try to find oraculooption@gmail.com
+      const { data: mainUserByEmail } = await supabase
+        .from('profiles')
+        .select('*')
+        .or('username.eq.oraculooption@gmail.com,full_name.ilike.%oraculo%')
+        .limit(1)
+        .maybeSingle();
+      
+      if (mainUserByEmail) {
+        setMainNetworkUser(mainUserByEmail);
+      }
     } catch (error: any) {
       toast.error("Erro ao carregar usuários: " + error.message);
     } finally {
@@ -306,176 +357,240 @@ export default function UsersAdminPage() {
           </Card>
         </div>
 
-        {/* Search */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Buscar por nome, ID ou telefone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-slate-800 border-slate-700 text-white"
-            />
-          </div>
-        </div>
+        <Tabs defaultValue="users" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-800">
+            <TabsTrigger value="users" className="data-[state=active]:bg-purple-600">
+              <Users className="w-4 h-4 mr-2" />
+              Usuários
+            </TabsTrigger>
+            <TabsTrigger value="network" className="data-[state=active]:bg-purple-600">
+              <User className="w-4 h-4 mr-2" />
+              Rede Principal
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="users" className="space-y-6">
+            {/* Search and Filters */}
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Buscar por nome, username, ID ou telefone..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  type="date"
+                  placeholder="Filtrar por data..."
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="pl-10 bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+            </div>
 
-        {/* Users Table */}
-        <Card className="bg-slate-800 border-slate-700">
-          <CardHeader>
-            <CardTitle>Usuários Cadastrados</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow className="border-slate-700">
-                  <TableHead className="text-gray-300">Nome</TableHead>
-                  <TableHead className="text-gray-300">Plano Principal</TableHead>
-                  <TableHead className="text-gray-300">Planos Extras</TableHead>
-                  <TableHead className="text-gray-300">Saldo Disponível</TableHead>
-                  <TableHead className="text-gray-300">Ganho Hoje</TableHead>
-                  <TableHead className="text-gray-300">Última Atualização</TableHead>
-                  <TableHead className="text-gray-300">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.map((user) => {
-                  const extraPlans = getUserPlansCount(user.id);
-                  return (
-                    <TableRow key={user.id} className="border-slate-700">
-                      <TableCell className="text-white">
-                        <div>
-                          <div className="font-medium">{user.full_name || 'Sem nome'}</div>
-                          <div className="text-xs text-gray-400">{user.id.substring(0, 8)}...</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={`${getPlanBadgeColor(user.plan)} text-white`}>
-                          {user.plan.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm text-gray-300">
-                          {extraPlans.length > 0 ? `${extraPlans.length} planos extras` : 'Nenhum'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-green-400 font-medium">
-                        R$ {(user.available_balance || 0).toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-yellow-400 font-medium">
-                        R$ {(user.daily_earnings || 0).toFixed(2)}
-                      </TableCell>
-                      <TableCell className="text-gray-300">
-                        {new Date(user.updated_at).toLocaleDateString('pt-BR')}
-                      </TableCell>
-                      <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setEditingUser({
-                                  plan: user.plan,
-                                  available_balance: user.available_balance || 0,
-                                  daily_earnings: user.daily_earnings || 0
-                                });
-                              }}
-                            >
-                              <Edit className="w-4 h-4 mr-1" />
-                              Editar
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="bg-slate-800 border-slate-700 text-white">
-                            <DialogHeader>
-                              <DialogTitle>Gerenciar Usuário: {user.full_name || 'Sem nome'}</DialogTitle>
-                            </DialogHeader>
-                            <div className="space-y-4">
-                              <div>
-                                <Label>Planos Ativos do Usuário</Label>
-                                <div className="bg-slate-700 rounded-lg p-3 mb-4">
-                                  {getUserPlansCount(selectedUser?.id || '').length > 0 ? (
-                                    <div className="space-y-2">
-                                      {getUserPlansCount(selectedUser?.id || '').map((plan) => (
-                                        <div key={plan.id} className="flex items-center justify-between bg-slate-600 rounded-lg p-2">
-                                          <span className="text-white font-medium">{plan.plan_name.toUpperCase()}</span>
-                                          <Button
-                                            size="sm"
-                                            variant="destructive"
-                                            onClick={() => handleRemovePlan(plan.id)}
-                                            className="bg-red-600 hover:bg-red-700 text-white"
-                                          >
-                                            Remover
-                                          </Button>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <p className="text-gray-400 text-sm">Nenhum plano ativo</p>
-                                  )}
-                                </div>
-                              </div>
-                              
-                              <div>
-                                <Label>Saldo Disponível (R$)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={editingUser?.available_balance || 0}
-                                  onChange={(e) => setEditingUser(prev => prev ? {...prev, available_balance: parseFloat(e.target.value) || 0} : null)}
-                                  className="bg-slate-700 border-slate-600"
-                                />
-                              </div>
-                              
-                              <div>
-                                <Label>Ganho do Dia (R$)</Label>
-                                <Input
-                                  type="number"
-                                  step="0.01"
-                                  value={editingUser?.daily_earnings || 0}
-                                  onChange={(e) => setEditingUser(prev => prev ? {...prev, daily_earnings: parseFloat(e.target.value) || 0} : null)}
-                                  className="bg-slate-700 border-slate-600"
-                                />
-                              </div>
-
-                              <div className="border-t border-slate-600 pt-4">
-                                <Label>Adicionar Novo Plano</Label>
-                                <div className="flex gap-2 mt-2">
-                                  <Select value={newPlan} onValueChange={setNewPlan}>
-                                    <SelectTrigger className="bg-slate-700 border-slate-600">
-                                      <SelectValue placeholder="Selecionar plano" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-700 border-slate-600">
-                                      <SelectItem value="partner">Partner</SelectItem>
-                                      <SelectItem value="master">Master</SelectItem>
-                                      <SelectItem value="premium">Premium</SelectItem>
-                                      <SelectItem value="platinum">Platinum</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <Button onClick={handleAddPlan} size="sm" className="bg-green-600 hover:bg-green-700">
-                                    <Plus className="w-4 h-4" />
-                                  </Button>
-                                </div>
-                              </div>
-
-                              <div className="flex gap-2">
-                                <Button onClick={handleUpdateUser} className="bg-purple-600 hover:bg-purple-700">
-                                  <Save className="w-4 h-4 mr-2" />
-                                  Salvar Alterações
-                                </Button>
+            {/* Users Table */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle>Usuários Cadastrados</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-slate-700">
+                      <TableHead className="text-gray-300">Nome/Username</TableHead>
+                      <TableHead className="text-gray-300">Indicado por</TableHead>
+                      <TableHead className="text-gray-300">Plano Principal</TableHead>
+                      <TableHead className="text-gray-300">Planos Extras</TableHead>
+                      <TableHead className="text-gray-300">Saldo Disponível</TableHead>
+                      <TableHead className="text-gray-300">Ganho Hoje</TableHead>
+                      <TableHead className="text-gray-300">Data de Cadastro</TableHead>
+                      <TableHead className="text-gray-300">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredUsers.map((user) => {
+                      const extraPlans = getUserPlansCount(user.id);
+                      return (
+                        <TableRow key={user.id} className="border-slate-700">
+                          <TableCell className="text-white">
+                            <div>
+                              <div className="font-medium">{user.full_name || 'Sem nome'}</div>
+                              <div className="text-sm text-blue-400">{user.username || 'Sem username'}</div>
+                              <div className="text-xs text-gray-400">{user.id.substring(0, 8)}...</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-white">
+                            <div className="text-sm">
+                              {user.referrer_username ? (
+                                <span className="text-green-400">{user.referrer_username}</span>
+                              ) : (
+                                <span className="text-gray-400">Cadastro direto</span>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={`${getPlanBadgeColor(user.plan)} text-white`}>
+                              {user.plan.toUpperCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm text-gray-300">
+                              {extraPlans.length > 0 ? `${extraPlans.length} planos extras` : 'Nenhum'}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-green-400 font-medium">
+                            R$ {(user.available_balance || 0).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-yellow-400 font-medium">
+                            R$ {(user.daily_earnings || 0).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-gray-300">
+                            <div>
+                              <div>{new Date(user.updated_at).toLocaleDateString('pt-BR')}</div>
+                              <div className="text-xs text-gray-400">
+                                {new Date(user.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
-                          </DialogContent>
-                        </Dialog>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                          </TableCell>
+                          <TableCell>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                                  onClick={() => {
+                                    setSelectedUser(user);
+                                    setEditingUser({
+                                      plan: user.plan,
+                                      available_balance: user.available_balance || 0,
+                                      daily_earnings: user.daily_earnings || 0
+                                    });
+                                  }}
+                                >
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Editar
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="bg-slate-800 border-slate-700 text-white">
+                                <DialogHeader>
+                                  <DialogTitle>Gerenciar Usuário: {user.full_name || 'Sem nome'}</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label>Planos Ativos do Usuário</Label>
+                                    <div className="bg-slate-700 rounded-lg p-3 mb-4">
+                                      {getUserPlansCount(selectedUser?.id || '').length > 0 ? (
+                                        <div className="space-y-2">
+                                          {getUserPlansCount(selectedUser?.id || '').map((plan) => (
+                                            <div key={plan.id} className="flex items-center justify-between bg-slate-600 rounded-lg p-2">
+                                              <span className="text-white font-medium">{plan.plan_name.toUpperCase()}</span>
+                                              <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() => handleRemovePlan(plan.id)}
+                                                className="bg-red-600 hover:bg-red-700 text-white"
+                                              >
+                                                Remover
+                                              </Button>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      ) : (
+                                        <p className="text-gray-400 text-sm">Nenhum plano ativo</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  <div>
+                                    <Label>Saldo Disponível (R$)</Label>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      value={editingUser?.available_balance || 0}
+                                      onChange={(e) => setEditingUser(prev => prev ? {...prev, available_balance: parseFloat(e.target.value) || 0} : null)}
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <Label>Ganho do Dia (R$)</Label>
+                                    <Input
+                                      type="number"
+                                      step="0.01"
+                                      value={editingUser?.daily_earnings || 0}
+                                      onChange={(e) => setEditingUser(prev => prev ? {...prev, daily_earnings: parseFloat(e.target.value) || 0} : null)}
+                                      className="bg-slate-700 border-slate-600"
+                                    />
+                                  </div>
+
+                                  <div className="border-t border-slate-600 pt-4">
+                                    <Label>Adicionar Novo Plano</Label>
+                                    <div className="flex gap-2 mt-2">
+                                      <Select value={newPlan} onValueChange={setNewPlan}>
+                                        <SelectTrigger className="bg-slate-700 border-slate-600">
+                                          <SelectValue placeholder="Selecionar plano" />
+                                        </SelectTrigger>
+                                        <SelectContent className="bg-slate-700 border-slate-600">
+                                          <SelectItem value="partner">Partner</SelectItem>
+                                          <SelectItem value="master">Master</SelectItem>
+                                          <SelectItem value="premium">Premium</SelectItem>
+                                          <SelectItem value="platinum">Platinum</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <Button onClick={handleAddPlan} size="sm" className="bg-green-600 hover:bg-green-700">
+                                        <Plus className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex gap-2">
+                                    <Button onClick={handleUpdateUser} className="bg-purple-600 hover:bg-purple-700">
+                                      <Save className="w-4 h-4 mr-2" />
+                                      Salvar Alterações
+                                    </Button>
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-6">
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-purple-400" />
+                  Rede Principal - oraculooption@gmail.com
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {mainNetworkUser ? (
+                  <AdminNetworkGraph 
+                    userId={mainNetworkUser.id} 
+                    userProfile={mainNetworkUser}
+                  />
+                ) : (
+                  <div className="text-center text-gray-400 py-8">
+                    Usuário principal não encontrado
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
