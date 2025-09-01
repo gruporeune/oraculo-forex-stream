@@ -1,14 +1,14 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Coins } from 'lucide-react';
+import { CreditCard, Coins, QrCode } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useI18n } from '@/lib/i18n';
 
 interface PaymentMethodModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectPaymentMethod: (method: 'pix' | 'usdt') => void;
+  onSelectPaymentMethod: (method: 'pix' | 'usdt' | 'pix-manual') => void;
   plan: {
     name: string;
     price: string;
@@ -65,6 +65,28 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
                   <div className="font-bold">{t('payment.method.pix')}</div>
                   <div className="text-sm text-white/50">
                     Temporariamente indisponível
+                  </div>
+                </div>
+              </Button>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 0 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <Button
+                onClick={() => onSelectPaymentMethod('pix-manual')}
+                className="w-full h-16 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/50 text-white flex items-center gap-4 justify-start px-6"
+                variant="outline"
+              >
+                <div className="bg-yellow-600 p-2 rounded-full">
+                  <QrCode className="w-6 h-6" />
+                </div>
+                <div className="text-left">
+                  <div className="font-bold">PIX Manual</div>
+                  <div className="text-sm text-white/70">
+                    {plan.priceInReals || `R$ ${plan.name === 'partner' ? '200' : plan.name === 'master' ? '600' : plan.name === 'premium' ? '2.750' : '5.000'}`} - QR Code
                   </div>
                 </div>
               </Button>

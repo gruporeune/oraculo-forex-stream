@@ -65,6 +65,42 @@ export type Database = {
         }
         Relationships: []
       }
+      manual_pix_payments: {
+        Row: {
+          amount_brl: number
+          created_at: string
+          email: string
+          id: string
+          plan_name: string
+          proof_image_path: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_brl: number
+          created_at?: string
+          email: string
+          id?: string
+          plan_name: string
+          proof_image_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_brl?: number
+          created_at?: string
+          email?: string
+          id?: string
+          plan_name?: string
+          proof_image_path?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       material_suggestions: {
         Row: {
           created_at: string

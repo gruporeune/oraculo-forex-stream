@@ -6,6 +6,7 @@ import { Check, Crown, Gem, Diamond, Star } from 'lucide-react';
 import { PaymentModal } from '@/components/PaymentModal';
 import { USDTPaymentModal } from '@/components/USDTPaymentModal';
 import { PaymentMethodModal } from '@/components/PaymentMethodModal';
+import { ManualPixPaymentModal } from '@/components/ManualPixPaymentModal';
 import { useI18n } from '@/lib/i18n';
 
 const plans = [
@@ -106,6 +107,7 @@ export default function PlansPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isUSDTModalOpen, setIsUSDTModalOpen] = useState(false);
   const [isPaymentMethodModalOpen, setIsPaymentMethodModalOpen] = useState(false);
+  const [isManualPixModalOpen, setIsManualPixModalOpen] = useState(false);
 
   const handlePurchase = (plan: typeof plans[0]) => {
     setSelectedPlan(plan);
@@ -122,13 +124,15 @@ export default function PlansPage() {
     }
   };
 
-  const handlePaymentMethodSelect = (method: 'pix' | 'usdt') => {
+  const handlePaymentMethodSelect = (method: 'pix' | 'usdt' | 'pix-manual') => {
     setIsPaymentMethodModalOpen(false);
     
     if (method === 'pix') {
       setIsPaymentModalOpen(true);
-    } else {
+    } else if (method === 'usdt') {
       setIsUSDTModalOpen(true);
+    } else if (method === 'pix-manual') {
+      setIsManualPixModalOpen(true);
     }
   };
 
@@ -264,6 +268,14 @@ export default function PlansPage() {
             isOpen={isUSDTModalOpen}
             onClose={() => {
               setIsUSDTModalOpen(false);
+              setSelectedPlan(null);
+            }}
+            plan={selectedPlan}
+          />
+          <ManualPixPaymentModal
+            isOpen={isManualPixModalOpen}
+            onClose={() => {
+              setIsManualPixModalOpen(false);
               setSelectedPlan(null);
             }}
             plan={selectedPlan}
