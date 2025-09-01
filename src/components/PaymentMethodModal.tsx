@@ -54,17 +54,17 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
               transition={{ delay: 0.1 }}
             >
               <Button
-                onClick={() => onSelectPaymentMethod('pix')}
-                className="w-full h-16 bg-green-600/20 hover:bg-green-600/30 border border-green-500/50 text-white flex items-center gap-4 justify-start px-6"
+                disabled
+                className="w-full h-16 bg-green-600/10 border border-green-500/20 text-white/30 flex items-center gap-4 justify-start px-6 cursor-not-allowed opacity-50"
                 variant="outline"
               >
-                <div className="bg-green-600 p-2 rounded-full">
+                <div className="bg-green-600/30 p-2 rounded-full">
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div className="text-left">
                   <div className="font-bold">{t('payment.method.pix')}</div>
-                  <div className="text-sm text-white/70">
-                    {plan.priceInReals || plan.price} - Pagamento instantâneo
+                  <div className="text-sm text-white/50">
+                    Temporariamente indisponível
                   </div>
                 </div>
               </Button>
