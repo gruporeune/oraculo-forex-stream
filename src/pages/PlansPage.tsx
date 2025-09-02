@@ -13,7 +13,7 @@ const plans = [
   {
     name: "PARTNER",
     price: "$36 USD",
-    priceInReals: "R$ 198",
+    priceInReals: "R$ 200",
     originalPrice: "$50 USD",
     description: "plan.partner.description",
     icon: Star,
