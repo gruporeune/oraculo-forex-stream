@@ -287,13 +287,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "profiles_referred_by_fkey"
-            columns: ["referred_by"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
-            referencedColumns: ["id"]
-          },
         ]
       }
       referral_commissions: {
@@ -333,24 +326,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "referral_commissions_referred_id_fkey"
-            columns: ["referred_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "referral_commissions_referrer_id_fkey"
             columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "referral_commissions_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
             referencedColumns: ["id"]
           },
         ]
@@ -404,13 +383,6 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "signals_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
             referencedColumns: ["id"]
           },
         ]
@@ -548,24 +520,10 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "user_referrals_referred_id_fkey"
-            columns: ["referred_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "user_referrals_referrer_id_fkey"
             columns: ["referrer_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_referrals_referrer_id_fkey"
-            columns: ["referrer_id"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
             referencedColumns: ["id"]
           },
         ]
@@ -629,49 +587,7 @@ export type Database = {
       }
     }
     Views: {
-      users_with_creation_date: {
-        Row: {
-          auto_operations_completed_today: number | null
-          auto_operations_paused: boolean | null
-          auto_operations_started: boolean | null
-          available_balance: number | null
-          avatar_url: string | null
-          broker_id: string | null
-          created_at: string | null
-          cycle_start_time: string | null
-          daily_commissions: number | null
-          daily_earnings: number | null
-          daily_referral_commissions: number | null
-          daily_signals_used: number | null
-          full_name: string | null
-          id: string | null
-          last_reset_date: string | null
-          phone: string | null
-          plan: string | null
-          referral_code: string | null
-          referred_by: string | null
-          total_referral_commissions: number | null
-          updated_at: string | null
-          username: string | null
-          welcome_sent: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_referred_by_fkey"
-            columns: ["referred_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_referred_by_fkey"
-            columns: ["referred_by"]
-            isOneToOne: false
-            referencedRelation: "users_with_creation_date"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       calculate_plan_commission: {

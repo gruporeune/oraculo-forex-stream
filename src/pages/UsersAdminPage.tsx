@@ -122,12 +122,26 @@ export default function UsersAdminPage() {
 
       if (error) throw error;
       
-      // Para simular a data de criação correta, vamos usar a data de update mais antiga disponível
-      // como aproximação da data de criação, já que não temos acesso direto à auth.users
-      const usersWithCreatedAt = (data || []).map(profile => ({
-        ...profile,
-        created_at: profile.updated_at // Usando updated_at como fallback
-      }));
+      // Get real creation dates using our secure function
+      const usersWithCreatedAt = await Promise.all(
+        (data || []).map(async (profile) => {
+          try {
+            const { data: creationDate, error: dateError } = await supabase
+              .rpc('get_user_creation_date', { user_uuid: profile.id });
+            
+            return {
+              ...profile,
+              created_at: creationDate || profile.updated_at
+            };
+          } catch (error) {
+            // Fallback to updated_at if function fails
+            return {
+              ...profile,
+              created_at: profile.updated_at
+            };
+          }
+        })
+      );
 
       // Load referrer usernames
       const usersWithReferrers = await Promise.all(
@@ -148,7 +162,12 @@ export default function UsersAdminPage() {
         })
       );
 
-      setUsers(usersWithReferrers);
+      // Sort by creation date (newest first)
+      const sortedUsers = usersWithReferrers.sort((a, b) => 
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+
+      setUsers(sortedUsers);
       
       // Load main network user - try to find oraculooption@gmail.com
       const { data: mainUserByEmail } = await supabase
