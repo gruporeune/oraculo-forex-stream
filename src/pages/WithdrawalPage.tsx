@@ -406,7 +406,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
               <p>• Saques em <span className="font-bold">USDT na rede TRC20</span>.</p>
               <p>• Processamento: <span className="font-bold">Manual (até 24h)</span>.</p>
               <p>• <span className="font-bold text-orange-400">Taxa de 5%</span> sobre o valor do saque.</p>
-              <p>• Conversão: <span className="font-bold">1 USD = R$ 6,00</span> (fixo).</p>
+              <p>• Conversão: <span className="font-bold">1 USD = R$ 5,50</span> (fixo).</p>
             </div>
             <div className="pt-3 border-t border-white/10">
               <p>• Valor mínimo para saque: <span className="font-bold">R$ 50,00</span>.</p>
