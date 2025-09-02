@@ -269,10 +269,32 @@ export default function UsersAdminPage() {
         throw error;
       }
 
+      // Se o usuário tem plano FREE e este é seu primeiro plano, atualizar o plano principal
+      if (selectedUser.plan === 'free') {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            plan: newPlan,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', selectedUser.id);
+
+        if (updateError) {
+          console.error("Erro ao atualizar plano principal:", updateError);
+          // Não fazer throw aqui para não cancelar a operação do user_plans
+        } else {
+          console.log("Plano principal atualizado para:", newPlan);
+          // Atualizar o estado local
+          setSelectedUser(prev => prev ? {...prev, plan: newPlan} : null);
+          setEditingUser(prev => prev ? {...prev, plan: newPlan} : null);
+        }
+      }
+
       console.log("Plano adicionado com sucesso:", data);
       toast.success("Plano adicionado com sucesso!");
       setNewPlan("");
       loadUserPlans();
+      loadUsers(); // Recarregar para atualizar o plano principal na interface
     } catch (error: any) {
       console.error("Erro ao adicionar plano:", error);
       toast.error("Erro ao adicionar plano: " + error.message);
@@ -513,7 +535,26 @@ export default function UsersAdminPage() {
                                 </DialogHeader>
                                 <div className="space-y-4">
                                   <div>
-                                    <Label>Planos Ativos do Usuário</Label>
+                                    <Label>Plano Principal</Label>
+                                    <Select 
+                                      value={editingUser?.plan || 'free'} 
+                                      onValueChange={(value) => setEditingUser(prev => prev ? {...prev, plan: value} : null)}
+                                    >
+                                      <SelectTrigger className="bg-slate-700 border-slate-600">
+                                        <SelectValue placeholder="Selecionar plano principal" />
+                                      </SelectTrigger>
+                                      <SelectContent className="bg-slate-700 border-slate-600">
+                                        <SelectItem value="free">Free</SelectItem>
+                                        <SelectItem value="partner">Partner</SelectItem>
+                                        <SelectItem value="master">Master</SelectItem>
+                                        <SelectItem value="premium">Premium</SelectItem>
+                                        <SelectItem value="platinum">Platinum</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+
+                                  <div>
+                                    <Label>Planos Extras do Usuário</Label>
                                     <div className="bg-slate-700 rounded-lg p-3 mb-4">
                                       {getUserPlansCount(selectedUser?.id || '').length > 0 ? (
                                         <div className="space-y-2">
@@ -532,7 +573,7 @@ export default function UsersAdminPage() {
                                           ))}
                                         </div>
                                       ) : (
-                                        <p className="text-gray-400 text-sm">Nenhum plano ativo</p>
+                                        <p className="text-gray-400 text-sm">Nenhum plano extra</p>
                                       )}
                                     </div>
                                   </div>
