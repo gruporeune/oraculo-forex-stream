@@ -86,7 +86,7 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
                 <div className="text-left">
                   <div className="font-bold">PIX Manual</div>
                   <div className="text-sm text-white/70">
-                    {plan.priceInReals || `R$ ${plan.name === 'partner' ? '200' : plan.name === 'master' ? '600' : plan.name === 'premium' ? '2.750' : '5.000'}`} - QR Code
+                    {plan.priceInReals || `R$ ${plan.name === 'partner' ? '198' : plan.name === 'master' ? '600' : plan.name === 'premium' ? '2.750' : '5.000'}`} - QR Code
                   </div>
                 </div>
               </Button>

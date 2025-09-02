@@ -12,8 +12,8 @@ import { useI18n } from '@/lib/i18n';
 const plans = [
   {
     name: "PARTNER",
-    price: "$33 USD",
-    priceInReals: "R$ 200",
+    price: "$36 USD",
+    priceInReals: "R$ 198",
     originalPrice: "$50 USD",
     description: "plan.partner.description",
     icon: Star,
@@ -33,7 +33,7 @@ const plans = [
   },
   {
     name: "MASTER",
-    price: "$100 USD",
+    price: "$109 USD",
     priceInReals: "R$ 600",
     originalPrice: "$150 USD",
     description: "plan.master.description",
@@ -55,7 +55,7 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "$458 USD",
+    price: "$500 USD",
     priceInReals: "R$ 2.750",
     originalPrice: "$687 USD",
     description: "plan.premium.description",
@@ -78,7 +78,7 @@ const plans = [
   },
   {
     name: "PLATINUM",
-    price: "$833 USD",
+    price: "$909 USD",
     priceInReals: "R$ 5.000",
     originalPrice: "$1250 USD",
     description: "plan.platinum.description",

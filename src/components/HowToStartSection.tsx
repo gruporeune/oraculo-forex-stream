@@ -57,7 +57,7 @@ const plans = [
   },
   {
     name: "INTERNATIONAL",
-    price: "$100 USD",
+    price: "$109 USD",
     description: "Para traders internacionais",
     icon: Crown,
     features: ["100 sinais por dia", "1% lucro diário até 200%", "Área de membros VIP", "Suporte prioritário"],
@@ -66,7 +66,7 @@ const plans = [
   },
   {
     name: "PREMIUM",
-    price: "$458 USD",
+    price: "$500 USD",
     priceInReals: "R$ 2.750", 
     description: "Para traders de alto volume",
     icon: Gem,
@@ -76,7 +76,7 @@ const plans = [
   },
   {
     name: "PLATINUM",
-    price: "$833 USD",
+    price: "$909 USD",
     priceInReals: "R$ 5.000",
     description: "O máximo em trading automatizado",
     icon: Diamond,
