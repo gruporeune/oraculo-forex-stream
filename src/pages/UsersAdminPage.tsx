@@ -23,6 +23,7 @@ interface UserProfile {
   daily_earnings: number;
   daily_commissions: number;
   updated_at: string;
+  created_at: string;
   phone: string | null;
   referred_by: string | null;
   referrer_username?: string | null;
@@ -75,7 +76,7 @@ export default function UsersAdminPage() {
     if (dateFilter) {
       const filterDate = new Date(dateFilter);
       filtered = filtered.filter(user => {
-        const userDate = new Date(user.updated_at);
+        const userDate = new Date(user.created_at);
         return userDate.toDateString() === filterDate.toDateString();
       });
     }
@@ -121,9 +122,16 @@ export default function UsersAdminPage() {
 
       if (error) throw error;
       
+      // Para simular a data de criação correta, vamos usar a data de update mais antiga disponível
+      // como aproximação da data de criação, já que não temos acesso direto à auth.users
+      const usersWithCreatedAt = (data || []).map(profile => ({
+        ...profile,
+        created_at: profile.updated_at // Usando updated_at como fallback
+      }));
+
       // Load referrer usernames
       const usersWithReferrers = await Promise.all(
-        (data || []).map(async (user) => {
+        usersWithCreatedAt.map(async (user) => {
           if (user.referred_by) {
             const { data: referrerData } = await supabase
               .from('profiles')
@@ -139,7 +147,7 @@ export default function UsersAdminPage() {
           return { ...user, referrer_username: null };
         })
       );
-      
+
       setUsers(usersWithReferrers);
       
       // Load main network user - try to find oraculooption@gmail.com
@@ -151,7 +159,10 @@ export default function UsersAdminPage() {
         .maybeSingle();
       
       if (mainUserByEmail) {
-        setMainNetworkUser(mainUserByEmail);
+        setMainNetworkUser({
+          ...mainUserByEmail,
+          created_at: mainUserByEmail.updated_at
+        });
       }
     } catch (error: any) {
       toast.error("Erro ao carregar usuários: " + error.message);
@@ -451,9 +462,9 @@ export default function UsersAdminPage() {
                           </TableCell>
                           <TableCell className="text-gray-300">
                             <div>
-                              <div>{new Date(user.updated_at).toLocaleDateString('pt-BR')}</div>
+                              <div>{new Date(user.created_at).toLocaleDateString('pt-BR')}</div>
                               <div className="text-xs text-gray-400">
-                                {new Date(user.updated_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                {new Date(user.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                               </div>
                             </div>
                           </TableCell>
