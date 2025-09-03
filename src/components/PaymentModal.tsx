@@ -723,6 +723,13 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
                   ⚡ Ativação automática após confirmação
                 </p>
               </div>
+              
+              {/* Tempo de Ativação */}
+              <div className="bg-orange-600/20 border border-orange-500/30 rounded-lg p-3 text-sm">
+                <p className="text-orange-300 font-medium">
+                  ⏱️ Após o pagamento e confirmação, aguarde até 30 minutos para ver sua conta ativada no sistema.
+                </p>
+              </div>
             </div>
           )}
         </div>

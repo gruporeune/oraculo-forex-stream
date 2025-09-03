@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Upload, MessageCircle, CheckCircle } from 'lucide-react';
+import { Upload, MessageCircle, CheckCircle, Copy, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,16 +33,25 @@ const PLAN_VALUES = {
   platinum: 5000,
 } as const;
 
+const PIX_CODES = {
+  partner: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA5204000053039865406200.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304C1C7',
+  master: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA5204000053039865406600.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304E39A',
+  premium: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA52040000530398654072750.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304C3B8',
+  platinum: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA52040000530398654075000.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304DDE2',
+} as const;
+
 export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymentModalProps) => {
   const [email, setEmail] = useState('');
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
   const planKey = plan.name.toLowerCase() as keyof typeof QR_CODES;
   const qrCodeUrl = QR_CODES[planKey];
   const planValue = PLAN_VALUES[planKey];
+  const pixCode = PIX_CODES[planKey];
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -134,10 +143,29 @@ export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymen
     }
   };
 
+  const copyPixCode = async () => {
+    try {
+      await navigator.clipboard.writeText(pixCode);
+      setIsCopied(true);
+      toast({
+        title: "Código PIX copiado!",
+        description: "O código PIX foi copiado para a área de transferência.",
+      });
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Erro ao copiar",
+        description: "Não foi possível copiar o código PIX.",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleClose = () => {
     setEmail('');
     setUploadedFile(null);
     setPaymentSubmitted(false);
+    setIsCopied(false);
     onClose();
   };
 
@@ -156,9 +184,14 @@ export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymen
             <div className="text-center space-y-4">
               <div className="bg-green-600/20 border border-green-500/30 rounded-lg p-6">
                 <h3 className="font-bold text-lg text-green-400 mb-2">Comprovante Recebido!</h3>
-                <p className="text-white/80">
-                  Seu pagamento está sendo analisado. O plano será ativado em até 24 horas.
+                <p className="text-white/80 mb-3">
+                  Seu pagamento está sendo analisado.
                 </p>
+                <div className="bg-yellow-600/20 border border-yellow-500/30 rounded p-3">
+                  <p className="text-yellow-300 font-medium text-sm">
+                    ⏱️ Após o pagamento e envio do comprovante, aguarde até 30 minutos para ver sua conta ativada no sistema.
+                  </p>
+                </div>
               </div>
 
               <div className="bg-blue-600/20 border border-blue-500/30 rounded-lg p-4">
@@ -216,6 +249,28 @@ export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymen
             </p>
           </div>
 
+          {/* PIX Copia e Cola */}
+          <div className="space-y-3">
+            <h4 className="text-lg font-semibold text-blue-400">PIX Copia e Cola</h4>
+            <div className="bg-gray-800/50 border border-gray-600 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm text-white/80">Código PIX:</span>
+                <Button
+                  onClick={copyPixCode}
+                  variant="outline"
+                  size="sm"
+                  className="text-white border-blue-500 hover:bg-blue-600/20"
+                >
+                  {isCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                  {isCopied ? 'Copiado!' : 'Copiar'}
+                </Button>
+              </div>
+              <div className="bg-black/40 p-2 rounded text-xs font-mono break-all text-white/90 max-h-20 overflow-y-auto">
+                {pixCode}
+              </div>
+            </div>
+          </div>
+
           {/* Email Input */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-white">Email Cadastrado *</Label>
@@ -254,11 +309,17 @@ export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymen
           <div className="bg-yellow-600/20 border border-yellow-500/30 rounded-lg p-4">
             <h4 className="font-semibold text-yellow-400 mb-2">Instruções:</h4>
             <ol className="text-sm text-white/80 space-y-1 list-decimal list-inside">
-              <li>Faça o pagamento via PIX usando o QR code acima</li>
+              <li>Faça o pagamento via PIX usando o QR code ou código copia e cola</li>
               <li>Digite seu email cadastrado</li>
               <li>Envie o comprovante de pagamento</li>
+              <li>Aguarde até 30 minutos para ativação no sistema</li>
               <li>Se precisar de ajuda, clique no botão do WhatsApp abaixo</li>
             </ol>
+            <div className="bg-orange-600/20 border border-orange-500/30 rounded-lg p-3 mt-3">
+              <p className="text-orange-300 text-sm font-medium">
+                ⏱️ Após o pagamento e envio do comprovante, aguarde até 30 minutos para ver sua conta ativada no sistema.
+              </p>
+            </div>
           </div>
 
           {/* Action Buttons */}

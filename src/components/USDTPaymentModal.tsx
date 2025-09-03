@@ -200,7 +200,7 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
                   Após a verificação você será ativado com sucesso!
                 </p>
                 <p className="text-orange-200 text-xs font-medium">
-                  🕐 Após o pagamento e comprovação, poderá demorar até 1 hora para a ativação do seu plano.
+                  🕐 Após o pagamento e envio do comprovante, aguarde até 30 minutos para ver sua conta ativada no sistema.
                 </p>
               </motion.div>
             )}
@@ -310,9 +310,14 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
           >
             <CheckCircle className="w-16 h-16 text-green-400 mx-auto" />
             <h3 className="text-xl font-bold text-green-400">Pagamento Registrado!</h3>
-            <p className="text-white/80">
+            <p className="text-white/80 mb-3">
               Seu pagamento foi registrado com sucesso. Nossa equipe irá analisar e ativar seu plano em breve.
             </p>
+            <div className="bg-orange-600/20 border border-orange-500/30 rounded-lg p-3">
+              <p className="text-orange-300 text-sm font-medium">
+                ⏱️ Após o pagamento e envio do comprovante, aguarde até 30 minutos para ver sua conta ativada no sistema.
+              </p>
+            </div>
             <Button onClick={handleClose} className="bg-green-600 hover:bg-green-700">
               Fechar
             </Button>

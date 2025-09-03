@@ -455,6 +455,7 @@ export default function UsersAdminPage() {
                   <TableHeader>
                     <TableRow className="border-slate-700">
                       <TableHead className="text-gray-300">Nome/Username</TableHead>
+                      <TableHead className="text-gray-300">Telefone</TableHead>
                       <TableHead className="text-gray-300">Indicado por</TableHead>
                       <TableHead className="text-gray-300">Plano Principal</TableHead>
                       <TableHead className="text-gray-300">Planos Extras</TableHead>
@@ -474,6 +475,13 @@ export default function UsersAdminPage() {
                               <div className="font-medium">{user.full_name || 'Sem nome'}</div>
                               <div className="text-sm text-blue-400">{user.username || 'Sem username'}</div>
                               <div className="text-xs text-gray-400">{user.id.substring(0, 8)}...</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-white">
+                            <div className="text-sm">
+                              {user.phone || (
+                                <span className="text-gray-400">Não informado</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-white">
