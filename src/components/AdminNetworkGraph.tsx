@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, TrendingUp, User } from 'lucide-react';
+import { Users, TrendingUp, User, ChevronDown, ChevronRight } from 'lucide-react';
 
 interface NetworkNode {
   id: string;
@@ -22,6 +22,7 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
   const [networkData, setNetworkData] = useState<NetworkNode | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [totalUsers, setTotalUsers] = useState(0);
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set([userId])); // Root node expanded by default
 
   useEffect(() => {
     loadNetworkData();
@@ -124,19 +125,55 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
     return colors[plan as keyof typeof colors] || colors.free;
   };
 
+  const toggleNodeExpansion = (nodeId: string) => {
+    setExpandedNodes(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else {
+        newSet.add(nodeId);
+      }
+      return newSet;
+    });
+  };
+
   const renderNode = (node: NetworkNode, isRoot = false) => {
+    const isExpanded = expandedNodes.has(node.id);
+    const hasChildren = node.referrals && node.referrals.length > 0;
+    
     return (
       <div key={node.id} className="flex flex-col items-center">
         {/* User Node */}
-        <div className={`relative ${isRoot ? 'mb-8' : 'mb-6'}`}>
-          <div className={`
-            w-20 h-20 rounded-full flex flex-col items-center justify-center text-white font-bold
-            ${getPlanColor(node.plan)} 
-            ${isRoot ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/30' : 'ring-2 ring-white/20'}
-            transition-all duration-300 hover:scale-110 cursor-pointer
-          `}>
-            <User className="w-8 h-8 mb-1" />
+        <div className={`relative ${isRoot ? 'mb-6' : 'mb-4'}`}>
+          <div 
+            className={`
+              relative w-20 h-20 rounded-full flex flex-col items-center justify-center text-white font-bold cursor-pointer
+              ${getPlanColor(node.plan)} 
+              ${isRoot ? 'ring-4 ring-yellow-400 shadow-lg shadow-yellow-400/30' : 'ring-2 ring-white/20'}
+              transition-all duration-300 hover:scale-110 group
+            `}
+            onClick={() => hasChildren && toggleNodeExpansion(node.id)}
+          >
+            <User className="w-6 h-6 mb-1" />
             <span className="text-xs">{node.level}</span>
+            
+            {/* Expand/Collapse Indicator */}
+            {hasChildren && (
+              <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center border-2 border-white">
+                {isExpanded ? (
+                  <ChevronDown className="w-3 h-3 text-white" />
+                ) : (
+                  <ChevronRight className="w-3 h-3 text-white" />
+                )}
+              </div>
+            )}
+            
+            {/* Children Count Badge */}
+            {hasChildren && (
+              <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">
+                {node.referrals.length}
+              </div>
+            )}
           </div>
           
           {/* User Info */}
@@ -150,35 +187,52 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
             <p className="text-white/40 text-xs">
               Nível {node.level}
             </p>
+            {hasChildren && (
+              <p className="text-purple-400 text-xs font-medium mt-1">
+                {isExpanded ? 'Clique para colapsar' : `${node.referrals.length} indicado${node.referrals.length > 1 ? 's' : ''}`}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Connection Lines and Children */}
-        {node.referrals && node.referrals.length > 0 && (
+        {/* Connection Lines and Children - Only show if expanded */}
+        {hasChildren && isExpanded && (
           <>
             {/* Vertical line down */}
-            <div className="w-0.5 h-8 bg-gradient-to-b from-purple-400 to-transparent"></div>
+            <div className="w-0.5 h-6 bg-gradient-to-b from-purple-400 to-transparent"></div>
             
-            {/* Horizontal line */}
-            {node.referrals.length > 1 && (
-              <div className="relative">
-                <div className="h-0.5 bg-gradient-to-r from-purple-400 via-purple-400 to-purple-400" 
-                     style={{ width: `${(node.referrals.length - 1) * 140}px` }}>
-                </div>
-                {/* Connection points */}
-                {node.referrals.map((_, index) => (
+            {/* Children Container */}
+            <div className="relative">
+              {/* Horizontal connector line */}
+              {node.referrals.length > 1 && (
+                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2">
                   <div 
-                    key={index}
-                    className="absolute top-0 w-0.5 h-8 bg-gradient-to-b from-purple-400 to-transparent"
-                    style={{ left: `${index * 140}px` }}
-                  ></div>
-                ))}
+                    className="h-0.5 bg-gradient-to-r from-purple-400 via-purple-400 to-purple-400"
+                    style={{ width: `${Math.max(200, (node.referrals.length - 1) * 120)}px` }}
+                  />
+                  {/* Vertical connection points */}
+                  {node.referrals.map((_, index) => (
+                    <div 
+                      key={index}
+                      className="absolute top-0 w-0.5 h-6 bg-gradient-to-b from-purple-400 to-transparent"
+                      style={{ 
+                        left: `${index * (Math.max(200, (node.referrals.length - 1) * 120) / (node.referrals.length - 1))}px`
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              
+              {/* Children Nodes in a more compact grid layout */}
+              <div className={`
+                mt-6 grid gap-x-8 gap-y-12 justify-center
+                ${node.referrals.length === 1 ? 'grid-cols-1' : 
+                  node.referrals.length === 2 ? 'grid-cols-2' : 
+                  node.referrals.length <= 4 ? 'grid-cols-2 lg:grid-cols-4' : 
+                  'grid-cols-2 md:grid-cols-3 lg:grid-cols-5'}
+              `}>
+                {node.referrals.map(child => renderNode(child))}
               </div>
-            )}
-            
-            {/* Children Nodes */}
-            <div className="flex gap-8 mt-8">
-              {node.referrals.map(child => renderNode(child))}
             </div>
           </>
         )}
@@ -294,15 +348,25 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
         
         {/* Legend */}
         <div className="mt-8 p-4 bg-white/5 rounded-lg">
-          <h4 className="text-white font-medium mb-3">Visualização Administrativa:</h4>
+          <h4 className="text-white font-medium mb-3">Controles da Visualização:</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
             <div className="flex items-center gap-2">
-              <User className="w-4 h-4 text-purple-400" />
-              <span className="text-white/70">Ícone de usuário com <span className="text-purple-400 font-medium">número do nível</span></span>
+              <div className="w-4 h-4 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold border border-white">3</div>
+              <span className="text-white/70">Badge laranja mostra <span className="text-orange-400 font-medium">quantos indicados diretos</span></span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-600 rounded-full"></div>
-              <span className="text-white/70">Sem limite de níveis - <span className="text-yellow-400 font-medium">rede completa</span></span>
+              <div className="w-4 h-4 bg-purple-600 rounded-full flex items-center justify-center">
+                <ChevronRight className="w-2 h-2 text-white" />
+              </div>
+              <span className="text-white/70"><span className="text-purple-400 font-medium">Clique para expandir/colapsar</span> a rede</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-purple-400" />
+              <span className="text-white/70">Número dentro do ícone indica o <span className="text-purple-400 font-medium">nível na rede</span></span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-yellow-600 rounded-full ring-2 ring-yellow-400"></div>
+              <span className="text-white/70">Usuário raiz com <span className="text-yellow-400 font-medium">borda dourada</span></span>
             </div>
           </div>
         </div>
