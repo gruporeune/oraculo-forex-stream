@@ -147,16 +147,21 @@ export default function UsersAdminPage() {
       const usersWithReferrers = await Promise.all(
         usersWithCreatedAt.map(async (user) => {
           if (user.referred_by) {
-            const { data: referrerData } = await supabase
-              .from('profiles')
-              .select('username')
-              .eq('id', user.referred_by)
-              .single();
-            
-            return {
-              ...user,
-              referrer_username: referrerData?.username || null
-            };
+            try {
+              const { data: referrerData } = await supabase
+                .from('profiles')
+                .select('username, full_name')
+                .eq('id', user.referred_by)
+                .maybeSingle();
+              
+              return {
+                ...user,
+                referrer_username: referrerData?.username || referrerData?.full_name || 'Usuário não encontrado'
+              };
+            } catch (error) {
+              console.error('Erro ao buscar referrer:', error);
+              return { ...user, referrer_username: 'Erro ao carregar' };
+            }
           }
           return { ...user, referrer_username: null };
         })
