@@ -169,11 +169,12 @@ export default function UsersAdminPage() {
 
       setUsers(sortedUsers);
       
-      // Load main network user - try to find oraculooption@gmail.com
+      // Load main network user - find the root user (without referrer)
       const { data: mainUserByEmail } = await supabase
         .from('profiles')
         .select('*')
-        .or('username.eq.oraculooption@gmail.com,full_name.ilike.%oraculo%')
+        .is('referred_by', null)
+        .eq('username', 'empresa')
         .limit(1)
         .maybeSingle();
       
@@ -361,10 +362,20 @@ export default function UsersAdminPage() {
             <Users className="w-8 h-8 text-purple-400" />
             <h1 className="text-3xl font-bold">Painel de Usuários</h1>
           </div>
-          <Button onClick={handleLogout} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
-            <LogOut className="w-4 h-4 mr-2" />
-            Sair
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => { loadUsers(); loadUserPlans(); }} 
+              variant="outline" 
+              className="border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white"
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Atualizar Dados
+            </Button>
+            <Button onClick={handleLogout} variant="outline" className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
