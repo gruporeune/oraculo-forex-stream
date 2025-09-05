@@ -98,6 +98,9 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
   };
 
   const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
+    // Limite de profundidade para melhorar performance
+    if (level > 3) return null;
+    
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, username, full_name, plan')
@@ -106,16 +109,24 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
       
     if (!profile) return null;
 
-    const { data: allPlans } = await supabase
-      .from('user_plans')
-      .select('plan_name')
-      .eq('user_id', nodeId)
-      .eq('is_active', true);
+    // Buscar planos e referrals em paralelo para otimizar
+    const [plansResult, referralsResult] = await Promise.all([
+      supabase
+        .from('user_plans')
+        .select('plan_name')
+        .eq('user_id', nodeId)
+        .eq('is_active', true),
+      supabase
+        .from('profiles')
+        .select('id, username, full_name, plan')
+        .eq('referred_by', nodeId)
+        .limit(10) // Limitar para melhorar performance
+    ]);
     
     let displayPlan = profile.plan || 'free';
-    if (allPlans && allPlans.length > 0) {
+    if (plansResult.data && plansResult.data.length > 0) {
       const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
-      const highestPlan = allPlans.reduce((highest, current) => {
+      const highestPlan = plansResult.data.reduce((highest, current) => {
         const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
         const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
         return currentPriority > highestPriority ? current : highest;
@@ -123,20 +134,16 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
       displayPlan = highestPlan.plan_name;
     }
 
-    const { data: directReferrals } = await supabase
-      .from('profiles')
-      .select('id, username, full_name, plan')
-      .eq('referred_by', nodeId);
-
     const referrals: NetworkNode[] = [];
     
-    if (directReferrals && directReferrals.length > 0) {
-      for (const referralProfile of directReferrals) {
-        const childNode = await buildNetworkTree(referralProfile.id, level + 1);
-        if (childNode) {
-          referrals.push(childNode);
-        }
-      }
+    if (referralsResult.data && referralsResult.data.length > 0) {
+      // Processar apenas os primeiros referrals em paralelo
+      const childPromises = referralsResult.data.slice(0, 5).map(async (referralProfile) => {
+        return await buildNetworkTree(referralProfile.id, level + 1);
+      });
+      
+      const childNodes = await Promise.all(childPromises);
+      referrals.push(...childNodes.filter(node => node !== null) as NetworkNode[]);
     }
 
     return {
