@@ -737,7 +737,7 @@ export default function AdminWithdrawalsPage() {
                           </DialogTrigger>
                           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Gerenciar Saque - {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}</DialogTitle>
+                              <DialogTitle>Gerenciar Saque{selectedWithdrawal ? ` - ${selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}` : ''}</DialogTitle>
                             </DialogHeader>
                             
                             {selectedWithdrawal && (
