@@ -29,12 +29,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Download, Eye, CheckCircle, XCircle, Clock, LogOut, Calendar as CalendarIcon } from "lucide-react";
+import { Download, Eye, CheckCircle, XCircle, Clock, LogOut, Calendar as CalendarIcon, TrendingUp, Users, Coins } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface WithdrawalRequest {
   id: string;
@@ -59,6 +60,206 @@ interface WithdrawalRequest {
     username: string | null;
   } | null;
   user_email?: string;
+}
+
+interface UserEarningsHistory {
+  referralCommissions: {
+    level1: number;
+    level2: number; 
+    level3: number;
+    total: number;
+  };
+  operationEarnings: number;
+  availableBalance: number;
+  totalEarnings: number;
+  dailyEarnings: number;
+}
+
+interface UserEarningsViewProps {
+  userId: string;
+}
+
+function UserEarningsView({ userId }: UserEarningsViewProps) {
+  const [earnings, setEarnings] = useState<UserEarningsHistory | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserEarnings = async () => {
+      try {
+        setLoading(true);
+        
+        // Buscar comissões de rede por nível
+        const { data: commissions, error: commissionsError } = await supabase
+          .from('referral_commissions')
+          .select('commission_amount, commission_level')
+          .eq('referrer_id', userId);
+
+        if (commissionsError) throw commissionsError;
+
+        // Calcular comissões por nível
+        const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
+        const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
+        const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
+
+        // Buscar dados do perfil do usuário
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('available_balance, daily_earnings, total_referral_commissions')
+          .eq('id', userId)
+          .single();
+
+        if (profileError) throw profileError;
+
+        // Buscar histórico de ganhos das operações
+        const { data: dailyHistory, error: historyError } = await supabase
+          .from('daily_earnings_history')
+          .select('total_earnings')
+          .eq('user_id', userId);
+
+        if (historyError) throw historyError;
+
+        const totalOperationEarnings = dailyHistory?.reduce((sum, h) => sum + (h.total_earnings || 0), 0) || 0;
+        const currentDailyEarnings = profile?.daily_earnings || 0;
+        const finalOperationEarnings = totalOperationEarnings + currentDailyEarnings;
+
+        setEarnings({
+          referralCommissions: {
+            level1,
+            level2,
+            level3,
+            total: level1 + level2 + level3
+          },
+          operationEarnings: finalOperationEarnings,
+          availableBalance: profile?.available_balance || 0,
+          totalEarnings: finalOperationEarnings + (level1 + level2 + level3),
+          dailyEarnings: currentDailyEarnings
+        });
+
+      } catch (error) {
+        console.error('Erro ao buscar histórico de ganhos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserEarnings();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="animate-pulse">
+          <div className="h-4 bg-muted rounded w-full mb-2"></div>
+          <div className="h-4 bg-muted rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!earnings) {
+    return <div className="text-muted-foreground">Erro ao carregar dados de ganhos</div>;
+  }
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  return (
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Resumo Financeiro
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Saldo Disponível</div>
+              <div className="text-lg font-bold text-green-600">{formatCurrency(earnings.availableBalance)}</div>
+            </div>
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Total de Ganhos</div>
+              <div className="text-lg font-bold">{formatCurrency(earnings.totalEarnings)}</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Comissões de Rede
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Nível 1 (10%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level1)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Nível 2 (3%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Nível 3 (2%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level3)}</span>
+            </div>
+            <hr />
+            <div className="flex justify-between items-center font-bold">
+              <span>Total Comissões</span>
+              <span className="text-blue-600">{formatCurrency(earnings.referralCommissions.total)}</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Coins className="w-4 h-4" />
+              Ganhos de Operações
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Ganhos Hoje</span>
+              <span className="font-medium">{formatCurrency(earnings.dailyEarnings)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Total Histórico</span>
+              <span className="font-medium">{formatCurrency(earnings.operationEarnings)}</span>
+            </div>
+            <hr />
+            <div className="flex justify-between items-center font-bold">
+              <span>Total Operações</span>
+              <span className="text-green-600">{formatCurrency(earnings.operationEarnings)}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-orange-200 bg-orange-50">
+        <CardContent className="pt-4">
+          <div className="text-sm text-orange-700">
+            <strong>Verificação de Saldo:</strong> O saldo disponível deve ser a soma das comissões de rede 
+            ({formatCurrency(earnings.referralCommissions.total)}) + ganhos das operações 
+            ({formatCurrency(earnings.operationEarnings)}) = {formatCurrency(earnings.totalEarnings)}
+            {earnings.availableBalance !== earnings.totalEarnings && (
+              <span className="text-red-600 block mt-1">
+                ⚠️ Divergência encontrada! Saldo atual: {formatCurrency(earnings.availableBalance)}
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default function AdminWithdrawalsPage() {
@@ -534,145 +735,156 @@ export default function AdminWithdrawalsPage() {
                               Gerenciar
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
+                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>Gerenciar Saque</DialogTitle>
+                              <DialogTitle>Gerenciar Saque - {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}</DialogTitle>
                             </DialogHeader>
                             
                             {selectedWithdrawal && (
-                              <div className="space-y-4">
-                                 {/* Withdrawal Details */}
-                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <Label>Nome Completo</Label>
-                                      <div className="text-sm p-2 bg-muted rounded">
-                                        {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <Label>Telefone</Label>
-                                      <div className="text-sm p-2 bg-muted rounded">
-                                        {selectedWithdrawal.profile?.phone || 'N/A'}
-                                      </div>
-                                    </div>
-                                    <div>
-                                      <Label>Username</Label>
-                                      <div className="text-sm p-2 bg-muted rounded font-medium">
-                                        @{selectedWithdrawal.profile?.username || 'N/A'}
-                                      </div>
-                                    </div>
-                                  <div>
-                                    <Label>Valor</Label>
-                                    <div className="text-sm p-2 bg-muted rounded font-medium">
-                                      {formatCurrency(selectedWithdrawal.amount)}
-                                    </div>
-                                  </div>
-                                  <div>
-                                    <Label>Status Atual</Label>
-                                    <div className="text-sm p-2 bg-muted rounded">
-                                      {getStatusBadge(selectedWithdrawal.status)}
-                                    </div>
-                                  </div>
+                              <Tabs defaultValue="withdrawal" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2">
+                                  <TabsTrigger value="withdrawal">Dados do Saque</TabsTrigger>
+                                  <TabsTrigger value="earnings">Histórico de Ganhos</TabsTrigger>
+                                </TabsList>
+                                
+                                <TabsContent value="withdrawal" className="space-y-4">
+                                  {/* Withdrawal Details */}
+                                  <div className="grid grid-cols-2 gap-4">
+                                     <div>
+                                       <Label>Nome Completo</Label>
+                                       <div className="text-sm p-2 bg-muted rounded">
+                                         {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}
+                                       </div>
+                                     </div>
+                                     <div>
+                                       <Label>Telefone</Label>
+                                       <div className="text-sm p-2 bg-muted rounded">
+                                         {selectedWithdrawal.profile?.phone || 'N/A'}
+                                       </div>
+                                     </div>
+                                     <div>
+                                       <Label>Username</Label>
+                                       <div className="text-sm p-2 bg-muted rounded font-medium">
+                                         @{selectedWithdrawal.profile?.username || 'N/A'}
+                                       </div>
+                                     </div>
                                    <div>
-                                     <Label>Tipo de Pagamento</Label>
-                                     <div className="text-sm p-2 bg-muted rounded">
-                                       {selectedWithdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX'}
+                                     <Label>Valor</Label>
+                                     <div className="text-sm p-2 bg-muted rounded font-medium">
+                                       {formatCurrency(selectedWithdrawal.amount)}
                                      </div>
                                    </div>
-                                   {selectedWithdrawal.withdrawal_type === 'usdt' ? (
-                                     <div>
-                                       <Label>Carteira USDT</Label>
-                                       <div className="text-sm p-2 bg-muted rounded font-mono">
-                                         {selectedWithdrawal.usdt_wallet || 'N/A'}
-                                       </div>
+                                   <div>
+                                     <Label>Status Atual</Label>
+                                     <div className="text-sm p-2 bg-muted rounded">
+                                       {getStatusBadge(selectedWithdrawal.status)}
                                      </div>
-                                   ) : (
-                                     <>
-                                       <div>
-                                         <Label>Chave PIX</Label>
-                                         <div className="text-sm p-2 bg-muted rounded">
-                                           {selectedWithdrawal.pix_key}
-                                         </div>
-                                       </div>
-                                       <div>
-                                         <Label>Tipo PIX</Label>
-                                         <div className="text-sm p-2 bg-muted rounded">
-                                           {selectedWithdrawal.pix_key_type}
-                                         </div>
-                                       </div>
-                                     </>
-                                   )}
-                                </div>
+                                   </div>
+                                    <div>
+                                      <Label>Tipo de Pagamento</Label>
+                                      <div className="text-sm p-2 bg-muted rounded">
+                                        {selectedWithdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX'}
+                                      </div>
+                                    </div>
+                                    {selectedWithdrawal.withdrawal_type === 'usdt' ? (
+                                      <div>
+                                        <Label>Carteira USDT</Label>
+                                        <div className="text-sm p-2 bg-muted rounded font-mono">
+                                          {selectedWithdrawal.usdt_wallet || 'N/A'}
+                                        </div>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <div>
+                                          <Label>Chave PIX</Label>
+                                          <div className="text-sm p-2 bg-muted rounded">
+                                            {selectedWithdrawal.pix_key}
+                                          </div>
+                                        </div>
+                                        <div>
+                                          <Label>Tipo PIX</Label>
+                                          <div className="text-sm p-2 bg-muted rounded">
+                                            {selectedWithdrawal.pix_key_type}
+                                          </div>
+                                        </div>
+                                      </>
+                                    )}
+                                 </div>
 
-                                {/* Admin Notes */}
-                                <div>
-                                  <Label htmlFor="admin-notes">Observações Administrativas</Label>
-                                  <Textarea
-                                    id="admin-notes"
-                                    value={adminNotes}
-                                    onChange={(e) => setAdminNotes(e.target.value)}
-                                    placeholder="Adicione observações sobre este saque..."
-                                    rows={3}
-                                  />
-                                </div>
+                                 {/* Admin Notes */}
+                                 <div>
+                                   <Label htmlFor="admin-notes">Observações Administrativas</Label>
+                                   <Textarea
+                                     id="admin-notes"
+                                     value={adminNotes}
+                                     onChange={(e) => setAdminNotes(e.target.value)}
+                                     placeholder="Adicione observações sobre este saque..."
+                                     rows={3}
+                                   />
+                                 </div>
 
-                                {/* Rejection Reason */}
-                                <div>
-                                  <Label htmlFor="rejection-reason">Motivo da Rejeição (opcional)</Label>
-                                  <Textarea
-                                    id="rejection-reason"
-                                    value={rejectionReason}
-                                    onChange={(e) => setRejectionReason(e.target.value)}
-                                    placeholder="Motivo caso o saque seja rejeitado..."
-                                    rows={2}
-                                  />
-                                </div>
+                                 {/* Rejection Reason */}
+                                 <div>
+                                   <Label htmlFor="rejection-reason">Motivo da Rejeição (opcional)</Label>
+                                   <Textarea
+                                     id="rejection-reason"
+                                     value={rejectionReason}
+                                     onChange={(e) => setRejectionReason(e.target.value)}
+                                     placeholder="Motivo caso o saque seja rejeitado..."
+                                     rows={2}
+                                   />
+                                 </div>
 
-                                {/* Action Buttons */}
-                                {selectedWithdrawal.status === 'pending' && (
-                                  <div className="flex gap-2 pt-4">
-                                    <Button
-                                      onClick={() => updateWithdrawalStatus(
-                                        selectedWithdrawal.id, 
-                                        'completed', 
-                                        adminNotes
-                                      )}
-                                      className="flex-1 bg-green-600 hover:bg-green-700"
-                                    >
-                                      <CheckCircle className="w-4 h-4 mr-1" />
-                                      Aprovar Saque
-                                    </Button>
-                                    <Button
-                                      onClick={() => updateWithdrawalStatus(
-                                        selectedWithdrawal.id, 
-                                        'rejected', 
-                                        adminNotes, 
-                                        rejectionReason
-                                      )}
-                                      variant="destructive"
-                                      className="flex-1"
-                                    >
-                                      <XCircle className="w-4 h-4 mr-1" />
-                                      Rejeitar Saque
-                                    </Button>
-                                  </div>
-                                )}
+                                 {/* Action Buttons */}
+                                 {selectedWithdrawal.status === 'pending' && (
+                                   <div className="flex gap-2 pt-4">
+                                     <Button
+                                       onClick={() => updateWithdrawalStatus(
+                                         selectedWithdrawal.id, 
+                                         'completed', 
+                                         adminNotes
+                                       )}
+                                       className="flex-1 bg-green-600 hover:bg-green-700"
+                                     >
+                                       <CheckCircle className="w-4 h-4 mr-1" />
+                                       Aprovar Saque
+                                     </Button>
+                                     <Button
+                                       onClick={() => updateWithdrawalStatus(
+                                         selectedWithdrawal.id, 
+                                         'rejected', 
+                                         adminNotes, 
+                                         rejectionReason
+                                       )}
+                                       variant="destructive"
+                                       className="flex-1"
+                                     >
+                                       <XCircle className="w-4 h-4 mr-1" />
+                                       Rejeitar Saque
+                                     </Button>
+                                   </div>
+                                 )}
 
-                                {selectedWithdrawal.status !== 'pending' && (
-                                  <div className="flex gap-2 pt-4">
-                                    <Button
-                                      onClick={() => updateWithdrawalStatus(
-                                        selectedWithdrawal.id, 
-                                        selectedWithdrawal.status, 
-                                        adminNotes
-                                      )}
-                                      className="flex-1"
-                                    >
-                                      Atualizar Observações
-                                    </Button>
-                                  </div>
-                                )}
-                              </div>
+                                 {selectedWithdrawal.status !== 'pending' && (
+                                   <div className="flex gap-2 pt-4">
+                                     <Button
+                                       onClick={() => updateWithdrawalStatus(
+                                         selectedWithdrawal.id, 
+                                         selectedWithdrawal.status, 
+                                         adminNotes
+                                       )}
+                                       className="flex-1"
+                                     >
+                                       Atualizar Observações
+                                     </Button>
+                                   </div>
+                                 )}
+                                </TabsContent>
+                                
+                                <TabsContent value="earnings" className="space-y-4">
+                                  <UserEarningsView userId={selectedWithdrawal.user_id} />
+                                </TabsContent>
+                              </Tabs>
                             )}
                           </DialogContent>
                         </Dialog>
