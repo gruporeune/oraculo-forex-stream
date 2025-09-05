@@ -87,6 +87,7 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
     const fetchUserEarnings = async () => {
       try {
         setLoading(true);
+        console.log('Buscando dados para userId:', userId);
         
         // Buscar comissões de rede por nível
         const { data: commissions, error: commissionsError } = await supabase
@@ -94,21 +95,29 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
           .select('commission_amount, commission_level')
           .eq('referrer_id', userId);
 
-        if (commissionsError) throw commissionsError;
+        console.log('Comissões encontradas:', commissions);
+        if (commissionsError) {
+          console.error('Erro ao buscar comissões:', commissionsError);
+        }
 
         // Calcular comissões por nível
         const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
         const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
         const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
 
+        console.log('Comissões por nível:', { level1, level2, level3 });
+
         // Buscar dados do perfil do usuário
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('available_balance, daily_earnings, total_referral_commissions')
+          .select('available_balance, daily_earnings, total_referral_commissions, daily_commissions')
           .eq('id', userId)
           .single();
 
-        if (profileError) throw profileError;
+        console.log('Dados do perfil:', profile);
+        if (profileError) {
+          console.error('Erro ao buscar perfil:', profileError);
+        }
 
         // Buscar histórico de ganhos das operações
         const { data: dailyHistory, error: historyError } = await supabase
@@ -116,23 +125,51 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
           .select('total_earnings')
           .eq('user_id', userId);
 
-        if (historyError) throw historyError;
+        console.log('Histórico diário:', dailyHistory);
+        if (historyError) {
+          console.error('Erro ao buscar histórico:', historyError);
+        }
+
+        // Buscar ganhos dos planos do usuário
+        const { data: userPlans, error: plansError } = await supabase
+          .from('user_plans')
+          .select('daily_earnings')
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+        console.log('Planos do usuário:', userPlans);
+        if (plansError) {
+          console.error('Erro ao buscar planos:', plansError);
+        }
 
         const totalOperationEarnings = dailyHistory?.reduce((sum, h) => sum + (h.total_earnings || 0), 0) || 0;
         const currentDailyEarnings = profile?.daily_earnings || 0;
-        const finalOperationEarnings = totalOperationEarnings + currentDailyEarnings;
+        const planEarnings = userPlans?.reduce((sum, p) => sum + (p.daily_earnings || 0), 0) || 0;
+        const finalOperationEarnings = totalOperationEarnings + currentDailyEarnings + planEarnings;
+
+        // Usar total_referral_commissions do perfil como fallback se não houver comissões detalhadas
+        const totalReferralCommissions = (level1 + level2 + level3) || (profile?.total_referral_commissions || 0);
+
+        console.log('Cálculos finais:', {
+          totalOperationEarnings,
+          currentDailyEarnings,
+          planEarnings,
+          finalOperationEarnings,
+          totalReferralCommissions,
+          availableBalance: profile?.available_balance
+        });
 
         setEarnings({
           referralCommissions: {
-            level1,
-            level2,
-            level3,
-            total: level1 + level2 + level3
+            level1: level1 || 0,
+            level2: level2 || 0,
+            level3: level3 || 0,
+            total: totalReferralCommissions
           },
           operationEarnings: finalOperationEarnings,
           availableBalance: profile?.available_balance || 0,
-          totalEarnings: finalOperationEarnings + (level1 + level2 + level3),
-          dailyEarnings: currentDailyEarnings
+          totalEarnings: finalOperationEarnings + totalReferralCommissions,
+          dailyEarnings: currentDailyEarnings + planEarnings
         });
 
       } catch (error) {
@@ -142,7 +179,9 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
       }
     };
 
-    fetchUserEarnings();
+    if (userId) {
+      fetchUserEarnings();
+    }
   }, [userId]);
 
   if (loading) {
@@ -250,9 +289,11 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
             <strong>Verificação de Saldo:</strong> O saldo disponível deve ser a soma das comissões de rede 
             ({formatCurrency(earnings.referralCommissions.total)}) + ganhos das operações 
             ({formatCurrency(earnings.operationEarnings)}) = {formatCurrency(earnings.totalEarnings)}
-            {earnings.availableBalance !== earnings.totalEarnings && (
+            {Math.abs(earnings.availableBalance - earnings.totalEarnings) > 0.01 && (
               <span className="text-red-600 block mt-1">
                 ⚠️ Divergência encontrada! Saldo atual: {formatCurrency(earnings.availableBalance)}
+                <br />
+                Diferença: {formatCurrency(earnings.availableBalance - earnings.totalEarnings)}
               </span>
             )}
           </div>
