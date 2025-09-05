@@ -92,39 +92,19 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
         // Buscar comissões de rede por nível na tabela referral_commissions
         const { data: commissions, error: commissionsError } = await supabase
           .from('referral_commissions')
-          .select('commission_amount, commission_level, referred_id, plan_name, created_at')
+          .select('commission_amount, commission_level')
           .eq('referrer_id', userId);
 
         console.log('Comissões encontradas na tabela referral_commissions:', commissions);
+        
         if (commissionsError) {
           console.error('Erro ao buscar comissões:', commissionsError);
         }
 
-        // Se não há dados em referral_commissions, tentar buscar na tabela user_referrals como fallback
-        let level1 = 0, level2 = 0, level3 = 0;
-        
-        if (!commissions || commissions.length === 0) {
-          console.log('Nenhuma comissão encontrada em referral_commissions, verificando user_referrals...');
-          
-          // Buscar na tabela user_referrals como fallback
-          const { data: userReferrals, error: referralsError } = await supabase
-            .from('user_referrals')
-            .select('commission_earned, referred_id')
-            .eq('referrer_id', userId);
-          
-          console.log('Dados em user_referrals:', userReferrals);
-          if (referralsError) {
-            console.error('Erro ao buscar user_referrals:', referralsError);
-          }
-          
-          // Como não temos os níveis específicos em user_referrals, vamos assumir que são nível 1
-          level1 = userReferrals?.reduce((sum, r) => sum + Number(r.commission_earned || 0), 0) || 0;
-        } else {
-          // Calcular comissões por nível dos dados reais
-          level1 = commissions.filter(c => c.commission_level === 1).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-          level2 = commissions.filter(c => c.commission_level === 2).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-          level3 = commissions.filter(c => c.commission_level === 3).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0);
-        }
+        // Calcular comissões por nível dos dados reais
+        const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
 
         console.log('Comissões por nível calculadas:', { level1, level2, level3 });
 
