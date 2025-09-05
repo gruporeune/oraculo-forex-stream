@@ -65,7 +65,7 @@ interface WithdrawalRequest {
 interface UserEarningsHistory {
   referralCommissions: {
     level1: number;
-    level2: number;
+    level2: number; 
     level3: number;
     total: number;
   };
@@ -73,7 +73,6 @@ interface UserEarningsHistory {
   availableBalance: number;
   totalEarnings: number;
   dailyEarnings: number;
-  commissionDetails?: any[];
 }
 
 interface UserEarningsViewProps {
@@ -88,87 +87,97 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
     const fetchUserEarnings = async () => {
       try {
         setLoading(true);
-        console.log('Buscando comissões de rede para userId:', userId);
+        console.log('Buscando dados para userId:', userId);
         
-        // Buscar comissões de rede detalhadas por nível
+        // Buscar comissões de rede por nível
         const { data: commissions, error: commissionsError } = await supabase
           .from('referral_commissions')
-          .select(`
-            commission_amount,
-            commission_level,
-            plan_name,
-            created_at,
-            referred_id
-          `)
-          .eq('referrer_id', userId)
-          .order('created_at', { ascending: false });
-
-        if (commissionsError) {
-          console.error('Erro ao buscar comissões:', commissionsError);
-          setEarnings({
-            referralCommissions: { level1: 0, level2: 0, level3: 0, total: 0 },
-            operationEarnings: 0,
-            availableBalance: 0,
-            totalEarnings: 0,
-            dailyEarnings: 0
-          });
-          return;
-        }
+          .select('commission_amount, commission_level')
+          .eq('referrer_id', userId);
 
         console.log('Comissões encontradas:', commissions);
+        if (commissionsError) {
+          console.error('Erro ao buscar comissões:', commissionsError);
+        }
 
-        // Calcular totais por nível
-        const level1Total = commissions
-          ?.filter(c => c.commission_level === 1)
-          .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
-        
-        const level2Total = commissions
-          ?.filter(c => c.commission_level === 2)
-          .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
-        
-        const level3Total = commissions
-          ?.filter(c => c.commission_level === 3)
-          .reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        // Calcular comissões por nível APENAS dos dados reais
+        const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
 
-        const totalCommissions = level1Total + level2Total + level3Total;
+        console.log('Comissões por nível (dados reais):', { level1, level2, level3 });
 
-        console.log('Totais calculados:', {
-          level1: level1Total,
-          level2: level2Total,
-          level3: level3Total,
-          total: totalCommissions
-        });
-
-        // Buscar saldo disponível do usuário
-        const { data: profile } = await supabase
+        // Buscar dados do perfil do usuário
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('available_balance')
+          .select('available_balance, daily_earnings, total_referral_commissions, daily_commissions')
           .eq('id', userId)
           .single();
 
+        console.log('Dados do perfil:', profile);
+        if (profileError) {
+          console.error('Erro ao buscar perfil:', profileError);
+        }
+
+        // Buscar histórico de ganhos das operações
+        const { data: dailyHistory, error: historyError } = await supabase
+          .from('daily_earnings_history')
+          .select('total_earnings')
+          .eq('user_id', userId);
+
+        console.log('Histórico diário:', dailyHistory);
+        if (historyError) {
+          console.error('Erro ao buscar histórico:', historyError);
+        }
+
+        // Buscar ganhos dos planos do usuário
+        const { data: userPlans, error: plansError } = await supabase
+          .from('user_plans')
+          .select('daily_earnings')
+          .eq('user_id', userId)
+          .eq('is_active', true);
+
+        console.log('Planos do usuário:', userPlans);
+        if (plansError) {
+          console.error('Erro ao buscar planos:', plansError);
+        }
+
+        const totalOperationEarnings = dailyHistory?.reduce((sum, h) => sum + (h.total_earnings || 0), 0) || 0;
+        const currentDailyEarnings = profile?.daily_earnings || 0;
+        const planEarnings = userPlans?.reduce((sum, p) => sum + (p.daily_earnings || 0), 0) || 0;
+        const finalOperationEarnings = totalOperationEarnings + currentDailyEarnings + planEarnings;
+
+        // Usar dados reais das comissões apenas
+        const totalFromLevels = level1 + level2 + level3;
+        const totalReferralCommissions = totalFromLevels;
+
+        console.log('Cálculos finais:', {
+          totalOperationEarnings,
+          currentDailyEarnings,
+          planEarnings,
+          finalOperationEarnings,
+          level1,
+          level2,
+          level3,
+          totalReferralCommissions,
+          availableBalance: profile?.available_balance
+        });
+
         setEarnings({
           referralCommissions: {
-            level1: level1Total,
-            level2: level2Total,
-            level3: level3Total,
-            total: totalCommissions
+            level1: level1,
+            level2: level2,
+            level3: level3,
+            total: totalReferralCommissions
           },
-          operationEarnings: 0,
+          operationEarnings: finalOperationEarnings,
           availableBalance: profile?.available_balance || 0,
-          totalEarnings: totalCommissions,
-          dailyEarnings: 0,
-          commissionDetails: commissions || []
+          totalEarnings: finalOperationEarnings + totalReferralCommissions,
+          dailyEarnings: currentDailyEarnings + planEarnings
         });
 
       } catch (error) {
-        console.error('Erro ao buscar comissões:', error);
-        setEarnings({
-          referralCommissions: { level1: 0, level2: 0, level3: 0, total: 0 },
-          operationEarnings: 0,
-          availableBalance: 0,
-          totalEarnings: 0,
-          dailyEarnings: 0
-        });
+        console.error('Erro ao buscar histórico de ganhos:', error);
       } finally {
         setLoading(false);
       }
@@ -203,79 +212,95 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
 
   return (
     <div className="space-y-4">
-      {/* Resumo do Saldo */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <TrendingUp className="w-5 h-5" />
-            Saldo Disponível
+            Resumo Financeiro
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="text-center p-4 bg-muted/50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{formatCurrency(earnings.availableBalance)}</div>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Saldo Disponível</div>
+              <div className="text-lg font-bold text-green-600">{formatCurrency(earnings.availableBalance)}</div>
+            </div>
+            <div className="text-center p-3 bg-muted/50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Total de Ganhos</div>
+              <div className="text-lg font-bold">{formatCurrency(earnings.totalEarnings)}</div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Comissões de Rede Simplificadas */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Histórico de Comissões de Rede
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="text-sm text-blue-600 font-medium">Nível 1</div>
-              <div className="text-sm text-muted-foreground mb-1">Diretos (10%)</div>
-              <div className="text-lg font-bold text-blue-700">{formatCurrency(earnings.referralCommissions.level1)}</div>
-            </div>
-            
-            <div className="text-center p-3 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="text-sm text-purple-600 font-medium">Nível 2</div>
-              <div className="text-sm text-muted-foreground mb-1">Indiretos (3%)</div>
-              <div className="text-lg font-bold text-purple-700">{formatCurrency(earnings.referralCommissions.level2)}</div>
-            </div>
-            
-            <div className="text-center p-3 bg-orange-50 rounded-lg border border-orange-200">
-              <div className="text-sm text-orange-600 font-medium">Nível 3</div>
-              <div className="text-sm text-muted-foreground mb-1">Sub-indiretos (2%)</div>
-              <div className="text-lg font-bold text-orange-700">{formatCurrency(earnings.referralCommissions.level3)}</div>
-            </div>
-          </div>
-          
-          <div className="pt-4 border-t">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Comissões de Rede
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-lg font-medium">Total de Comissões:</span>
-              <span className="text-xl font-bold text-green-600">{formatCurrency(earnings.referralCommissions.total)}</span>
+              <span className="text-sm">Nível 1 (10%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level1)}</span>
             </div>
-          </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Nível 2 (3%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level2)}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Nível 3 (2%)</span>
+              <span className="font-medium">{formatCurrency(earnings.referralCommissions.level3)}</span>
+            </div>
+            <hr />
+            <div className="flex justify-between items-center font-bold">
+              <span>Total Comissões</span>
+              <span className="text-blue-600">{formatCurrency(earnings.referralCommissions.total)}</span>
+            </div>
+          </CardContent>
+        </Card>
 
-          {/* Detalhes das Comissões */}
-          {earnings.commissionDetails && earnings.commissionDetails.length > 0 && (
-            <div className="mt-6">
-              <h4 className="font-medium mb-3">Últimas Comissões Recebidas:</h4>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {earnings.commissionDetails.slice(0, 10).map((commission: any, index: number) => (
-                  <div key={index} className="flex justify-between items-center py-2 px-3 bg-muted/30 rounded text-sm">
-                    <div>
-                      <span className="font-medium">Nível {commission.commission_level}</span>
-                      <span className="text-muted-foreground ml-2">({commission.plan_name})</span>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">{formatCurrency(commission.commission_amount)}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(commission.created_at).toLocaleDateString('pt-BR')}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Coins className="w-4 h-4" />
+              Ganhos de Operações
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Ganhos Hoje</span>
+              <span className="font-medium">{formatCurrency(earnings.dailyEarnings)}</span>
             </div>
-          )}
+            <div className="flex justify-between items-center">
+              <span className="text-sm">Total Histórico</span>
+              <span className="font-medium">{formatCurrency(earnings.operationEarnings)}</span>
+            </div>
+            <hr />
+            <div className="flex justify-between items-center font-bold">
+              <span>Total Operações</span>
+              <span className="text-green-600">{formatCurrency(earnings.operationEarnings)}</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-orange-200 bg-orange-50">
+        <CardContent className="pt-4">
+          <div className="text-sm text-orange-700">
+            <strong>Verificação de Saldo:</strong> O saldo disponível deve ser a soma das comissões de rede 
+            ({formatCurrency(earnings.referralCommissions.total)}) + ganhos das operações 
+            ({formatCurrency(earnings.operationEarnings)}) = {formatCurrency(earnings.totalEarnings)}
+            {Math.abs(earnings.availableBalance - earnings.totalEarnings) > 0.01 && (
+              <span className="text-red-600 block mt-1">
+                ⚠️ Divergência encontrada! Saldo atual: {formatCurrency(earnings.availableBalance)}
+                <br />
+                Diferença: {formatCurrency(earnings.availableBalance - earnings.totalEarnings)}
+              </span>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
