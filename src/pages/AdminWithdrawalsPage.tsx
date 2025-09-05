@@ -101,11 +101,16 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
         }
 
         // Calcular comissões por nível
-        const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
-        const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
-        const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + (c.commission_amount || 0), 0) || 0;
+        const level1 = commissions?.filter(c => c.commission_level === 1).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level2 = commissions?.filter(c => c.commission_level === 2).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
+        const level3 = commissions?.filter(c => c.commission_level === 3).reduce((sum, c) => sum + Number(c.commission_amount || 0), 0) || 0;
 
         console.log('Comissões por nível:', { level1, level2, level3 });
+        
+        // Se não há comissões detalhadas, buscar do profile
+        let finalLevel1 = level1;
+        let finalLevel2 = level2; 
+        let finalLevel3 = level3;
 
         // Buscar dados do perfil do usuário
         const { data: profile, error: profileError } = await supabase
@@ -148,22 +153,35 @@ function UserEarningsView({ userId }: UserEarningsViewProps) {
         const finalOperationEarnings = totalOperationEarnings + currentDailyEarnings + planEarnings;
 
         // Usar total_referral_commissions do perfil como fallback se não houver comissões detalhadas
-        const totalReferralCommissions = (level1 + level2 + level3) || (profile?.total_referral_commissions || 0);
+        const totalFromLevels = finalLevel1 + finalLevel2 + finalLevel3;
+        const totalReferralCommissions = totalFromLevels > 0 ? totalFromLevels : (profile?.total_referral_commissions || 0);
+        
+        // Se não há comissões por nível mas há total no profile, tentar distribuir
+        if (totalFromLevels === 0 && (profile?.total_referral_commissions || 0) > 0) {
+          // Distribuição aproximada: 67% nível 1, 20% nível 2, 13% nível 3 (baseado nas percentagens)
+          const total = profile.total_referral_commissions;
+          finalLevel1 = total * 0.67;
+          finalLevel2 = total * 0.20;
+          finalLevel3 = total * 0.13;
+        }
 
         console.log('Cálculos finais:', {
           totalOperationEarnings,
           currentDailyEarnings,
           planEarnings,
           finalOperationEarnings,
+          finalLevel1,
+          finalLevel2,
+          finalLevel3,
           totalReferralCommissions,
           availableBalance: profile?.available_balance
         });
 
         setEarnings({
           referralCommissions: {
-            level1: level1 || 0,
-            level2: level2 || 0,
-            level3: level3 || 0,
+            level1: finalLevel1,
+            level2: finalLevel2,
+            level3: finalLevel3,
             total: totalReferralCommissions
           },
           operationEarnings: finalOperationEarnings,
