@@ -65,6 +65,35 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       return;
     }
 
+    // Check if user already made a withdrawal today
+    const today = new Date().toISOString().split('T')[0];
+    const { data: todayWithdrawals, error: withdrawalCheckError } = await supabase
+      .from('withdrawal_requests')
+      .select('id')
+      .eq('user_id', user.id)
+      .gte('created_at', `${today}T00:00:00.000Z`)
+      .lt('created_at', `${today}T23:59:59.999Z`);
+
+    if (withdrawalCheckError) {
+      toast({ 
+        title: "Erro ao verificar saques", 
+        description: "Erro interno. Tente novamente.", 
+        variant: "destructive" 
+      });
+      setFormLoading(false);
+      return;
+    }
+
+    if (todayWithdrawals && todayWithdrawals.length > 0) {
+      toast({ 
+        title: "Limite de saques atingido", 
+        description: "Você já fez uma solicitação de saque hoje. Só é permitido 1 saque por dia.", 
+        variant: "destructive" 
+      });
+      setFormLoading(false);
+      return;
+    }
+
     if (amount < 50) {
       toast({ 
         title: "Valor muito baixo", 
@@ -394,7 +423,14 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
               Regras e Informações
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-white/90">
+            <CardContent className="space-y-3 text-sm text-white/90">
+            <div className="space-y-2 p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg mb-4">
+              <h4 className="font-semibold text-orange-400 flex items-center">
+                <Info className="mr-2 h-4 w-4" />
+                Limite Diário
+              </h4>
+              <p className="text-orange-200">• <span className="font-bold">Apenas 1 saque por dia</span> é permitido.</p>
+            </div>
             <div className="space-y-2">
               <h4 className="font-semibold text-white">PIX (Reais):</h4>
               <p>• Saques via <span className="font-bold">PIX em até 72 hrs</span> pela Faturefy.</p>
