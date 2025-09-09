@@ -45,7 +45,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const { toast } = useToast();
 
   const planLimits = {
-    partner: { dailyTarget: 1.00 },
+    partner: { dailyTarget: 2.00 },
     master: { dailyTarget: 6.00 },
     premium: { dailyTarget: 41.25 },
     platinum: { dailyTarget: 100.00 }

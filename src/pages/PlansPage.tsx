@@ -19,7 +19,7 @@ const plans = [
     icon: Star,
     features: [
       "20 feature.signals.day",
-      "0,5% feature.profit.daily",
+      "1% feature.profit.daily",
       "feature.members.area exclusiva",
       "feature.support.basic",
       "feature.market.analysis",
