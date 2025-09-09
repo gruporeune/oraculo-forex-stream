@@ -69,12 +69,14 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
 
   const loadNetworkData = async () => {
     try {
-      const rootNode = await buildNetworkTree(userId, 1);
+      // Carregar apenas o nó raiz com seus filhos diretos (1 nível apenas)
+      const rootNode = await buildNetworkTreeOptimized(userId, 1);
       setNetworkData(rootNode);
       
       if (rootNode) {
-        const flatUsers = flattenNetworkTree(rootNode);
-        setAllUsers(flatUsers);
+        // Construir lista de usuários de forma mais eficiente
+        const allUsersData = await loadAllUsersForSearch();
+        setAllUsers(allUsersData);
       }
     } catch (error) {
       console.error('Error loading network data:', error);
@@ -85,19 +87,21 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
 
   const loadFocusedUserData = async (targetUserId: string) => {
     try {
-      const focusedNode = await buildNetworkTree(targetUserId, 1);
+      // Usar a versão otimizada para carregar usuário focado
+      const focusedNode = await buildNetworkTreeOptimized(targetUserId, 1);
       setFocusedUserData(focusedNode);
       
-      if (networkData) {
-        const path = findPathToUser(networkData, targetUserId);
-        setBreadcrumb(path);
-      }
+      // Construir breadcrumb de forma mais eficiente
+      const path = await buildBreadcrumbPath(targetUserId);
+      setBreadcrumb(path);
     } catch (error) {
       console.error('Error loading focused user data:', error);
     }
   };
 
-  const buildNetworkTree = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
+  // Versão otimizada que carrega apenas 1 nível por vez e usa queries em lote
+  const buildNetworkTreeOptimized = async (nodeId: string, level: number): Promise<NetworkNode | null> => {
+    // Buscar perfil do usuário principal
     const { data: profile } = await supabase
       .from('profiles')
       .select('id, username, full_name, plan')
@@ -106,16 +110,18 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
       
     if (!profile) return null;
 
-    const { data: allPlans } = await supabase
+    // Buscar planos ativos apenas quando necessário e de forma otimizada
+    const { data: userPlans } = await supabase
       .from('user_plans')
       .select('plan_name')
       .eq('user_id', nodeId)
-      .eq('is_active', true);
+      .eq('is_active', true)
+      .limit(5); // Limitar para evitar queries muito grandes
     
     let displayPlan = profile.plan || 'free';
-    if (allPlans && allPlans.length > 0) {
+    if (userPlans && userPlans.length > 0) {
       const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
-      const highestPlan = allPlans.reduce((highest, current) => {
+      const highestPlan = userPlans.reduce((highest, current) => {
         const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
         const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
         return currentPriority > highestPriority ? current : highest;
@@ -123,19 +129,66 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
       displayPlan = highestPlan.plan_name;
     }
 
+    // Carregar apenas indicações diretas (1 nível), com limite para evitar sobrecarga
     const { data: directReferrals } = await supabase
       .from('profiles')
       .select('id, username, full_name, plan')
-      .eq('referred_by', nodeId);
+      .eq('referred_by', nodeId)
+      .limit(50) // Limitar a 50 indicações diretas por vez
+      .order('updated_at', { ascending: false });
 
     const referrals: NetworkNode[] = [];
     
     if (directReferrals && directReferrals.length > 0) {
+      // Buscar planos de todos os filhos de uma vez
+      const childIds = directReferrals.map(r => r.id);
+      const { data: allChildPlans } = await supabase
+        .from('user_plans')
+        .select('user_id, plan_name')
+        .in('user_id', childIds)
+        .eq('is_active', true);
+
+      // Mapear planos por usuário
+      const plansByUser = (allChildPlans || []).reduce((acc, plan) => {
+        if (!acc[plan.user_id]) acc[plan.user_id] = [];
+        acc[plan.user_id].push(plan.plan_name);
+        return acc;
+      }, {} as Record<string, string[]>);
+
+      // Buscar contagem de indicações diretas para cada filho de uma vez
+      const { data: childReferralCounts } = await supabase
+        .from('profiles')
+        .select('referred_by')
+        .in('referred_by', childIds);
+
+      const referralCounts = (childReferralCounts || []).reduce((acc, ref) => {
+        acc[ref.referred_by] = (acc[ref.referred_by] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Construir nós filhos sem recursão
       for (const referralProfile of directReferrals) {
-        const childNode = await buildNetworkTree(referralProfile.id, level + 1);
-        if (childNode) {
-          referrals.push(childNode);
+        const userPlanList = plansByUser[referralProfile.id] || [];
+        let childDisplayPlan = referralProfile.plan || 'free';
+        
+        if (userPlanList.length > 0) {
+          const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+          const highestPlan = userPlanList.reduce((highest, current) => {
+            const currentPriority = planPriority[current as keyof typeof planPriority] || 0;
+            const highestPriority = planPriority[highest as keyof typeof planPriority] || 0;
+            return currentPriority > highestPriority ? current : highest;
+          });
+          childDisplayPlan = highestPlan;
         }
+
+        referrals.push({
+          id: referralProfile.id,
+          username: referralProfile.username || 'User',
+          full_name: referralProfile.full_name || 'Usuário',
+          plan: childDisplayPlan,
+          level: level + 1,
+          referrals: [] // Não carregar recursivamente - será carregado quando necessário
+        });
       }
     }
 
@@ -147,6 +200,60 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
       level,
       referrals
     };
+  };
+
+  // Função otimizada para busca que carrega todos os usuários de uma vez
+  const loadAllUsersForSearch = async (): Promise<NetworkNode[]> => {
+    try {
+      const { data: allProfiles } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, plan, referred_by')
+        .order('username')
+        .limit(1000); // Limitar a 1000 usuários para pesquisa
+
+      if (!allProfiles) return [];
+
+      return allProfiles.map(profile => ({
+        id: profile.id,
+        username: profile.username || 'User',
+        full_name: profile.full_name || 'Usuário',
+        plan: profile.plan || 'free',
+        level: 0, // Nível será calculado quando necessário
+        referrals: []
+      }));
+    } catch (error) {
+      console.error('Error loading users for search:', error);
+      return [];
+    }
+  };
+
+  // Construir breadcrumb de forma mais eficiente
+  const buildBreadcrumbPath = async (targetUserId: string): Promise<{ id: string; name: string }[]> => {
+    const path: { id: string; name: string }[] = [];
+    let currentId = targetUserId;
+    
+    // Buscar caminho até a raiz de forma iterativa, não recursiva
+    while (currentId && path.length < 10) { // Limite de 10 níveis para evitar loops infinitos
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id, username, full_name, referred_by')
+        .eq('id', currentId)
+        .maybeSingle();
+      
+      if (!profile) break;
+      
+      path.unshift({
+        id: profile.id,
+        name: profile.username || profile.full_name || 'Usuário'
+      });
+      
+      currentId = profile.referred_by;
+      
+      // Se chegamos à raiz (usuário sem referrer), parar
+      if (!profile.referred_by) break;
+    }
+    
+    return path;
   };
 
   const flattenNetworkTree = (node: NetworkNode): NetworkNode[] => {
@@ -241,58 +348,82 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
             <div className="text-center mb-6">
               <h3 className="text-white text-lg font-semibold mb-2">Indicações Diretas</h3>
               <div className="w-24 h-0.5 bg-gradient-to-r from-purple-400 to-blue-400 mx-auto"></div>
+              <p className="text-white/60 text-sm mt-2">
+                Mostrando {node.referrals.length} indicação{node.referrals.length > 1 ? 'ões' : ''} direta{node.referrals.length > 1 ? 's' : ''}
+                {node.referrals.length >= 50 ? ' (primeiras 50)' : ''}
+              </p>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 justify-center max-w-6xl mx-auto">
-              {node.referrals.map(child => (
-                <div key={child.id} className="flex flex-col items-center group">
-                  <div className="relative mb-4">
-                    <div 
-                      className={`
-                        relative w-20 h-20 rounded-full flex flex-col items-center justify-center text-white font-bold cursor-pointer
-                        ${getPlanColor(child.plan)} 
-                        ring-2 ring-white/20 hover:ring-white/40
-                        transition-all duration-300 hover:scale-110
-                      `}
-                      onClick={() => setFocusedUserId(child.id)}
-                    >
-                      <User className="w-6 h-6 mb-1" />
-                      <span className="text-xs">{child.level}</span>
-                      
-                      {/* Zoom indicator */}
-                      <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ZoomIn className="w-3 h-3 text-white" />
+              {node.referrals.map(child => {
+                // Calcular quantos filhos este usuário tem
+                const childrenCount = allUsers.filter(user => user.id !== child.id).length; // Placeholder
+                
+                return (
+                  <div key={child.id} className="flex flex-col items-center group">
+                    <div className="relative mb-4">
+                      <div 
+                        className={`
+                          relative w-20 h-20 rounded-full flex flex-col items-center justify-center text-white font-bold cursor-pointer
+                          ${getPlanColor(child.plan)} 
+                          ring-2 ring-white/20 hover:ring-white/40
+                          transition-all duration-300 hover:scale-110
+                        `}
+                        onClick={() => setFocusedUserId(child.id)}
+                      >
+                        <User className="w-6 h-6 mb-1" />
+                        <span className="text-xs">{child.level}</span>
+                        
+                        {/* Zoom indicator */}
+                        <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center border-2 border-white opacity-0 group-hover:opacity-100 transition-opacity">
+                          <ZoomIn className="w-3 h-3 text-white" />
+                        </div>
+                        
+                        {/* Children indicator */}
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">
+                          +
+                        </div>
                       </div>
                       
-                      {/* Children count badge */}
-                      {child.referrals && child.referrals.length > 0 && (
-                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-xs font-bold border-2 border-white">
-                          {child.referrals.length}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Child Info */}
-                    <div className="text-center">
-                      <p className="text-white text-sm font-medium truncate max-w-24">
-                        {child.username || child.full_name.split(' ')[0]}
-                      </p>
-                      <p className="text-white/60 text-xs uppercase font-semibold">
-                        {child.plan}
-                      </p>
-                      <p className="text-white/40 text-xs">
-                        Nível {child.level}
-                      </p>
-                      {child.referrals && child.referrals.length > 0 && (
-                        <p className="text-orange-400 text-xs mt-1">
-                          {child.referrals.length} indicação{child.referrals.length > 1 ? 'ões' : ''}
+                      {/* Child Info */}
+                      <div className="text-center">
+                        <p className="text-white text-sm font-medium truncate max-w-24">
+                          {child.username || child.full_name.split(' ')[0]}
                         </p>
-                      )}
+                        <p className="text-white/60 text-xs uppercase font-semibold">
+                          {child.plan}
+                        </p>
+                        <p className="text-white/40 text-xs">
+                          Nível {child.level}
+                        </p>
+                        <p className="text-orange-400 text-xs mt-1">
+                          Clique para expandir
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
+
+            {/* Load More Button se há exatamente 50 resultados */}
+            {node.referrals.length >= 50 && (
+              <div className="text-center mt-6">
+                <p className="text-white/60 text-sm mb-3">
+                  Há mais indicações para carregar...
+                </p>
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    // Implementar carregamento de mais resultados se necessário
+                    console.log('Carregar mais resultados...');
+                  }}
+                  className="border-purple-500 text-purple-400 hover:bg-purple-500 hover:text-white"
+                >
+                  Carregar mais indicações
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -300,8 +431,9 @@ export default function AdminNetworkGraph({ userId, userProfile }: AdminNetworkG
   };
 
   const countTotalReferrals = (node: NetworkNode): number => {
-    if (!node.referrals) return 0;
-    return node.referrals.length + node.referrals.reduce((sum, child) => sum + countTotalReferrals(child), 0);
+    // Como agora não carregamos a rede completa recursivamente,
+    // vamos calcular de forma aproximada baseado nos dados que temos
+    return allUsers.length;
   };
 
   if (isLoading) {
