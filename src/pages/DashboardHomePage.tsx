@@ -316,18 +316,6 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </div>
         </div>
 
-        {/* Mobile headline */}
-        <div className="lg:hidden text-center mt-8 mb-4">
-          <h3 className="text-lg font-black text-white mb-2 tracking-tight leading-tight">
-            Corretoras oficiais com mais de<br />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-green-600 font-black">
-              93% de precisão
-            </span>
-          </h3>
-          <p className="text-white/70 text-sm font-medium">
-            {t('dashboard.brokers.subtitle')}
-          </p>
-        </div>
 
         {/* Broker Cards Section - No gap, directly below banners */}
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
