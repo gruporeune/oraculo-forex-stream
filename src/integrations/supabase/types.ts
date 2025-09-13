@@ -124,35 +124,50 @@ export type Database = {
       }
       materials: {
         Row: {
+          allowed_plans: string[] | null
+          author: string | null
           category: string | null
           created_at: string
           description: string | null
           file_type: string
           file_url: string
           id: string
+          image_url: string | null
           is_active: boolean | null
+          is_free: boolean | null
+          price_brl: number | null
           title: string
           updated_at: string
         }
         Insert: {
+          allowed_plans?: string[] | null
+          author?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           file_type: string
           file_url: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
+          is_free?: boolean | null
+          price_brl?: number | null
           title: string
           updated_at?: string
         }
         Update: {
+          allowed_plans?: string[] | null
+          author?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
           file_type?: string
           file_url?: string
           id?: string
+          image_url?: string | null
           is_active?: boolean | null
+          is_free?: boolean | null
+          price_brl?: number | null
           title?: string
           updated_at?: string
         }

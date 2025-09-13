@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, Download, Lightbulb, Send, Loader2 } from 'lucide-react';
+import { Package, Download, Lightbulb, Send, Loader2, Star } from 'lucide-react';
+import ebookAnaliseTecnica from '@/assets/ebook-analise-tecnica.png';
+import ebookInvestimentos from '@/assets/ebook-investimentos-soros-buffett.png';
 
 interface Material {
   id: string;
@@ -14,6 +16,11 @@ interface Material {
   file_url: string;
   file_type: string;
   category: string;
+  allowed_plans?: string[];
+  price_brl?: number;
+  image_url?: string;
+  author?: string;
+  is_free?: boolean;
 }
 
 interface MaterialsPageProps {
@@ -86,6 +93,21 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
     }
   };
 
+  const getMaterialImage = (material: Material) => {
+    if (material.image_url === '/src/assets/ebook-analise-tecnica.png') {
+      return ebookAnaliseTecnica;
+    }
+    if (material.image_url === '/src/assets/ebook-investimentos-soros-buffett.png') {
+      return ebookInvestimentos;
+    }
+    return null;
+  };
+
+  const canAccessMaterial = (material: Material) => {
+    if (!material.allowed_plans || material.allowed_plans.length === 0) return true;
+    return material.allowed_plans.includes(profile?.plan || 'free');
+  };
+
   const handleSuggestionSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!suggestion.trim()) {
@@ -139,41 +161,92 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
           <p className="text-white/50 text-sm">Use o formulário abaixo para sugerir novos materiais!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {materials.map((material, index) => (
-            <motion.div
-              key={material.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card className="bg-black/40 border-white/10 text-white h-full flex flex-col">
-                <CardHeader>
-                  <CardTitle className="flex items-start gap-4">
-                    <span className="text-3xl">{getFileIcon(material.file_type)}</span>
-                    <span className="text-lg">{material.title}</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                  <p className="text-white/70 text-sm">{material.description || 'Material educativo para aprimorar seus conhecimentos.'}</p>
-                  <div className="mt-2">
-                    <span className="inline-block px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded">
-                      {material.file_type.toUpperCase()}
-                    </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {materials.map((material, index) => {
+            const materialImage = getMaterialImage(material);
+            const hasAccess = canAccessMaterial(material);
+            
+            return (
+              <motion.div
+                key={material.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card className="bg-black/40 border-white/10 text-white h-full flex flex-col overflow-hidden">
+                  {materialImage && (
+                    <div className="relative">
+                      <img 
+                        src={materialImage} 
+                        alt={material.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      {material.price_brl && material.price_brl > 0 && (
+                        <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                          R$ {material.price_brl.toFixed(0)}
+                        </div>
+                      )}
+                      {material.is_free && (
+                        <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+                          <Star className="w-3 h-3" />
+                          GRÁTIS
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  <CardHeader className={materialImage ? "pb-2" : ""}>
+                    <CardTitle className="flex items-start gap-3">
+                      {!materialImage && (
+                        <span className="text-3xl">{getFileIcon(material.file_type)}</span>
+                      )}
+                      <div className="flex-1">
+                        <span className="text-lg leading-tight">{material.title}</span>
+                        {material.author && (
+                          <p className="text-sm text-white/60 mt-1">por {material.author}</p>
+                        )}
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  
+                  <CardContent className="flex-grow">
+                    <p className="text-white/70 text-sm mb-3">
+                      {material.description || 'Material educativo para aprimorar seus conhecimentos.'}
+                    </p>
+                    <div className="flex gap-2 flex-wrap">
+                      <span className="inline-block px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded">
+                        {material.file_type.toUpperCase()}
+                      </span>
+                      {material.category && (
+                        <span className="inline-block px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded capitalize">
+                          {material.category}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                  
+                  <div className="p-6 pt-0">
+                    <Button 
+                      className={`w-full ${hasAccess 
+                        ? 'bg-green-500 hover:bg-green-600' 
+                        : 'bg-gray-500 hover:bg-gray-600'
+                      } text-white`}
+                      onClick={() => handleDownload(material.file_url, material.title)}
+                      disabled={!hasAccess}
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      {hasAccess ? (material.is_free ? 'FREE' : 'Baixar Agora') : 'Bloqueado'}
+                    </Button>
+                    {!hasAccess && (
+                      <p className="text-xs text-white/50 text-center mt-2">
+                        Disponível para: {material.allowed_plans?.join(', ')}
+                      </p>
+                    )}
                   </div>
-                </CardContent>
-                <div className="p-6 pt-0">
-                  <Button 
-                    className="w-full bg-blue-500 hover:bg-blue-600 text-white"
-                    onClick={() => handleDownload(material.file_url, material.title)}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Baixar Agora
-                  </Button>
-                </div>
-              </Card>
-            </motion.div>
-          ))}
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       )}
 
