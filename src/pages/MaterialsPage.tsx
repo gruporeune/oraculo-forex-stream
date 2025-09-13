@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Package, Download, Lightbulb, Send, Loader2 } from 'lucide-react';
 import analysisEbook from '@/assets/ebook-analise-tecnica.png';
 import investmentsEbook from '@/assets/ebook-investimentos-soros-buffett.png';
+import indicadorOraculo from '@/assets/indicador-oraculo.png';
 
 interface Material {
   id: string;
@@ -80,9 +81,19 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
       if (material.image_url.includes('ebook-investimentos-soros-buffett')) {
         return investmentsEbook;
       }
+      if (material.image_url.includes('indicador-oraculo')) {
+        return indicadorOraculo;
+      }
       return material.image_url;
     }
     return null;
+  };
+
+  const canDownloadMaterial = (material: Material) => {
+    if (!material.allowed_plans || material.allowed_plans.length === 0) {
+      return true; // If no restrictions, everyone can download
+    }
+    return material.allowed_plans.includes(profile?.plan || 'free');
   };
 
   const getFileIcon = (fileType: string) => {
@@ -214,13 +225,22 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
                     </div>
                   </CardContent>
                   <div className="p-6 pt-0">
-                    <Button 
-                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold"
-                      onClick={() => handleDownload(material.file_url, material.title)}
-                    >
-                      <Download className="mr-2 h-4 w-4" />
-                      FREE
-                    </Button>
+                    {canDownloadMaterial(material) ? (
+                      <Button 
+                        className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold"
+                        onClick={() => handleDownload(material.file_url, material.title)}
+                      >
+                        <Download className="mr-2 h-4 w-4" />
+                        FREE
+                      </Button>
+                    ) : (
+                      <Button 
+                        disabled
+                        className="w-full bg-muted text-muted-foreground cursor-not-allowed opacity-50"
+                      >
+                        🔒 UPGRADE SEU PLANO
+                      </Button>
+                    )}
                   </div>
                 </Card>
               </motion.div>
