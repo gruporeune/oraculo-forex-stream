@@ -5,9 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { Package, Download, Lightbulb, Send, Loader2, Star } from 'lucide-react';
-import ebookAnaliseTecnica from '@/assets/ebook-analise-tecnica.png';
-import ebookInvestimentos from '@/assets/ebook-investimentos-soros-buffett.png';
+import { Package, Download, Lightbulb, Send, Loader2 } from 'lucide-react';
+import analysisEbook from '@/assets/ebook-analise-tecnica.png';
+import investmentsEbook from '@/assets/ebook-investimentos-soros-buffett.png';
 
 interface Material {
   id: string;
@@ -72,6 +72,19 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
     }
   };
 
+  const getImageSrc = (material: Material) => {
+    if (material.image_url) {
+      if (material.image_url.includes('ebook-analise-tecnica')) {
+        return analysisEbook;
+      }
+      if (material.image_url.includes('ebook-investimentos-soros-buffett')) {
+        return investmentsEbook;
+      }
+      return material.image_url;
+    }
+    return null;
+  };
+
   const getFileIcon = (fileType: string) => {
     switch (fileType.toLowerCase()) {
       case 'pdf':
@@ -91,21 +104,6 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
       default:
         return '📁';
     }
-  };
-
-  const getMaterialImage = (material: Material) => {
-    if (material.image_url === '/src/assets/ebook-analise-tecnica.png') {
-      return ebookAnaliseTecnica;
-    }
-    if (material.image_url === '/src/assets/ebook-investimentos-soros-buffett.png') {
-      return ebookInvestimentos;
-    }
-    return null;
-  };
-
-  const canAccessMaterial = (material: Material) => {
-    if (!material.allowed_plans || material.allowed_plans.length === 0) return true;
-    return material.allowed_plans.includes(profile?.plan || 'free');
   };
 
   const handleSuggestionSubmit = async (e: React.FormEvent) => {
@@ -163,9 +161,7 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {materials.map((material, index) => {
-            const materialImage = getMaterialImage(material);
-            const hasAccess = canAccessMaterial(material);
-            
+            const imageSrc = getImageSrc(material);
             return (
               <motion.div
                 key={material.id}
@@ -174,74 +170,57 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card className="bg-black/40 border-white/10 text-white h-full flex flex-col overflow-hidden">
-                  {materialImage && (
-                    <div className="relative">
+                  {imageSrc && (
+                    <div className="relative h-48 bg-gradient-to-b from-blue-500/20 to-purple-500/20">
                       <img 
-                        src={materialImage} 
+                        src={imageSrc} 
                         alt={material.title}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover"
                       />
-                      {material.price_brl && material.price_brl > 0 && (
-                        <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
-                          R$ {material.price_brl.toFixed(0)}
-                        </div>
-                      )}
                       {material.is_free && (
-                        <div className="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-                          <Star className="w-3 h-3" />
+                        <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
                           GRÁTIS
                         </div>
                       )}
                     </div>
                   )}
-                  
-                  <CardHeader className={materialImage ? "pb-2" : ""}>
-                    <CardTitle className="flex items-start gap-3">
-                      {!materialImage && (
-                        <span className="text-3xl">{getFileIcon(material.file_type)}</span>
-                      )}
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-start gap-2">
+                      {!imageSrc && <span className="text-2xl">{getFileIcon(material.file_type)}</span>}
                       <div className="flex-1">
-                        <span className="text-lg leading-tight">{material.title}</span>
+                        <h3 className="text-lg font-bold leading-tight">{material.title}</h3>
                         {material.author && (
-                          <p className="text-sm text-white/60 mt-1">por {material.author}</p>
+                          <p className="text-white/60 text-sm mt-1">por {material.author}</p>
                         )}
                       </div>
                     </CardTitle>
                   </CardHeader>
-                  
                   <CardContent className="flex-grow">
                     <p className="text-white/70 text-sm mb-3">
                       {material.description || 'Material educativo para aprimorar seus conhecimentos.'}
                     </p>
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex items-center justify-between">
                       <span className="inline-block px-2 py-1 text-xs bg-blue-500/20 text-blue-300 rounded">
                         {material.file_type.toUpperCase()}
                       </span>
-                      {material.category && (
-                        <span className="inline-block px-2 py-1 text-xs bg-purple-500/20 text-purple-300 rounded capitalize">
-                          {material.category}
-                        </span>
+                      {material.price_brl && material.price_brl > 0 && (
+                        <div className="text-right">
+                          <p className="text-white/50 text-xs line-through">
+                            R$ {material.price_brl.toFixed(2)}
+                          </p>
+                          <p className="text-green-400 text-sm font-bold">GRÁTIS</p>
+                        </div>
                       )}
                     </div>
                   </CardContent>
-                  
                   <div className="p-6 pt-0">
                     <Button 
-                      className={`w-full ${hasAccess 
-                        ? 'bg-green-500 hover:bg-green-600' 
-                        : 'bg-gray-500 hover:bg-gray-600'
-                      } text-white`}
+                      className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold"
                       onClick={() => handleDownload(material.file_url, material.title)}
-                      disabled={!hasAccess}
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      {hasAccess ? (material.is_free ? 'FREE' : 'Baixar Agora') : 'Bloqueado'}
+                      FREE
                     </Button>
-                    {!hasAccess && (
-                      <p className="text-xs text-white/50 text-center mt-2">
-                        Disponível para: {material.allowed_plans?.join(', ')}
-                      </p>
-                    )}
                   </div>
                 </Card>
               </motion.div>
@@ -284,6 +263,54 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
                 )}
               </Button>
             </form>
+          </CardContent>
+        </Card>
+      </motion.div>
+
+      {/* Tutorial Section */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
+        <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20 text-white">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-3">
+              <Package className="w-6 h-6 text-blue-400" />
+              Como Adicionar Novos Materiais
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-sm">
+            <div className="space-y-2">
+              <h4 className="font-semibold text-blue-300">1. Adicionar Material no Banco de Dados:</h4>
+              <p className="text-white/70 pl-4">
+                Acesse o Supabase Dashboard → Table Editor → Tabela "materials" → Insert → New Row
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <h4 className="font-semibold text-blue-300">2. Campos Obrigatórios:</h4>
+              <ul className="text-white/70 pl-4 space-y-1">
+                <li>• <strong>title:</strong> Nome do material</li>
+                <li>• <strong>description:</strong> Descrição detalhada</li>
+                <li>• <strong>file_type:</strong> Tipo do arquivo (pdf, doc, etc.)</li>
+                <li>• <strong>file_url:</strong> Link direto para download</li>
+                <li>• <strong>allowed_plans:</strong> ["free", "partner", "master", "premium", "platinum"]</li>
+                <li>• <strong>price_brl:</strong> Preço original (ex: 89.00)</li>
+                <li>• <strong>author:</strong> Nome do autor</li>
+                <li>• <strong>is_free:</strong> true (para mostrar como GRÁTIS)</li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold text-blue-300">3. Adicionar Imagem de Capa:</h4>
+              <p className="text-white/70 pl-4">
+                Salve a imagem em src/assets/ → Importe no código → Configure o campo image_url
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <h4 className="font-semibold text-blue-300">4. Linkar Arquivo para Download:</h4>
+              <p className="text-white/70 pl-4">
+                No campo <strong>file_url</strong>, coloque o link direto do arquivo hospedado (Google Drive, Dropbox, etc.)
+              </p>
+            </div>
           </CardContent>
         </Card>
       </motion.div>
