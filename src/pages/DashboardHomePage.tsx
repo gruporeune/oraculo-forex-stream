@@ -5,6 +5,8 @@ import { DashboardCards } from '@/components/DashboardCards';
 import MultiPlanAutomaticSignals from '@/components/MultiPlanAutomaticSignals';
 import { EarningsHistory } from '@/components/EarningsHistory';
 import { useI18n } from '@/lib/i18n';
+import bannerTransformeDados from '@/assets/banner-transforme-dados.jpg';
+import bannerLiveToday from '@/assets/banner-live-today.jpg';
 
 import { useToast } from '@/hooks/use-toast';
 import { Tilt } from '@/components/ui/tilt';
@@ -130,7 +132,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               <div className="relative bg-gradient-to-br from-red-900/80 via-red-800/80 to-red-700/80 backdrop-blur-xl border border-red-500/30 rounded-2xl p-3 hover:border-red-400/50 transition-all duration-500 cursor-pointer shadow-2xl shadow-red-500/20 h-full flex flex-col">
                 <div className="aspect-video w-full rounded-xl overflow-hidden bg-black flex-1">
                   <iframe
-                    src="https://www.youtube.com/embed/EVBbuArKeUA?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1&start=0&loop=1&playlist=EVBbuArKeUA"
+                    src="https://www.youtube.com/embed/5jjZQ4Q61rQ?autoplay=1&mute=0&controls=0&showinfo=0&rel=0&modestbranding=1&cc_load_policy=0&iv_load_policy=3&fs=0&disablekb=1"
                     className="w-full h-full"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; autoplay"
@@ -178,8 +180,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               />
               <div className="relative bg-gradient-to-br from-green-900/80 via-green-800/80 to-green-700/80 backdrop-blur-xl border border-green-500/30 rounded-2xl p-3 hover:border-green-400/50 transition-all duration-500 shadow-2xl shadow-green-500/20">
                 <img 
-                  src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
-                  alt="Oráculo - Apresentação de Negócios"
+                  src={bannerTransformeDados}
+                  alt="Transforme dados em lucro"
                   className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
@@ -246,8 +248,8 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
               />
               <div className="relative bg-gradient-to-br from-yellow-900/80 via-yellow-800/80 to-yellow-700/80 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-3 hover:border-yellow-400/50 transition-all duration-500 shadow-2xl shadow-yellow-500/20">
                 <img 
-                  src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
-                  alt="Oráculo - Pré Lançamento IA Financeira"
+                  src={bannerLiveToday}
+                  alt="Live Today - Exclusive Launch"
                   className="w-full h-auto rounded-xl object-contain"
                 />
               </div>
@@ -259,7 +261,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         <div className="lg:hidden mt-4 flex justify-center gap-2">
           <div className="w-16 h-20">
             <img 
-              src="/lovable-uploads/e304badb-daf3-4b8b-9cc3-ffd1471be262.png"
+              src={bannerTransformeDados}
               alt="Banner 1"
               className="w-full h-full rounded-lg object-contain border border-green-500/30"
             />
@@ -273,7 +275,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
           </div>
           <div className="w-16 h-20">
             <img 
-              src="/lovable-uploads/34604923-f4a1-4800-9966-0cd00b06bf77.png"
+              src={bannerLiveToday}
               alt="Banner 3"
               className="w-full h-full rounded-lg object-contain border border-yellow-500/30"
             />
