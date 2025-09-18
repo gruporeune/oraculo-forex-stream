@@ -420,11 +420,14 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
             
             {/* Video section */}
             <div className="mt-4 pt-4 border-t border-white/10">
-              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-yellow-400 text-lg font-semibold mb-2">📹</div>
-                  <p className="text-white/70 text-sm">Aguardando vídeo atualizado</p>
-                </div>
+              <div className="aspect-video w-full rounded-lg overflow-hidden bg-black">
+                <iframe
+                  src="https://www.youtube.com/embed/WgpfDudiJw8?autoplay=1&mute=0&controls=1&showinfo=0&rel=0&modestbranding=1"
+                  className="w-full h-full"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
               </div>
             </div>
           </CardContent>
