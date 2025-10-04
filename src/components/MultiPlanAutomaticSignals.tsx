@@ -44,6 +44,15 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const [recentOperations, setRecentOperations] = useState<{[key: string]: RecentOperation[]}>({});
   const { toast } = useToast();
 
+  // Check if it's weekend in Brazil timezone
+  const isWeekendInBrazil = () => {
+    const now = new Date();
+    // Convert to Brazil timezone (UTC-3)
+    const brasilTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+    const day = brasilTime.getUTCDay();
+    return day === 0 || day === 6; // Sunday = 0, Saturday = 6
+  };
+
   const planLimits = {
     partner: { dailyTarget: 2.00 },
     master: { dailyTarget: 6.00 },
@@ -54,6 +63,11 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   // Automatic operations effect
   useEffect(() => {
     const interval = setInterval(async () => {
+      // Don't generate operations on weekends
+      if (isWeekendInBrazil()) {
+        return;
+      }
+
       const activePlans = userPlans.filter(plan => 
         plan.auto_operations_started && 
         !plan.auto_operations_paused && 
@@ -562,43 +576,51 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                       </p>
                     </div>
 
-                    <div className="flex flex-col gap-3">
-                      {!plan.auto_operations_started ? (
-                        <Button
-                          onClick={() => startOperations(plan.id)}
-                          disabled={isLoading[plan.id]}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          {isLoading[plan.id] ? 'Iniciando...' : 'INICIAR OPERAÇÕES'}
-                        </Button>
-                      ) : plan.auto_operations_paused ? (
-                        <Button
-                          onClick={() => resumeOperations(plan.id)}
-                          disabled={isLoading[plan.id]}
-                          className="w-full bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <Play className="w-4 h-4 mr-2" />
-                          {isLoading[plan.id] ? 'Retomando...' : 'RETOMAR OPERAÇÕES'}
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => pauseOperations(plan.id)}
-                          disabled={isLoading[plan.id]}
-                          className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
-                        >
-                          <Pause className="w-4 h-4 mr-2" />
-                          {isLoading[plan.id] ? 'Pausando...' : 'PAUSAR OPERAÇÕES'}
-                        </Button>
-                      )}
+                    {isWeekendInBrazil() ? (
+                      <div className="text-center p-4 bg-orange-600/20 rounded-lg border border-orange-500/50">
+                        <AlertCircle className="w-8 h-8 text-orange-400 mx-auto mb-2" />
+                        <p className="text-white font-medium mb-1">Operações Indisponíveis</p>
+                        <p className="text-white/70 text-sm">As operações automáticas funcionam apenas de Segunda a Sexta-feira</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-3">
+                        {!plan.auto_operations_started ? (
+                          <Button
+                            onClick={() => startOperations(plan.id)}
+                            disabled={isLoading[plan.id]}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {isLoading[plan.id] ? 'Iniciando...' : 'INICIAR OPERAÇÕES'}
+                          </Button>
+                        ) : plan.auto_operations_paused ? (
+                          <Button
+                            onClick={() => resumeOperations(plan.id)}
+                            disabled={isLoading[plan.id]}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                          >
+                            <Play className="w-4 h-4 mr-2" />
+                            {isLoading[plan.id] ? 'Retomando...' : 'RETOMAR OPERAÇÕES'}
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => pauseOperations(plan.id)}
+                            disabled={isLoading[plan.id]}
+                            className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
+                          >
+                            <Pause className="w-4 h-4 mr-2" />
+                            {isLoading[plan.id] ? 'Pausando...' : 'PAUSAR OPERAÇÕES'}
+                          </Button>
+                        )}
 
-                      {plan.auto_operations_started && (
-                        <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          {plan.auto_operations_paused ? 'Operações pausadas' : 'Operações em andamento'}
-                        </div>
-                      )}
-                    </div>
+                        {plan.auto_operations_started && (
+                          <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
+                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                            {plan.auto_operations_paused ? 'Operações pausadas' : 'Operações em andamento'}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
