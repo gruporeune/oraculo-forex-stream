@@ -613,6 +613,10 @@ export type Database = {
         Args: { level: number; plan_name: string }
         Returns: number
       }
+      fix_user_balances_and_earnings: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_creation_date: {
         Args: { user_uuid: string }
         Returns: string

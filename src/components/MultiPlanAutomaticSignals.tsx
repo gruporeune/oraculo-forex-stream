@@ -274,10 +274,30 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (fetchError) throw fetchError;
 
+      // Calculate total daily target from all active plans
+      const { data: allUserPlans, error: plansError } = await supabase
+        .from('user_plans')
+        .select('plan_name')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (plansError) throw plansError;
+
+      const totalDailyTarget = (allUserPlans || []).reduce((total, p) => {
+        const planLimit = planLimits[p.plan_name as keyof typeof planLimits];
+        return total + (planLimit?.dailyTarget || 0);
+      }, 0);
+
+      // Calculate new daily earnings, ensuring we don't exceed total limit
+      const newDailyEarnings = Math.min(
+        Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
+        totalDailyTarget
+      );
+
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
-          daily_earnings: Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
+          daily_earnings: newDailyEarnings,
           available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
           updated_at: new Date().toISOString()
         })
