@@ -477,6 +477,7 @@ export default function UsersAdminPage() {
                       <TableHead className="text-gray-300">Planos Extras</TableHead>
                       <TableHead className="text-gray-300">Saldo Disponível</TableHead>
                       <TableHead className="text-gray-300">Ganho Hoje</TableHead>
+                      <TableHead className="text-gray-300">Comissões Hoje</TableHead>
                       <TableHead className="text-gray-300">Data de Cadastro</TableHead>
                       <TableHead className="text-gray-300">Ações</TableHead>
                     </TableRow>
@@ -524,6 +525,9 @@ export default function UsersAdminPage() {
                           </TableCell>
                           <TableCell className="text-yellow-400 font-medium">
                             R$ {(user.daily_earnings || 0).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-blue-400 font-medium">
+                            R$ {(user.daily_commissions || 0).toFixed(2)}
                           </TableCell>
                           <TableCell className="text-gray-300">
                             <div>
