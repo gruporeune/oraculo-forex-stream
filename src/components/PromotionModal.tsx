@@ -57,12 +57,12 @@ export const PromotionModal = ({ isOpen, onClose }: PromotionModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
+      <DialogContent className="max-w-lg p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          className="absolute right-3 top-3 z-10 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
         >
-          <X className="h-5 w-5 text-white drop-shadow-lg" />
+          <X className="h-4 w-4 text-white drop-shadow-lg" />
           <span className="sr-only">Fechar</span>
         </button>
 
@@ -74,58 +74,58 @@ export const PromotionModal = ({ isOpen, onClose }: PromotionModalProps) => {
           />
         </div>
 
-        <div className="p-6 space-y-6 bg-gradient-to-b from-background to-background/95">
-          <DialogHeader className="space-y-3">
-            <DialogTitle className="text-3xl font-bold text-center bg-gradient-to-r from-primary via-amber-500 to-primary bg-clip-text text-transparent">
+        <div className="p-4 space-y-4 bg-gradient-to-b from-background to-background/95">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl font-bold text-center bg-gradient-to-r from-primary via-amber-500 to-primary bg-clip-text text-transparent">
               🚀 PROMOÇÃO EXCLUSIVA! 🚀
             </DialogTitle>
-            <p className="text-center text-xl font-semibold text-foreground">
+            <p className="text-center text-base font-semibold text-foreground">
               Compre 2 Planos e Leve o 3º Totalmente GRÁTIS!
             </p>
-            <p className="text-center text-muted-foreground">
+            <p className="text-center text-sm text-muted-foreground">
               Triplique seus ganhos com essa oportunidade imperdível!
             </p>
           </DialogHeader>
 
-          <div className="bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 rounded-lg p-6 space-y-3">
-            <p className="text-center text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <div className="bg-gradient-to-r from-primary/10 via-amber-500/10 to-primary/10 rounded-lg p-4 space-y-2">
+            <p className="text-center text-xs font-medium text-muted-foreground uppercase tracking-wide">
               ⏰ Promoção encerra em:
             </p>
-            <div className="grid grid-cols-4 gap-3">
-              <div className="bg-background rounded-lg p-3 text-center shadow-lg border border-primary/20">
-                <div className="text-3xl font-bold text-primary">
+            <div className="grid grid-cols-4 gap-2">
+              <div className="bg-background rounded-lg p-2 text-center shadow-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">
                   {timeLeft.days}
                 </div>
-                <div className="text-xs text-muted-foreground uppercase">
+                <div className="text-[10px] text-muted-foreground uppercase">
                   Dias
                 </div>
               </div>
-              <div className="bg-background rounded-lg p-3 text-center shadow-lg border border-primary/20">
-                <div className="text-3xl font-bold text-primary">
+              <div className="bg-background rounded-lg p-2 text-center shadow-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">
                   {String(timeLeft.hours).padStart(2, "0")}
                 </div>
-                <div className="text-xs text-muted-foreground uppercase">
+                <div className="text-[10px] text-muted-foreground uppercase">
                   Horas
                 </div>
               </div>
-              <div className="bg-background rounded-lg p-3 text-center shadow-lg border border-primary/20">
-                <div className="text-3xl font-bold text-primary">
+              <div className="bg-background rounded-lg p-2 text-center shadow-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">
                   {String(timeLeft.minutes).padStart(2, "0")}
                 </div>
-                <div className="text-xs text-muted-foreground uppercase">
+                <div className="text-[10px] text-muted-foreground uppercase">
                   Min
                 </div>
               </div>
-              <div className="bg-background rounded-lg p-3 text-center shadow-lg border border-primary/20">
-                <div className="text-3xl font-bold text-primary">
+              <div className="bg-background rounded-lg p-2 text-center shadow-lg border border-primary/20">
+                <div className="text-2xl font-bold text-primary">
                   {String(timeLeft.seconds).padStart(2, "0")}
                 </div>
-                <div className="text-xs text-muted-foreground uppercase">
+                <div className="text-[10px] text-muted-foreground uppercase">
                   Seg
                 </div>
               </div>
             </div>
-            <p className="text-center text-sm text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               Sexta-feira, 10 de Outubro de 2025 às 18:00
             </p>
           </div>
@@ -133,12 +133,12 @@ export const PromotionModal = ({ isOpen, onClose }: PromotionModalProps) => {
           <Button
             onClick={handleGoToPlans}
             size="lg"
-            className="w-full text-lg font-bold bg-gradient-to-r from-primary via-amber-500 to-primary hover:opacity-90 transition-opacity"
+            className="w-full text-base font-bold bg-gradient-to-r from-primary via-amber-500 to-primary hover:opacity-90 transition-opacity"
           >
             🎁 APROVEITAR PROMOÇÃO AGORA
           </Button>
 
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-center text-[10px] text-muted-foreground">
             * Oferta válida apenas durante o período promocional
           </p>
         </div>
