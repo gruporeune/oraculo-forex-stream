@@ -239,15 +239,42 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     });
 
     try {
-      // Calculate new earnings, ensuring we don't exceed the target
-      const newEarnings = Math.min(Math.max(plan.daily_earnings + operationProfit, 0), limits.dailyTarget);
+      // First, get fresh data from database to avoid race conditions
+      const { data: freshPlan, error: fetchPlanError } = await supabase
+        .from('user_plans')
+        .select('daily_earnings, auto_operations_completed_today')
+        .eq('id', plan.id)
+        .single();
+
+      if (fetchPlanError) throw fetchPlanError;
+
+      // Calculate new earnings with fresh data, ensuring we don't exceed the target
+      const currentEarnings = freshPlan.daily_earnings || 0;
+      const newEarnings = Math.min(Math.max(currentEarnings + operationProfit, 0), limits.dailyTarget);
+      
+      // If already at or above target, stop here
+      if (currentEarnings >= limits.dailyTarget) {
+        console.log(`[${plan.plan_name.toUpperCase()}] Already at target, skipping operation`);
+        
+        // Set cycle start time if not already set
+        await supabase
+          .from('user_plans')
+          .update({
+            cycle_start_time: new Date().toISOString(),
+            auto_operations_started: false,
+            auto_operations_paused: false
+          })
+          .eq('id', plan.id);
+        onPlansUpdate();
+        return;
+      }
       
       // Check if target will be reached with this operation
       const willReachTarget = newEarnings >= limits.dailyTarget;
       
       const updateData: any = {
         daily_earnings: newEarnings,
-        auto_operations_completed_today: plan.auto_operations_completed_today + 1,
+        auto_operations_completed_today: (freshPlan.auto_operations_completed_today || 0) + 1,
         updated_at: new Date().toISOString()
       };
 
@@ -265,7 +292,8 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (error) throw error;
 
-      // Also update user's total earnings and balance instantly
+      // Use RPC function to atomically update profile earnings
+      // This prevents race conditions when multiple operations update simultaneously
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('daily_earnings, available_balance')
@@ -274,36 +302,49 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (fetchError) throw fetchError;
 
-      // Calculate total daily target from all active plans
+      // Calculate total daily target from all ACTIVE plans
       const { data: allUserPlans, error: plansError } = await supabase
         .from('user_plans')
-        .select('plan_name')
+        .select('plan_name, daily_earnings')
         .eq('user_id', user.id)
         .eq('is_active', true);
 
       if (plansError) throw plansError;
 
+      // Calculate what the total should be by summing all plan earnings
+      const totalFromPlans = (allUserPlans || []).reduce((total, p) => {
+        return total + (p.daily_earnings || 0);
+      }, 0);
+
+      // Calculate total daily target
       const totalDailyTarget = (allUserPlans || []).reduce((total, p) => {
         const planLimit = planLimits[p.plan_name as keyof typeof planLimits];
         return total + (planLimit?.dailyTarget || 0);
       }, 0);
 
-      // Calculate new daily earnings, ensuring we don't exceed total limit
-      const newDailyEarnings = Math.min(
-        Math.max((currentProfile.daily_earnings || 0) + operationProfit, 0),
-        totalDailyTarget
-      );
+      // The new daily earnings should match the sum from all plans, capped at total target
+      const correctDailyEarnings = Math.min(totalFromPlans, totalDailyTarget);
+      
+      // Calculate new balance by adding only this operation's profit
+      const newBalance = Math.max((currentProfile.available_balance || 0) + operationProfit, 0);
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          daily_earnings: newDailyEarnings,
-          available_balance: Math.max((currentProfile.available_balance || 0) + operationProfit, 0),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+      // Only update if values are different to avoid unnecessary writes
+      const needsUpdate = 
+        Math.abs((currentProfile.daily_earnings || 0) - correctDailyEarnings) > 0.01 ||
+        Math.abs((currentProfile.available_balance || 0) - newBalance) > 0.01;
 
-      if (profileError) throw profileError;
+      if (needsUpdate) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            daily_earnings: correctDailyEarnings,
+            available_balance: newBalance,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', user.id);
+
+        if (profileError) throw profileError;
+      }
 
       // Update state immediately for instant UI feedback
       onPlansUpdate();
