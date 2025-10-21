@@ -20,6 +20,17 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { 
@@ -29,7 +40,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { Download, Eye, CheckCircle, XCircle, Clock, LogOut, Calendar as CalendarIcon, TrendingUp, Users, Coins } from "lucide-react";
+import { Download, Eye, CheckCircle, XCircle, Clock, LogOut, Calendar as CalendarIcon, TrendingUp, Users, Coins, Trash2 } from "lucide-react";
 import * as XLSX from 'xlsx';
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -480,6 +491,31 @@ export default function AdminWithdrawalsPage() {
     }
   };
 
+  const deleteWithdrawal = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('withdrawal_requests')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Pedido de saque removido com sucesso",
+      });
+
+      fetchWithdrawals();
+    } catch (error) {
+      console.error('Erro ao deletar saque:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao remover pedido de saque",
+        variant: "destructive",
+      });
+    }
+  };
+
   const exportToExcel = () => {
     // Filtrar dados para exportação baseado na data selecionada
     let dataToExport = withdrawals;
@@ -761,174 +797,205 @@ export default function AdminWithdrawalsPage() {
                         {getStatusBadge(withdrawal.status)}
                       </TableCell>
                       <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => {
-                                setSelectedWithdrawal(withdrawal);
-                                setAdminNotes(withdrawal.admin_notes || "");
-                                setRejectionReason(withdrawal.rejection_reason || "");
-                              }}
-                            >
-                              <Eye className="w-4 h-4 mr-1" />
-                              Gerenciar
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>Gerenciar Saque{selectedWithdrawal ? ` - ${selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}` : ''}</DialogTitle>
-                            </DialogHeader>
-                            
-                            {selectedWithdrawal && (
-                              <Tabs defaultValue="withdrawal" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2">
-                                  <TabsTrigger value="withdrawal">Dados do Saque</TabsTrigger>
-                                  <TabsTrigger value="earnings">Histórico de Ganhos</TabsTrigger>
-                                </TabsList>
-                                
-                                <TabsContent value="withdrawal" className="space-y-4">
-                                  {/* Withdrawal Details */}
-                                  <div className="grid grid-cols-2 gap-4">
-                                     <div>
-                                       <Label>Nome Completo</Label>
-                                       <div className="text-sm p-2 bg-muted rounded">
-                                         {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}
+                        <div className="flex gap-2">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => {
+                                  setSelectedWithdrawal(withdrawal);
+                                  setAdminNotes(withdrawal.admin_notes || "");
+                                  setRejectionReason(withdrawal.rejection_reason || "");
+                                }}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                Gerenciar
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                              <DialogHeader>
+                                <DialogTitle>Gerenciar Saque{selectedWithdrawal ? ` - ${selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}` : ''}</DialogTitle>
+                              </DialogHeader>
+                              
+                              {selectedWithdrawal && (
+                                <Tabs defaultValue="withdrawal" className="w-full">
+                                  <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="withdrawal">Dados do Saque</TabsTrigger>
+                                    <TabsTrigger value="earnings">Histórico de Ganhos</TabsTrigger>
+                                  </TabsList>
+                                  
+                                  <TabsContent value="withdrawal" className="space-y-4">
+                                    {/* Withdrawal Details */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                       <div>
+                                         <Label>Nome Completo</Label>
+                                         <div className="text-sm p-2 bg-muted rounded">
+                                           {selectedWithdrawal.full_name || selectedWithdrawal.profile?.full_name || 'N/A'}
+                                         </div>
                                        </div>
-                                     </div>
-                                     <div>
-                                       <Label>Telefone</Label>
-                                       <div className="text-sm p-2 bg-muted rounded">
-                                         {selectedWithdrawal.profile?.phone || 'N/A'}
+                                       <div>
+                                         <Label>Telefone</Label>
+                                         <div className="text-sm p-2 bg-muted rounded">
+                                           {selectedWithdrawal.profile?.phone || 'N/A'}
+                                         </div>
                                        </div>
-                                     </div>
+                                       <div>
+                                         <Label>Username</Label>
+                                         <div className="text-sm p-2 bg-muted rounded font-medium">
+                                           @{selectedWithdrawal.profile?.username || 'N/A'}
+                                         </div>
+                                       </div>
                                      <div>
-                                       <Label>Username</Label>
+                                       <Label>Valor</Label>
                                        <div className="text-sm p-2 bg-muted rounded font-medium">
-                                         @{selectedWithdrawal.profile?.username || 'N/A'}
+                                         {formatCurrency(selectedWithdrawal.amount)}
                                        </div>
                                      </div>
-                                   <div>
-                                     <Label>Valor</Label>
-                                     <div className="text-sm p-2 bg-muted rounded font-medium">
-                                       {formatCurrency(selectedWithdrawal.amount)}
+                                     <div>
+                                       <Label>Status Atual</Label>
+                                       <div className="text-sm p-2 bg-muted rounded">
+                                         {getStatusBadge(selectedWithdrawal.status)}
+                                       </div>
                                      </div>
-                                   </div>
-                                   <div>
-                                     <Label>Status Atual</Label>
-                                     <div className="text-sm p-2 bg-muted rounded">
-                                       {getStatusBadge(selectedWithdrawal.status)}
-                                     </div>
-                                   </div>
-                                    <div>
-                                      <Label>Tipo de Pagamento</Label>
-                                      <div className="text-sm p-2 bg-muted rounded">
-                                        {selectedWithdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX'}
-                                      </div>
-                                    </div>
-                                    {selectedWithdrawal.withdrawal_type === 'usdt' ? (
                                       <div>
-                                        <Label>Carteira USDT</Label>
-                                        <div className="text-sm p-2 bg-muted rounded font-mono">
-                                          {selectedWithdrawal.usdt_wallet || 'N/A'}
+                                        <Label>Tipo de Pagamento</Label>
+                                        <div className="text-sm p-2 bg-muted rounded">
+                                          {selectedWithdrawal.withdrawal_type === 'usdt' ? 'USDT (TRC20)' : 'PIX'}
                                         </div>
                                       </div>
-                                    ) : (
-                                      <>
+                                      {selectedWithdrawal.withdrawal_type === 'usdt' ? (
                                         <div>
-                                          <Label>Chave PIX</Label>
-                                          <div className="text-sm p-2 bg-muted rounded">
-                                            {selectedWithdrawal.pix_key}
+                                          <Label>Carteira USDT</Label>
+                                          <div className="text-sm p-2 bg-muted rounded font-mono">
+                                            {selectedWithdrawal.usdt_wallet || 'N/A'}
                                           </div>
                                         </div>
-                                        <div>
-                                          <Label>Tipo PIX</Label>
-                                          <div className="text-sm p-2 bg-muted rounded">
-                                            {selectedWithdrawal.pix_key_type}
+                                      ) : (
+                                        <>
+                                          <div>
+                                            <Label>Chave PIX</Label>
+                                            <div className="text-sm p-2 bg-muted rounded">
+                                              {selectedWithdrawal.pix_key}
+                                            </div>
                                           </div>
-                                        </div>
-                                      </>
-                                    )}
-                                 </div>
-
-                                 {/* Admin Notes */}
-                                 <div>
-                                   <Label htmlFor="admin-notes">Observações Administrativas</Label>
-                                   <Textarea
-                                     id="admin-notes"
-                                     value={adminNotes}
-                                     onChange={(e) => setAdminNotes(e.target.value)}
-                                     placeholder="Adicione observações sobre este saque..."
-                                     rows={3}
-                                   />
-                                 </div>
-
-                                 {/* Rejection Reason */}
-                                 <div>
-                                   <Label htmlFor="rejection-reason">Motivo da Rejeição (opcional)</Label>
-                                   <Textarea
-                                     id="rejection-reason"
-                                     value={rejectionReason}
-                                     onChange={(e) => setRejectionReason(e.target.value)}
-                                     placeholder="Motivo caso o saque seja rejeitado..."
-                                     rows={2}
-                                   />
-                                 </div>
-
-                                 {/* Action Buttons */}
-                                 {selectedWithdrawal.status === 'pending' && (
-                                   <div className="flex gap-2 pt-4">
-                                     <Button
-                                       onClick={() => updateWithdrawalStatus(
-                                         selectedWithdrawal.id, 
-                                         'completed', 
-                                         adminNotes
-                                       )}
-                                       className="flex-1 bg-green-600 hover:bg-green-700"
-                                     >
-                                       <CheckCircle className="w-4 h-4 mr-1" />
-                                       Aprovar Saque
-                                     </Button>
-                                     <Button
-                                       onClick={() => updateWithdrawalStatus(
-                                         selectedWithdrawal.id, 
-                                         'rejected', 
-                                         adminNotes, 
-                                         rejectionReason
-                                       )}
-                                       variant="destructive"
-                                       className="flex-1"
-                                     >
-                                       <XCircle className="w-4 h-4 mr-1" />
-                                       Rejeitar Saque
-                                     </Button>
+                                          <div>
+                                            <Label>Tipo PIX</Label>
+                                            <div className="text-sm p-2 bg-muted rounded">
+                                              {selectedWithdrawal.pix_key_type}
+                                            </div>
+                                          </div>
+                                        </>
+                                      )}
                                    </div>
-                                 )}
 
-                                 {selectedWithdrawal.status !== 'pending' && (
-                                   <div className="flex gap-2 pt-4">
-                                     <Button
-                                       onClick={() => updateWithdrawalStatus(
-                                         selectedWithdrawal.id, 
-                                         selectedWithdrawal.status, 
-                                         adminNotes
-                                       )}
-                                       className="flex-1"
-                                     >
-                                       Atualizar Observações
-                                     </Button>
+                                   {/* Admin Notes */}
+                                   <div>
+                                     <Label htmlFor="admin-notes">Observações Administrativas</Label>
+                                     <Textarea
+                                       id="admin-notes"
+                                       value={adminNotes}
+                                       onChange={(e) => setAdminNotes(e.target.value)}
+                                       placeholder="Adicione observações sobre este saque..."
+                                       rows={3}
+                                     />
                                    </div>
-                                 )}
-                                </TabsContent>
-                                
-                                <TabsContent value="earnings" className="space-y-4">
-                                  <UserEarningsView userId={selectedWithdrawal.user_id} />
-                                </TabsContent>
-                              </Tabs>
-                            )}
-                          </DialogContent>
-                        </Dialog>
+
+                                   {/* Rejection Reason */}
+                                   <div>
+                                     <Label htmlFor="rejection-reason">Motivo da Rejeição (opcional)</Label>
+                                     <Textarea
+                                       id="rejection-reason"
+                                       value={rejectionReason}
+                                       onChange={(e) => setRejectionReason(e.target.value)}
+                                       placeholder="Motivo caso o saque seja rejeitado..."
+                                       rows={2}
+                                     />
+                                   </div>
+
+                                   {/* Action Buttons */}
+                                   {selectedWithdrawal.status === 'pending' && (
+                                     <div className="flex gap-2 pt-4">
+                                       <Button
+                                         onClick={() => updateWithdrawalStatus(
+                                           selectedWithdrawal.id, 
+                                           'completed', 
+                                           adminNotes
+                                         )}
+                                         className="flex-1"
+                                       >
+                                         <CheckCircle className="w-4 h-4 mr-1" />
+                                         Aprovar Saque
+                                       </Button>
+                                       <Button
+                                         onClick={() => updateWithdrawalStatus(
+                                           selectedWithdrawal.id, 
+                                           'rejected', 
+                                           adminNotes, 
+                                           rejectionReason
+                                         )}
+                                         variant="destructive"
+                                         className="flex-1"
+                                       >
+                                         <XCircle className="w-4 h-4 mr-1" />
+                                         Rejeitar Saque
+                                       </Button>
+                                     </div>
+                                   )}
+
+                                   {selectedWithdrawal.status !== 'pending' && (
+                                     <div className="flex gap-2 pt-4">
+                                       <Button
+                                         onClick={() => updateWithdrawalStatus(
+                                           selectedWithdrawal.id, 
+                                           selectedWithdrawal.status, 
+                                           adminNotes
+                                         )}
+                                         className="flex-1"
+                                       >
+                                         Atualizar Observações
+                                       </Button>
+                                     </div>
+                                   )}
+                                  </TabsContent>
+                                  
+                                  <TabsContent value="earnings" className="space-y-4">
+                                    <UserEarningsView userId={selectedWithdrawal.user_id} />
+                                  </TabsContent>
+                                </Tabs>
+                              )}
+                            </DialogContent>
+                          </Dialog>
+                          
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Tem certeza que deseja remover este pedido de saque? Esta ação não pode ser desfeita.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => deleteWithdrawal(withdrawal.id)}
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Remover
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
