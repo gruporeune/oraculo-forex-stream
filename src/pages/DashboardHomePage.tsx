@@ -323,51 +323,6 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         <div className="hidden lg:grid lg:grid-cols-5 lg:gap-6">
           {/* Empty space to align with video */}
           <div className="col-span-2"></div>
-          
-          {/* BullTec Card - Full width like banners */}
-          <div className="col-span-1">
-            <Tilt
-              rotationFactor={8}
-              isRevese
-              style={{
-                transformOrigin: 'center center',
-              }}
-              springOptions={{
-                stiffness: 26.7,
-                damping: 4.1,
-                mass: 0.2,
-              }}
-              className="group relative rounded-lg w-full"
-            >
-              <Spotlight
-                className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
-                size={120}
-                springOptions={{
-                  stiffness: 26.7,
-                  damping: 4.1,
-                  mass: 0.2,
-                }}
-              />
-              <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-6 hover:border-purple-400/50 transition-all duration-300 cursor-pointer w-full h-[200px] flex flex-col justify-center items-center">
-                <div className="flex items-center justify-center mb-4">
-                  <img 
-                    src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                    alt="BullTec" 
-                    className="h-16 w-auto object-contain"
-                  />
-                </div>
-                <div className="space-y-2 text-center">
-                  <h4 className="text-lg font-bold text-white">BullTec</h4>
-                  <p className="text-purple-200 text-sm">
-                    {t('dashboard.bulltec.official')}
-                  </p>
-                </div>
-                <div className="absolute top-3 right-3">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </Tilt>
-          </div>
 
           {/* Exnova Card - Full width like banners */}
           <div className="col-span-1">
@@ -473,50 +428,6 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
 
         {/* Mobile: Broker Cards in centered row */}
         <div className="lg:hidden mt-6 flex justify-center items-center gap-3">
-          {/* BullTec Card */}
-          <div className="flex-shrink-0">
-            <Tilt
-              rotationFactor={8}
-              isRevese
-              style={{
-                transformOrigin: 'center center',
-              }}
-              springOptions={{
-                stiffness: 26.7,
-                damping: 4.1,
-                mass: 0.2,
-              }}
-              className="group relative rounded-lg"
-            >
-              <Spotlight
-                className="z-10 from-white/50 via-white/20 to-white/10 blur-2xl"
-                size={100}
-                springOptions={{
-                  stiffness: 26.7,
-                  damping: 4.1,
-                  mass: 0.2,
-                }}
-              />
-              <div className="relative bg-gradient-to-br from-purple-900/80 to-purple-700/80 backdrop-blur-xl border border-purple-500/30 rounded-xl p-3 hover:border-purple-400/50 transition-all duration-300 cursor-pointer">
-                <div className="flex items-center justify-center mb-2">
-                  <img 
-                    src="/lovable-uploads/bd5c3c52-6bcd-4d40-b489-1c9a7cb7ba3c.png" 
-                    alt="BullTec" 
-                    className="h-12 w-auto object-contain"
-                  />
-                </div>
-                <div className="space-y-1 text-center">
-                  <h4 className="text-xs font-bold text-white">BullTec</h4>
-                  <p className="text-purple-200 text-[10px] max-w-[80px]">
-                    {t('dashboard.bulltec.official')}
-                  </p>
-                </div>
-                <div className="absolute top-1 right-1">
-                  <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </Tilt>
-          </div>
 
           {/* Exnova Card */}
           <div className="flex-shrink-0">
