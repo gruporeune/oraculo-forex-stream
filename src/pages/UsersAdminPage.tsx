@@ -342,6 +342,7 @@ export default function UsersAdminPage() {
       case 'master': return 'bg-purple-500';
       case 'pro': return 'bg-amber-500';
       case 'premium': return 'bg-gold-500';
+      case 'platinum': return 'bg-pink-500';
       default: return 'bg-gray-500';
     }
   };
@@ -577,6 +578,7 @@ export default function UsersAdminPage() {
                                         <SelectItem value="master">Master</SelectItem>
                                         <SelectItem value="pro">PRO</SelectItem>
                                         <SelectItem value="premium">Premium</SelectItem>
+                                        <SelectItem value="platinum">Platinum</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>

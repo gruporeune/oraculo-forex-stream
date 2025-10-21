@@ -91,7 +91,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
 
               let highestPlan = referral.plan || 'free';
               if (userPlans && userPlans.length > 0) {
-                const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
+                const planPriority = { platinum: 5, premium: 4, pro: 3, master: 2, partner: 1 };
                 const highest = userPlans.reduce((highest, current) => {
                   const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
                   const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -155,7 +155,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
                 // Get highest plan
                 let highestPlan = l2User.plan || 'free';
                 if (userPlans && userPlans.length > 0) {
-                  const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
+                  const planPriority = { platinum: 5, premium: 4, pro: 3, master: 2, partner: 1 };
                   const highest = userPlans.reduce((highest, current) => {
                     const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
                     const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -191,8 +191,9 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
       free: 'bg-gray-100 text-gray-800',
       partner: 'bg-blue-100 text-blue-800',
       master: 'bg-purple-100 text-purple-800',
+      pro: 'bg-amber-100 text-amber-800',
       premium: 'bg-yellow-100 text-yellow-800',
-      pro: 'bg-amber-100 text-amber-800'
+      platinum: 'bg-pink-100 text-pink-800'
     };
     return colors[plan as keyof typeof colors] || colors.free;
   };

@@ -465,8 +465,9 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     const colors = {
       partner: 'from-blue-600/20 to-blue-400/20 border-blue-500/50',
       master: 'from-purple-600/20 to-purple-400/20 border-purple-500/50',
+      pro: 'from-amber-600/20 to-amber-400/20 border-amber-500/50',
       premium: 'from-yellow-600/20 to-yellow-400/20 border-yellow-500/50',
-      pro: 'from-amber-600/20 to-amber-400/20 border-amber-500/50'
+      platinum: 'from-pink-600/20 to-pink-400/20 border-pink-500/50'
     };
     return colors[planName as keyof typeof colors] || colors.partner;
   };

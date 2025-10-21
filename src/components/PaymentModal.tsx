@@ -225,7 +225,8 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         'PARTNER': 200,
         'MASTER': 600,
         'PRO': 1000,
-        'PREMIUM': 2750
+        'PREMIUM': 2750,
+        'PLATINUM': 5000
       };
       
       amountValue = planValues[plan.name.toUpperCase()] || parseFloat(priceText.replace('.', '').replace(',', '.'));

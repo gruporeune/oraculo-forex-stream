@@ -47,7 +47,7 @@ const plans = [
       "feature.webinars",
       "feature.reports"
     ],
-    popular: true,
+    popular: false,
     gradient: "from-purple-600 to-purple-400",
     borderColor: "border-purple-500/50",
     buttonColor: "bg-purple-600 hover:bg-purple-700",
@@ -69,7 +69,7 @@ const plans = [
       "feature.early.access",
       "feature.support.priority"
     ],
-    popular: false,
+    popular: true,
     gradient: "from-amber-600 to-amber-400",
     borderColor: "border-amber-500/50",
     buttonColor: "bg-amber-600 hover:bg-amber-700",

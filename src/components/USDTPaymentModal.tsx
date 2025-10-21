@@ -37,10 +37,12 @@ export const USDTPaymentModal = ({ isOpen, onClose, plan }: USDTPaymentModalProp
         return 33;
       case 'master':
         return 100;
-      case 'premium':
-        return 458;
       case 'pro':
         return 182;
+      case 'premium':
+        return 458;
+      case 'platinum':
+        return 913;
       default:
         return 100;
     }
