@@ -8,7 +8,6 @@ import { LanguageSelector } from '@/components/LanguageSelector';
 import { useI18n } from '@/lib/i18n';
 import { supabase } from '@/integrations/supabase/client';
 import { useDailySignalsReset } from '@/hooks/useDailySignalsReset';
-import { PromotionModal } from '@/components/PromotionModal';
 import DashboardHomePage from './DashboardHomePage';
 import ProfilePage from './ProfilePage';
 import NetworkPage from './NetworkPage';
@@ -22,7 +21,6 @@ export default function DashboardPage() {
   const { t } = useI18n();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
-  const [showPromotionModal, setShowPromotionModal] = useState(false);
   const navigate = useNavigate();
 
   // Use the daily signals reset hook
@@ -61,21 +59,7 @@ export default function DashboardPage() {
 
     if (data) {
       setProfile(data);
-      
-      // Mostrar modal de promoção quando o perfil carrega (após login)
-      // Verifica se já foi mostrado nesta sessão
-      const sessionKey = `promotion_shown_${userId}_${new Date().toDateString()}`;
-      const hasShownToday = sessionStorage.getItem(sessionKey);
-      
-      if (!hasShownToday) {
-        setShowPromotionModal(true);
-        sessionStorage.setItem(sessionKey, 'true');
-      }
     }
-  };
-
-  const handleClosePromotionModal = () => {
-    setShowPromotionModal(false);
   };
 
   const handleLogout = async () => {
@@ -95,11 +79,6 @@ export default function DashboardPage() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-gradient-to-br from-black via-purple-900/20 to-black text-white">
         <AppSidebar />
-        
-        <PromotionModal 
-          isOpen={showPromotionModal} 
-          onClose={handleClosePromotionModal} 
-        />
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
