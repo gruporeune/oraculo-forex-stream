@@ -340,8 +340,8 @@ export default function UsersAdminPage() {
       case 'free': return 'bg-gray-500';
       case 'partner': return 'bg-blue-500';
       case 'master': return 'bg-purple-500';
+      case 'pro': return 'bg-amber-500';
       case 'premium': return 'bg-gold-500';
-      case 'platinum': return 'bg-slate-800';
       default: return 'bg-gray-500';
     }
   };
@@ -575,8 +575,8 @@ export default function UsersAdminPage() {
                                         <SelectItem value="free">Free</SelectItem>
                                         <SelectItem value="partner">Partner</SelectItem>
                                         <SelectItem value="master">Master</SelectItem>
+                                        <SelectItem value="pro">PRO</SelectItem>
                                         <SelectItem value="premium">Premium</SelectItem>
-                                        <SelectItem value="platinum">Platinum</SelectItem>
                                       </SelectContent>
                                     </Select>
                                   </div>
@@ -638,8 +638,8 @@ export default function UsersAdminPage() {
                                         <SelectContent className="bg-slate-700 border-slate-600">
                                           <SelectItem value="partner">Partner</SelectItem>
                                           <SelectItem value="master">Master</SelectItem>
+                                          <SelectItem value="pro">PRO</SelectItem>
                                           <SelectItem value="premium">Premium</SelectItem>
-                                          <SelectItem value="platinum">Platinum</SelectItem>
                                         </SelectContent>
                                       </Select>
                                       <Button onClick={handleAddPlan} size="sm" className="bg-green-600 hover:bg-green-700">

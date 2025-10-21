@@ -1,1 +1,40 @@
 project_id = "nzxidhlktjpzkxhofswx"
+
+[functions.create-faturefy-payment]
+verify_jwt = false
+
+[functions.check-faturefy-payment]
+verify_jwt = false
+
+[functions.faturefy-webhook]
+verify_jwt = false
+
+[functions.create-secretpay-withdrawal]
+verify_jwt = false
+
+[functions.secretpay-webhook]
+verify_jwt = false
+
+[functions.secretpay-withdrawal-webhook]
+verify_jwt = false
+
+[functions.create-payment]
+verify_jwt = false
+
+[functions.payment-webhook]
+verify_jwt = false
+
+[functions.fix-duplicate-commissions]
+verify_jwt = false
+
+[functions.create-asaas-payment]
+verify_jwt = false
+
+[functions.asaas-webhook]
+verify_jwt = false
+
+[functions.check-asaas-payment]
+verify_jwt = false
+
+[functions.create-asaas-withdrawal]
+verify_jwt = false

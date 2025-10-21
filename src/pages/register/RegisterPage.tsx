@@ -42,13 +42,13 @@ const planDetails = {
     borderColor: "border-neon-purple",
     features: ["500 sinais por dia", "1% lucro diário até 200%", "Grupo VIP", "Área de membros", "Suporte VIP 24/7"]
   },
-  platinum: {
-    name: "PLATINUM",
-    price: "$1,000",
+  pro: {
+    name: "PRO",
+    price: "$182",
     icon: Diamond,
-    color: "text-primary",
-    borderColor: "border-primary", 
-    features: ["1000 sinais por dia", "1% lucro diário até 200%", "Grupo VIP", "Área de membros", "Suporte dedicado", "Mentoria 1:1"]
+    color: "text-amber-500",
+    borderColor: "border-amber-500",
+    features: ["200 sinais por dia", "1% lucro diário até 200%", "Grupo VIP", "Área de membros", "Suporte prioritário", "Estratégias avançadas"]
   }
 };
 

@@ -221,11 +221,11 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const priceText = plan.price.replace('R$ ', '');
       
       // Map plan names to their actual values to avoid conversion errors
-      const planValues = {
+      const planValues: {[key: string]: number} = {
         'PARTNER': 200,
-        'MASTER': 600, 
-        'PREMIUM': 2750,
-        'PLATINUM': 5000
+        'MASTER': 600,
+        'PRO': 1000,
+        'PREMIUM': 2750
       };
       
       amountValue = planValues[plan.name.toUpperCase()] || parseFloat(priceText.replace('.', '').replace(',', '.'));
@@ -256,7 +256,7 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
         requestBody.customer_state = formData.estado;
       }
 
-      const { data, error } = await supabase.functions.invoke('create-faturefy-payment', {
+      const { data, error } = await supabase.functions.invoke('create-asaas-payment', {
         body: requestBody
       });
 
@@ -271,15 +271,15 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
 
       console.log('Payment created successfully:', data);
 
-      // Use the data directly from Faturefy
+      // Use the data directly from Asaas
       const adaptedData = {
         success: data.success,
-        transaction_id: data.transaction_id,
+        transaction_id: data.payment_id,
         qr_code: data.qr_code,
         qr_code_image: data.qr_code_image,
         amount: data.amount,
         expires_at: data.expires_at,
-        request_number: data.request_number
+        request_number: data.payment_id
       };
 
       setPaymentData(adaptedData);
@@ -320,10 +320,10 @@ export function PaymentModal({ isOpen, onClose, plan }: PaymentModalProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Call our edge function to check payment status via Faturefy API
-      const { data, error } = await supabase.functions.invoke('check-faturefy-payment', {
+      // Call our edge function to check payment status via Asaas API
+      const { data, error } = await supabase.functions.invoke('check-asaas-payment', {
         body: {
-          payment_id: paymentData.request_number, // Use request_number as payment_id
+          payment_id: paymentData.request_number,
           user_id: user.id
         }
       });

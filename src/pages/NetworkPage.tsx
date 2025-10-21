@@ -133,7 +133,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
         let currentPlan = profile.plan || 'free';
         if (activePlans && activePlans.length > 0) {
-          const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+          const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
           const highestPlan = activePlans.reduce((highest, current) => {
             const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
             const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -211,7 +211,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
           let currentPlan = profile.plan || 'free';
           if (activePlans && activePlans.length > 0) {
-            const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+            const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
             const highestPlan = activePlans.reduce((highest, current) => {
               const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
               const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -271,7 +271,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
 
             let currentPlan = profile.plan || 'free';
             if (activePlans && activePlans.length > 0) {
-              const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+              const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
               const highestPlan = activePlans.reduce((highest, current) => {
                 const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
                 const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -324,7 +324,7 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       partner: 'bg-blue-600',
       master: 'bg-purple-600',
       premium: 'bg-yellow-600',
-      platinum: 'bg-orange-600'
+      pro: 'bg-amber-600'
     };
     return colors[plan as keyof typeof colors] || colors.free;
   };

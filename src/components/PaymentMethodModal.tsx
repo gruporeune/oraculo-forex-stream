@@ -54,17 +54,17 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
               transition={{ delay: 0.1 }}
             >
               <Button
-                disabled
-                className="w-full h-16 bg-green-600/10 border border-green-500/20 text-white/30 flex items-center gap-4 justify-start px-6 cursor-not-allowed opacity-50"
+                onClick={() => onSelectPaymentMethod('pix')}
+                className="w-full h-16 bg-green-600/20 hover:bg-green-600/30 border border-green-500/50 text-white flex items-center gap-4 justify-start px-6"
                 variant="outline"
               >
-                <div className="bg-green-600/30 p-2 rounded-full">
+                <div className="bg-green-600 p-2 rounded-full">
                   <CreditCard className="w-6 h-6" />
                 </div>
                 <div className="text-left">
                   <div className="font-bold">{t('payment.method.pix')}</div>
-                  <div className="text-sm text-white/50">
-                    Temporariamente indisponível
+                  <div className="text-sm text-white/70">
+                    {plan.priceInReals} - Pagamento Instantâneo
                   </div>
                 </div>
               </Button>
@@ -76,17 +76,17 @@ export const PaymentMethodModal = ({ isOpen, onClose, onSelectPaymentMethod, pla
               transition={{ delay: 0.15 }}
             >
               <Button
-                onClick={() => onSelectPaymentMethod('pix-manual')}
-                className="w-full h-16 bg-yellow-600/20 hover:bg-yellow-600/30 border border-yellow-500/50 text-white flex items-center gap-4 justify-start px-6"
+                disabled
+                className="w-full h-16 bg-yellow-600/10 border border-yellow-500/20 text-white/30 flex items-center gap-4 justify-start px-6 cursor-not-allowed opacity-50"
                 variant="outline"
               >
-                <div className="bg-yellow-600 p-2 rounded-full">
+                <div className="bg-yellow-600/30 p-2 rounded-full">
                   <QrCode className="w-6 h-6" />
                 </div>
                 <div className="text-left">
                   <div className="font-bold">PIX Manual</div>
-                  <div className="text-sm text-white/70">
-                    {plan.priceInReals || `R$ ${plan.name === 'partner' ? '198' : plan.name === 'master' ? '600' : plan.name === 'premium' ? '2.750' : '5.000'}`} - QR Code
+                  <div className="text-sm text-white/50">
+                    Temporariamente indisponível
                   </div>
                 </div>
               </Button>

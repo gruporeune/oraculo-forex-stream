@@ -16,7 +16,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
     partner: { signals: 20, dailyEarnings: 0.20 },
     master: { signals: 100, dailyEarnings: 1.00 },
     premium: { signals: 500, dailyEarnings: 7.50 },
-    platinum: { signals: 1000, dailyEarnings: 20.00 }
+    pro: { signals: 200, dailyEarnings: 3.00 }
   };
 
   // Calculate total signals from all active plans
@@ -56,7 +56,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       partner: 'from-blue-600/20 to-blue-400/20 border-blue-500/50',
       master: 'from-purple-600/20 to-purple-400/20 border-purple-500/50',
       premium: 'from-yellow-600/20 to-yellow-400/20 border-yellow-500/50',
-      platinum: 'from-orange-600/20 to-orange-400/20 border-orange-500/50'
+      pro: 'from-amber-600/20 to-amber-400/20 border-amber-500/50'
     };
     return colors[plan as keyof typeof colors] || colors.free;
   };

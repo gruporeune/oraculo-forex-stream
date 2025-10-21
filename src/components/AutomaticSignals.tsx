@@ -122,7 +122,7 @@ export function AutomaticSignals({ userPlan, onEarningsGenerated, userId }: Auto
     partner: { maxSignals: 1, targetProfit: 1.00 },
     master: { maxSignals: 3, targetProfit: 6.00 },
     premium: { maxSignals: 4, targetProfit: 41.25 },
-    platinum: { maxSignals: 5, targetProfit: 100.00 }
+    pro: { maxSignals: 3, targetProfit: 50.00 }
   };
 
   const config = planConfig[userPlan as keyof typeof planConfig] || planConfig.free;

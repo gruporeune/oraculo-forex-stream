@@ -56,6 +56,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const planLimits = {
     partner: { dailyTarget: 2.00 },
     master: { dailyTarget: 6.00 },
+    pro: { dailyTarget: 50.00 },
     premium: { dailyTarget: 41.25 },
     platinum: { dailyTarget: 100.00 }
   };
@@ -465,7 +466,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       partner: 'from-blue-600/20 to-blue-400/20 border-blue-500/50',
       master: 'from-purple-600/20 to-purple-400/20 border-purple-500/50',
       premium: 'from-yellow-600/20 to-yellow-400/20 border-yellow-500/50',
-      platinum: 'from-orange-600/20 to-orange-400/20 border-orange-500/50'
+      pro: 'from-amber-600/20 to-amber-400/20 border-amber-500/50'
     };
     return colors[planName as keyof typeof colors] || colors.partner;
   };

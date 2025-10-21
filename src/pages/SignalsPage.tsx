@@ -64,6 +64,7 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
     free: 5,
     partner: 20,
     master: 100,
+    pro: 200,
     premium: 500,
     platinum: 1000
   };

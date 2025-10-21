@@ -91,7 +91,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
 
               let highestPlan = referral.plan || 'free';
               if (userPlans && userPlans.length > 0) {
-                const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+                const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
                 const highest = userPlans.reduce((highest, current) => {
                   const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
                   const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -146,7 +146,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
                       partner: 6.0,
                       master: 18.0,
                       premium: 82.5,
-                      platinum: 150.0
+                      pro: 30.0
                     };
                     return sum + (commissionValues[plan.plan_name as keyof typeof commissionValues] || 0);
                   }, 0);
@@ -155,7 +155,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
                 // Get highest plan
                 let highestPlan = l2User.plan || 'free';
                 if (userPlans && userPlans.length > 0) {
-                  const planPriority = { platinum: 4, premium: 3, master: 2, partner: 1 };
+                  const planPriority = { pro: 4, premium: 3, master: 2, partner: 1 };
                   const highest = userPlans.reduce((highest, current) => {
                     const currentPriority = planPriority[current.plan_name as keyof typeof planPriority] || 0;
                     const highestPriority = planPriority[highest.plan_name as keyof typeof planPriority] || 0;
@@ -192,7 +192,7 @@ export default function ReferralsList({ userId, title, level }: ReferralsListPro
       partner: 'bg-blue-100 text-blue-800',
       master: 'bg-purple-100 text-purple-800',
       premium: 'bg-yellow-100 text-yellow-800',
-      platinum: 'bg-orange-100 text-orange-800'
+      pro: 'bg-amber-100 text-amber-800'
     };
     return colors[plan as keyof typeof colors] || colors.free;
   };

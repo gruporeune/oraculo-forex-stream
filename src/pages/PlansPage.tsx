@@ -54,6 +54,28 @@ const plans = [
     paymentType: "both"
   },
   {
+    name: "PRO",
+    price: "$182 USD",
+    priceInReals: "R$ 1.000",
+    originalPrice: "$250 USD",
+    description: "plan.pro.description",
+    icon: Diamond,
+    features: [
+      "200 feature.signals.day",
+      "1% feature.profit.daily",
+      "feature.members.area PRO",
+      "feature.telegram.vip",
+      "feature.strategies avançadas",
+      "feature.early.access",
+      "feature.support.priority"
+    ],
+    popular: false,
+    gradient: "from-amber-600 to-amber-400",
+    borderColor: "border-amber-500/50",
+    buttonColor: "bg-amber-600 hover:bg-amber-700",
+    paymentType: "both"
+  },
+  {
     name: "PREMIUM",
     price: "$500 USD",
     priceInReals: "R$ 2.750",
@@ -74,30 +96,7 @@ const plans = [
     gradient: "from-blue-600 to-blue-400",
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700",
-    paymentType: "both" // Premium can pay with both PIX or USDT
-  },
-  {
-    name: "PLATINUM",
-    price: "$909 USD",
-    priceInReals: "R$ 5.000",
-    originalPrice: "$1250 USD",
-    description: "plan.platinum.description",
-    icon: Diamond,
-    features: [
-      "1000 feature.signals.day",
-      "2% feature.profit.daily",
-      "feature.members.area Platinum",
-      "feature.consultation semanal",
-      "Estratégias VIP exclusivas",
-      "feature.early.access",
-      "feature.support.vip",
-      "feature.dedicated.analyst"
-    ],
-    popular: false,
-    gradient: "from-slate-600 to-slate-400",
-    borderColor: "border-slate-500/50",
-    buttonColor: "bg-slate-600 hover:bg-slate-700",
-    paymentType: "both" // Platinum can pay with both PIX or USDT
+    paymentType: "both"
   }
 ];
 
@@ -113,7 +112,7 @@ export default function PlansPage() {
     setSelectedPlan(plan);
     
     if (plan.paymentType === 'both') {
-      // Partner, Master, Premium and Platinum - show method selection
+      // Partner, Master, PRO, and Premium - show method selection
       setIsPaymentMethodModalOpen(true);
     } else if (plan.paymentType === 'usdt') {
       // International - direct USDT
