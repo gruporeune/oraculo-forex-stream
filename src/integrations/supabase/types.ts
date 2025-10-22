@@ -613,22 +613,10 @@ export type Database = {
         Args: { level: number; plan_name: string }
         Returns: number
       }
-      fix_user_balances_and_earnings: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      get_user_creation_date: {
-        Args: { user_uuid: string }
-        Returns: string
-      }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      make_user_admin: {
-        Args: { target_email: string }
-        Returns: boolean
-      }
+      fix_user_balances_and_earnings: { Args: never; Returns: undefined }
+      get_user_creation_date: { Args: { user_uuid: string }; Returns: string }
+      is_current_user_admin: { Args: never; Returns: boolean }
+      make_user_admin: { Args: { target_email: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
