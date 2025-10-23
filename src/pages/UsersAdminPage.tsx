@@ -18,6 +18,7 @@ interface UserProfile {
   id: string;
   full_name: string | null;
   username: string | null;
+  email?: string | null;
   plan: string;
   available_balance: number;
   daily_earnings: number;
@@ -143,9 +144,16 @@ export default function UsersAdminPage() {
         })
       );
 
+      // Buscar emails dos usuários
+      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+      const authUsers = authData?.users || [];
+      if (authError) console.error('Erro ao buscar emails:', authError);
+
       // Load referrer usernames
       const usersWithReferrers = await Promise.all(
         usersWithCreatedAt.map(async (user) => {
+          const userEmail = authUsers?.find(u => u.id === user.id)?.email || null;
+          
           if (user.referred_by) {
             try {
               const { data: referrerData } = await supabase
@@ -156,14 +164,15 @@ export default function UsersAdminPage() {
               
               return {
                 ...user,
+                email: userEmail,
                 referrer_username: referrerData?.username || referrerData?.full_name || 'Usuário não encontrado'
               };
             } catch (error) {
               console.error('Erro ao buscar referrer:', error);
-              return { ...user, referrer_username: 'Erro ao carregar' };
+              return { ...user, email: userEmail, referrer_username: 'Erro ao carregar' };
             }
           }
-          return { ...user, referrer_username: null };
+          return { ...user, email: userEmail, referrer_username: null };
         })
       );
 
@@ -472,6 +481,7 @@ export default function UsersAdminPage() {
                   <TableHeader>
                     <TableRow className="border-slate-700">
                       <TableHead className="text-gray-300">Nome/Username</TableHead>
+                      <TableHead className="text-gray-300">Email</TableHead>
                       <TableHead className="text-gray-300">Telefone</TableHead>
                       <TableHead className="text-gray-300">Indicado por</TableHead>
                       <TableHead className="text-gray-300">Plano Principal</TableHead>
@@ -493,6 +503,13 @@ export default function UsersAdminPage() {
                               <div className="font-medium">{user.full_name || 'Sem nome'}</div>
                               <div className="text-sm text-blue-400">{user.username || 'Sem username'}</div>
                               <div className="text-xs text-gray-400">{user.id.substring(0, 8)}...</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-white">
+                            <div className="text-sm text-purple-400">
+                              {user.email || (
+                                <span className="text-gray-400">Não informado</span>
+                              )}
                             </div>
                           </TableCell>
                           <TableCell className="text-white">

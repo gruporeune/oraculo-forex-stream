@@ -370,10 +370,16 @@ export default function AdminWithdrawalsPage() {
 
         if (profilesError) console.error('Erro ao buscar perfis:', profilesError);
 
+        // Buscar emails dos usuários
+        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
+        const authUsers = authData?.users || [];
+        if (authError) console.error('Erro ao buscar emails:', authError);
+
         // Combinar dados
         const withdrawalsWithProfiles = withdrawalData.map(withdrawal => ({
           ...withdrawal,
-          profile: profilesData?.find(p => p.id === withdrawal.user_id) || null
+          profile: profilesData?.find(p => p.id === withdrawal.user_id) || null,
+          user_email: authUsers?.find(u => u.id === withdrawal.user_id)?.email || 'N/A'
         }));
 
         setWithdrawals(withdrawalsWithProfiles);
@@ -735,6 +741,7 @@ export default function AdminWithdrawalsPage() {
                   <TableRow>
                     <TableHead>Data</TableHead>
                     <TableHead>Nome</TableHead>
+                    <TableHead>Email</TableHead>
                     <TableHead>ID do Usuário</TableHead>
                     <TableHead>Plano</TableHead>
                     <TableHead>Valor</TableHead>
@@ -757,6 +764,11 @@ export default function AdminWithdrawalsPage() {
                           <div className="text-sm text-muted-foreground">
                             {withdrawal.profile?.phone || 'N/A'}
                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm text-muted-foreground">
+                          {withdrawal.user_email || 'N/A'}
                         </div>
                       </TableCell>
                       <TableCell>
