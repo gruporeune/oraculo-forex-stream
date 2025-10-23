@@ -615,6 +615,14 @@ export type Database = {
       }
       fix_user_balances_and_earnings: { Args: never; Returns: undefined }
       get_user_creation_date: { Args: { user_uuid: string }; Returns: string }
+      get_user_email: { Args: { user_uuid: string }; Returns: string }
+      get_users_emails: {
+        Args: { user_uuids: string[] }
+        Returns: {
+          email: string
+          user_id: string
+        }[]
+      }
       is_current_user_admin: { Args: never; Returns: boolean }
       make_user_admin: { Args: { target_email: string }; Returns: boolean }
     }

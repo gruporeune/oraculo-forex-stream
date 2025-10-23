@@ -370,16 +370,17 @@ export default function AdminWithdrawalsPage() {
 
         if (profilesError) console.error('Erro ao buscar perfis:', profilesError);
 
-        // Buscar emails dos usuários
-        const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-        const authUsers = authData?.users || [];
-        if (authError) console.error('Erro ao buscar emails:', authError);
+        // Buscar emails dos usuários usando função RPC
+        const { data: emailsData, error: emailsError } = await supabase
+          .rpc('get_users_emails', { user_uuids: userIds });
+        
+        if (emailsError) console.error('Erro ao buscar emails:', emailsError);
 
         // Combinar dados
         const withdrawalsWithProfiles = withdrawalData.map(withdrawal => ({
           ...withdrawal,
           profile: profilesData?.find(p => p.id === withdrawal.user_id) || null,
-          user_email: authUsers?.find(u => u.id === withdrawal.user_id)?.email || 'N/A'
+          user_email: emailsData?.find((e: any) => e.user_id === withdrawal.user_id)?.email || 'N/A'
         }));
 
         setWithdrawals(withdrawalsWithProfiles);

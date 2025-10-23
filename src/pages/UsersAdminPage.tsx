@@ -144,15 +144,17 @@ export default function UsersAdminPage() {
         })
       );
 
-      // Buscar emails dos usuários
-      const { data: authData, error: authError } = await supabase.auth.admin.listUsers();
-      const authUsers = authData?.users || [];
-      if (authError) console.error('Erro ao buscar emails:', authError);
+      // Buscar emails dos usuários usando função RPC
+      const userIds = (data || []).map(u => u.id);
+      const { data: emailsData, error: emailsError } = await supabase
+        .rpc('get_users_emails', { user_uuids: userIds });
+      
+      if (emailsError) console.error('Erro ao buscar emails:', emailsError);
 
       // Load referrer usernames
       const usersWithReferrers = await Promise.all(
         usersWithCreatedAt.map(async (user) => {
-          const userEmail = authUsers?.find(u => u.id === user.id)?.email || null;
+          const userEmail = emailsData?.find((e: any) => e.user_id === user.id)?.email || null;
           
           if (user.referred_by) {
             try {
