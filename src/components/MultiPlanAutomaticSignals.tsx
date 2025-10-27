@@ -293,8 +293,10 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (error) throw error;
 
-      // Use RPC function to atomically update profile earnings
-      // This prevents race conditions when multiple operations update simultaneously
+      // CRITICAL: Wait a moment to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Now fetch UPDATED data after the user_plans update
       const { data: currentProfile, error: fetchError } = await supabase
         .from('profiles')
         .select('daily_earnings, available_balance')
@@ -303,7 +305,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (fetchError) throw fetchError;
 
-      // Calculate total daily target from all ACTIVE plans
+      // Fetch all ACTIVE plans with FRESH data (after the update above)
       const { data: allUserPlans, error: plansError } = await supabase
         .from('user_plans')
         .select('plan_name, daily_earnings')
@@ -312,7 +314,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
       if (plansError) throw plansError;
 
-      // Calculate what the total should be by summing all plan earnings
+      // Calculate what the total should be by summing all plan earnings (now with updated values)
       const totalFromPlans = (allUserPlans || []).reduce((total, p) => {
         return total + (p.daily_earnings || 0);
       }, 0);
