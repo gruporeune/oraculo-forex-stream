@@ -51,20 +51,21 @@ serve(async (req) => {
       console.log('✅ Payment confirmed, activating plan for user:', transaction.user_id);
 
       // Verificar se já existe um plano ativo para evitar duplicação
-      const { data: existingPlan, error: checkError } = await supabase
+      const { data: existingPlans, error: checkError } = await supabase
         .from('user_plans')
-        .select('id, is_active')
+        .select('id, is_active, created_at')
         .eq('user_id', transaction.user_id)
         .eq('plan_name', transaction.plan_name)
-        .maybeSingle();
+        .eq('is_active', true);
 
       if (checkError) {
         console.error('❌ Error checking existing plan:', checkError);
         throw checkError;
       }
 
-      if (existingPlan?.is_active) {
+      if (existingPlans && existingPlans.length > 0) {
         console.log('⚠️ Plan already active for user, skipping duplicate activation');
+        console.log('Existing plans:', existingPlans.length);
         return new Response(
           JSON.stringify({ success: true, message: 'Plan already active' }),
           { 

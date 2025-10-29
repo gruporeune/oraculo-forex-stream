@@ -105,7 +105,8 @@ export default function UsersAdminPage() {
 
   const loadUsers = async () => {
     try {
-      const { data, error } = await supabase
+      // Buscar TODOS os usuários sem limite
+      const { data, error, count } = await supabase
         .from('profiles')
         .select(`
           id,
@@ -118,8 +119,10 @@ export default function UsersAdminPage() {
           updated_at,
           phone,
           referred_by
-        `)
+        `, { count: 'exact' })
         .order('updated_at', { ascending: false });
+
+      console.log('📊 Total de usuários carregados:', data?.length, 'Count:', count);
 
       if (error) throw error;
       

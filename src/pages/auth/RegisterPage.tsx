@@ -33,6 +33,18 @@ export default function RegisterPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Verificar e salvar código de referência no cookie (último clique)
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get('ref');
+    
+    if (referralCode) {
+      // Salvar no cookie com validade de 30 dias (último clique sempre sobrescreve)
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 30);
+      document.cookie = `referral_code=${referralCode}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+      console.log('🔗 Código de referência salvo no cookie:', referralCode);
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (session?.user) {
@@ -76,9 +88,21 @@ export default function RegisterPage() {
 
       const redirectUrl = `${window.location.origin}/`;
       
-      // Check for referral code in URL
+      // Check for referral code in URL or cookie (prioriza URL, depois cookie)
       const urlParams = new URLSearchParams(window.location.search);
-      const referralCode = urlParams.get('ref');
+      let referralCode = urlParams.get('ref');
+      
+      // Se não houver código na URL, buscar do cookie
+      if (!referralCode) {
+        const cookies = document.cookie.split(';');
+        const referralCookie = cookies.find(cookie => cookie.trim().startsWith('referral_code='));
+        if (referralCookie) {
+          referralCode = referralCookie.split('=')[1];
+          console.log('🍪 Usando código de referência do cookie:', referralCode);
+        }
+      } else {
+        console.log('🔗 Usando código de referência da URL:', referralCode);
+      }
       
       // Sign up the user
       const { data, error: signUpError } = await supabase.auth.signUp({
@@ -104,15 +128,24 @@ export default function RegisterPage() {
         
         // If there's a referral code, find the referrer
         if (referralCode) {
-          const { data: referrerData } = await supabase
+          const { data: referrerData, error: referrerError } = await supabase
             .from('profiles')
-            .select('id')
+            .select('id, username')
             .eq('referral_code', referralCode)
-            .single();
+            .maybeSingle();
+          
+          if (referrerError) {
+            console.error('Erro ao buscar referrer:', referrerError);
+          }
           
           if (referrerData) {
             referrerId = referrerData.id;
+            console.log('✅ Referrer encontrado:', referrerData.username, 'ID:', referrerId);
+          } else {
+            console.log('⚠️ Nenhum referrer encontrado para o código:', referralCode);
           }
+        } else {
+          console.log('ℹ️ Nenhum código de referência fornecido');
         }
         
         const { error: profileError } = await supabase
@@ -153,6 +186,9 @@ export default function RegisterPage() {
         }
       }
 
+      // Limpar cookie de referência após cadastro bem-sucedido
+      document.cookie = 'referral_code=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      
       setSuccess('Conta criada com sucesso! Verifique seu e-mail para confirmar.');
       
     } catch (error: any) {
