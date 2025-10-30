@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Users, Plus, Edit, Save, LogOut, Search, DollarSign, User, Calendar, Filter } from "lucide-react";
 import { toast } from "sonner";
 import AdminNetworkGraph from "@/components/AdminNetworkGraph";
@@ -44,6 +45,7 @@ export default function UsersAdminPage() {
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
+  const [showOnlyPaidUsers, setShowOnlyPaidUsers] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editingUser, setEditingUser] = useState<{
@@ -62,7 +64,7 @@ export default function UsersAdminPage() {
   }, []);
 
   useEffect(() => {
-    // Filter users based on search term and date
+    // Filter users based on search term, date, and paid plans
     let filtered = users;
     
     if (searchTerm) {
@@ -81,9 +83,21 @@ export default function UsersAdminPage() {
         return userDate.toDateString() === filterDate.toDateString();
       });
     }
+
+    if (showOnlyPaidUsers) {
+      // Filtra apenas usuários que têm pelo menos um plano ativo (partner, master, pro, premium, platinum)
+      filtered = filtered.filter(user => {
+        const activePlans = userPlans.filter(
+          plan => plan.user_id === user.id && 
+          plan.is_active && 
+          ['partner', 'master', 'pro', 'premium', 'platinum', 'international'].includes(plan.plan_name)
+        );
+        return activePlans.length > 0;
+      });
+    }
     
     setFilteredUsers(filtered);
-  }, [searchTerm, dateFilter, users]);
+  }, [searchTerm, dateFilter, showOnlyPaidUsers, users, userPlans]);
 
   const checkAdminAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -454,7 +468,7 @@ export default function UsersAdminPage() {
           
           <TabsContent value="users" className="space-y-6">
             {/* Search and Filters */}
-            <div className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -472,6 +486,17 @@ export default function UsersAdminPage() {
                   value={dateFilter}
                   onChange={(e) => setDateFilter(e.target.value)}
                   className="pl-10 bg-slate-800 border-slate-700 text-white"
+                />
+              </div>
+              <div className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-md px-4 py-2">
+                <Filter className="text-gray-400 w-4 h-4" />
+                <Label htmlFor="paid-filter" className="text-sm text-gray-300 cursor-pointer flex-1">
+                  Apenas usuários com planos pagos
+                </Label>
+                <Switch
+                  id="paid-filter"
+                  checked={showOnlyPaidUsers}
+                  onCheckedChange={setShowOnlyPaidUsers}
                 />
               </div>
             </div>
