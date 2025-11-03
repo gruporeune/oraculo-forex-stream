@@ -11,9 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Users, Plus, Edit, Save, LogOut, Search, DollarSign, User, Calendar, Filter } from "lucide-react";
+import { Users, Plus, Edit, Save, LogOut, Search, DollarSign, User, Calendar, Filter, Download } from "lucide-react";
 import { toast } from "sonner";
 import AdminNetworkGraph from "@/components/AdminNetworkGraph";
+import * as XLSX from 'xlsx';
 
 interface UserProfile {
   id: string;
@@ -119,30 +120,49 @@ export default function UsersAdminPage() {
 
   const loadUsers = async () => {
     try {
-      // Buscar TODOS os usuários sem limite
-      const { data, error, count } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          full_name,
-          username,
-          plan,
-          available_balance,
-          daily_earnings,
-          daily_commissions,
-          updated_at,
-          phone,
-          referred_by
-        `, { count: 'exact' })
-        .order('updated_at', { ascending: false });
+      // Buscar TODOS os usuários - usar paginação para garantir que pegamos todos
+      let allProfiles: any[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
 
-      console.log('📊 Total de usuários carregados:', data?.length, 'Count:', count);
+      console.log('🔄 Iniciando carregamento de TODOS os usuários...');
 
-      if (error) throw error;
-      
+      while (hasMore) {
+        const { data, error, count } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            full_name,
+            username,
+            plan,
+            available_balance,
+            daily_earnings,
+            daily_commissions,
+            updated_at,
+            phone,
+            referred_by
+          `, { count: 'exact' })
+          .range(from, from + pageSize - 1)
+          .order('updated_at', { ascending: false });
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          allProfiles = [...allProfiles, ...data];
+          from += pageSize;
+          hasMore = data.length === pageSize;
+          console.log(`📥 Carregados ${allProfiles.length} usuários... (Total no DB: ${count})`);
+        } else {
+          hasMore = false;
+        }
+      }
+
+      console.log('✅ Total de usuários carregados:', allProfiles.length);
+
       // Get real creation dates using our secure function
       const usersWithCreatedAt = await Promise.all(
-        (data || []).map(async (profile) => {
+        allProfiles.map(async (profile) => {
           try {
             const { data: creationDate, error: dateError } = await supabase
               .rpc('get_user_creation_date', { user_uuid: profile.id });
@@ -161,17 +181,28 @@ export default function UsersAdminPage() {
         })
       );
 
-      // Buscar emails dos usuários usando função RPC
-      const userIds = (data || []).map(u => u.id);
-      const { data: emailsData, error: emailsError } = await supabase
-        .rpc('get_users_emails', { user_uuids: userIds });
+      // Buscar emails dos usuários usando função RPC em lotes
+      const userIds = allProfiles.map(u => u.id);
+      let allEmailsData: any[] = [];
       
-      if (emailsError) console.error('Erro ao buscar emails:', emailsError);
-
+      // Processar em lotes de 1000 para evitar limitações de tamanho de array
+      for (let i = 0; i < userIds.length; i += 1000) {
+        const batchIds = userIds.slice(i, i + 1000);
+        const { data: emailsData, error: emailsError } = await supabase
+          .rpc('get_users_emails', { user_uuids: batchIds });
+        
+        if (emailsError) {
+          console.error('Erro ao buscar emails do lote:', emailsError);
+        } else if (emailsData) {
+          allEmailsData = [...allEmailsData, ...emailsData];
+        }
+      }
+      
+      console.log('📧 Total de emails carregados:', allEmailsData.length);
       // Load referrer usernames
       const usersWithReferrers = await Promise.all(
         usersWithCreatedAt.map(async (user) => {
-          const userEmail = emailsData?.find((e: any) => e.user_id === user.id)?.email || null;
+          const userEmail = allEmailsData?.find((e: any) => e.user_id === user.id)?.email || null;
           
           if (user.referred_by) {
             try {
@@ -379,6 +410,67 @@ export default function UsersAdminPage() {
     return userPlans.filter(plan => plan.user_id === userId && plan.is_active);
   };
 
+  const handleExportToExcel = () => {
+    try {
+      // Preparar dados para exportação
+      const exportData = filteredUsers.map(user => {
+        const activePlans = getUserPlansCount(user.id);
+        const planNames = activePlans.map(p => p.plan_name).join(', ') || user.plan;
+        
+        return {
+          'Nome': user.full_name || 'N/A',
+          'Username': user.username || 'N/A',
+          'Email': user.email || 'N/A',
+          'Telefone': user.phone || 'N/A',
+          'Plano Principal': user.plan,
+          'Planos Ativos': planNames,
+          'Quantidade de Planos': activePlans.length,
+          'Saldo Disponível': `R$ ${(user.available_balance || 0).toFixed(2)}`,
+          'Ganhos Diários': `R$ ${(user.daily_earnings || 0).toFixed(2)}`,
+          'Comissões Diárias': `R$ ${(user.daily_commissions || 0).toFixed(2)}`,
+          'Data de Cadastro': new Date(user.created_at).toLocaleDateString('pt-BR'),
+          'Última Atualização': new Date(user.updated_at).toLocaleDateString('pt-BR'),
+          'Indicado Por': user.referrer_username || 'Cadastro Direto'
+        };
+      });
+
+      // Criar worksheet
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      
+      // Ajustar largura das colunas
+      const colWidths = [
+        { wch: 25 }, // Nome
+        { wch: 20 }, // Username
+        { wch: 30 }, // Email
+        { wch: 18 }, // Telefone
+        { wch: 15 }, // Plano Principal
+        { wch: 30 }, // Planos Ativos
+        { wch: 10 }, // Quantidade
+        { wch: 18 }, // Saldo
+        { wch: 18 }, // Ganhos
+        { wch: 18 }, // Comissões
+        { wch: 15 }, // Data Cadastro
+        { wch: 15 }, // Última Atualização
+        { wch: 25 }  // Indicado Por
+      ];
+      ws['!cols'] = colWidths;
+
+      // Criar workbook
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Usuários');
+
+      // Gerar arquivo e fazer download
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `usuarios_oraculo_${timestamp}.xlsx`;
+      XLSX.writeFile(wb, filename);
+
+      toast.success(`${exportData.length} usuários exportados com sucesso!`);
+    } catch (error: any) {
+      console.error('Erro ao exportar:', error);
+      toast.error('Erro ao exportar usuários: ' + error.message);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center">
@@ -397,6 +489,14 @@ export default function UsersAdminPage() {
             <h1 className="text-3xl font-bold">Painel de Usuários</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              onClick={handleExportToExcel}
+              variant="outline" 
+              className="border-green-500 text-green-500 hover:bg-green-500 hover:text-white"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Exportar Excel
+            </Button>
             <Button 
               onClick={() => { loadUsers(); loadUserPlans(); }} 
               variant="outline" 
