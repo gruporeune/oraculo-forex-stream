@@ -5,8 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Wallet, DollarSign, Info, FileText, Loader2, CreditCard, Smartphone, Mail, FileCheck, Hash, Banknote } from 'lucide-react';
+import { Wallet, DollarSign, Info, FileText, Loader2, CreditCard, Smartphone, Mail, FileCheck, Hash, Banknote, AlertCircle, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface WithdrawalPageProps {
   user: any;
@@ -20,6 +21,27 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   const [loading, setLoading] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
+  
+  // Check if today is Monday (1) or Thursday (4) in Brasília timezone
+  const isWithdrawalDay = () => {
+    const now = new Date();
+    // Convert to Brasília time (UTC-3)
+    const brasiliaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const dayOfWeek = brasiliaTime.getDay();
+    return dayOfWeek === 1 || dayOfWeek === 4; // Monday or Thursday
+  };
+  
+  const getNextWithdrawalDay = () => {
+    const now = new Date();
+    const brasiliaTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const dayOfWeek = brasiliaTime.getDay();
+    
+    if (dayOfWeek === 1) return "hoje (segunda-feira)";
+    if (dayOfWeek === 4) return "hoje (quinta-feira)";
+    if (dayOfWeek < 1) return "segunda-feira";
+    if (dayOfWeek < 4) return "quinta-feira";
+    return "segunda-feira";
+  };
   
   const fetchWithdrawalRequests = async () => {
     if (!user) return;
@@ -51,6 +73,17 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   const handleSaque = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormLoading(true);
+
+    // Check if it's withdrawal day
+    if (!isWithdrawalDay()) {
+      toast({ 
+        title: "Dia não permitido", 
+        description: "Saques só são permitidos nas segundas e quintas-feiras.", 
+        variant: "destructive" 
+      });
+      setFormLoading(false);
+      return;
+    }
 
     const amount = parseFloat(saqueData.amount);
     const availableBalance = profile?.available_balance || 0;
@@ -248,6 +281,17 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
+          {!isWithdrawalDay() && (
+            <Alert className="bg-yellow-500/20 border-yellow-500/50 text-yellow-100">
+              <Calendar className="h-4 w-4 text-yellow-400" />
+              <AlertTitle className="text-yellow-200">Dia não permitido para saques</AlertTitle>
+              <AlertDescription className="text-yellow-100">
+                Saques só podem ser solicitados nas <strong>segundas-feiras</strong> e <strong>quintas-feiras</strong> no horário de Brasília. 
+                Próximo dia disponível: <strong>{getNextWithdrawalDay()}</strong>.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <Card className="bg-black/40 border-white/10 text-white bg-gradient-to-r from-orange-500/20 to-yellow-500/20">
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -397,12 +441,17 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                 <Button 
                   type="submit" 
                   className="w-full bg-orange-500 hover:bg-orange-600" 
-                  disabled={formLoading}
+                  disabled={formLoading || !isWithdrawalDay()}
                 >
                   {formLoading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                       Enviando...
+                    </>
+                  ) : !isWithdrawalDay() ? (
+                    <>
+                      <AlertCircle className="mr-2 h-4 w-4" />
+                      Disponível apenas às Segundas e Quintas
                     </>
                   ) : (
                     <>
@@ -424,6 +473,14 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             </CardTitle>
           </CardHeader>
             <CardContent className="space-y-3 text-sm text-white/90">
+            <div className="space-y-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg mb-4">
+              <h4 className="font-semibold text-blue-400 flex items-center">
+                <Calendar className="mr-2 h-4 w-4" />
+                Dias de Saque
+              </h4>
+              <p className="text-blue-200">• Saques permitidos apenas nas <span className="font-bold">segundas-feiras</span> e <span className="font-bold">quintas-feiras</span>.</p>
+              <p className="text-blue-200">• Horário de Brasília (UTC-3).</p>
+            </div>
             <div className="space-y-2 p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg mb-4">
               <h4 className="font-semibold text-orange-400 flex items-center">
                 <Info className="mr-2 h-4 w-4" />
