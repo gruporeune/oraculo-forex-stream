@@ -47,6 +47,7 @@ export default function UsersAdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [showOnlyPaidUsers, setShowOnlyPaidUsers] = useState(false);
+  const [showOnlyWithBalance, setShowOnlyWithBalance] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
   const [editingUser, setEditingUser] = useState<{
@@ -65,7 +66,7 @@ export default function UsersAdminPage() {
   }, []);
 
   useEffect(() => {
-    // Filter users based on search term, date, and paid plans
+    // Filter users based on search term, date, paid plans, and balance
     let filtered = users;
     
     if (searchTerm) {
@@ -96,9 +97,14 @@ export default function UsersAdminPage() {
         return activePlans.length > 0;
       });
     }
+
+    if (showOnlyWithBalance) {
+      // Filtra apenas usuários que têm saldo disponível maior que zero
+      filtered = filtered.filter(user => (user.available_balance || 0) > 0);
+    }
     
     setFilteredUsers(filtered);
-  }, [searchTerm, dateFilter, showOnlyPaidUsers, users, userPlans]);
+  }, [searchTerm, dateFilter, showOnlyPaidUsers, showOnlyWithBalance, users, userPlans]);
 
   const checkAdminAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -568,7 +574,7 @@ export default function UsersAdminPage() {
           
           <TabsContent value="users" className="space-y-6">
             {/* Search and Filters */}
-            <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
@@ -597,6 +603,17 @@ export default function UsersAdminPage() {
                   id="paid-filter"
                   checked={showOnlyPaidUsers}
                   onCheckedChange={setShowOnlyPaidUsers}
+                />
+              </div>
+              <div className="flex items-center gap-3 bg-slate-800 border border-slate-700 rounded-md px-4 py-2">
+                <DollarSign className="text-green-400 w-4 h-4" />
+                <Label htmlFor="balance-filter" className="text-sm text-gray-300 cursor-pointer flex-1">
+                  Apenas usuários com saldo disponível
+                </Label>
+                <Switch
+                  id="balance-filter"
+                  checked={showOnlyWithBalance}
+                  onCheckedChange={setShowOnlyWithBalance}
                 />
               </div>
             </div>
