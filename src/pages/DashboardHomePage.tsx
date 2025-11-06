@@ -74,7 +74,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="space-y-3 md:space-y-4 lg:space-y-6 bg-white rounded-lg p-3 md:p-4 lg:p-6"
+      className="space-y-3 md:space-y-4 lg:space-y-6 bg-white rounded-lg p-3 md:p-4 lg:p-6 max-w-full overflow-hidden"
     >
       <DashboardCards
         profile={profile} 

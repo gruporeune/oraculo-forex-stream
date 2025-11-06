@@ -59,7 +59,7 @@ export function BrazilianStocksCarousel() {
   }, []);
 
   return (
-    <Card className="p-6 bg-gradient-to-br from-background to-muted/30">
+    <Card className="p-6 bg-gradient-to-br from-background to-muted/30 overflow-hidden">
       <div className="flex items-center gap-2 mb-4">
         <Activity className="w-5 h-5 text-primary animate-pulse" />
         <h3 className="text-lg font-semibold">Mercado Financeiro - Tempo Real</h3>
@@ -79,9 +79,9 @@ export function BrazilianStocksCarousel() {
             stopOnMouseEnter: true,
           }),
         ]}
-        className="w-full"
+        className="w-full overflow-hidden"
       >
-        <CarouselContent className="-ml-2 md:-ml-4">
+        <CarouselContent className="-ml-2 md:-ml-3">
           {assets.map((asset) => {
             const isPositive = asset.change >= 0;
             const isCrypto = asset.symbol.includes("USD");
@@ -94,7 +94,7 @@ export function BrazilianStocksCarousel() {
             return (
               <CarouselItem
                 key={asset.id}
-                className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                className="pl-2 md:pl-3 basis-1/2 md:basis-1/3 lg:basis-1/5"
               >
                 <Card className="p-4 hover:shadow-lg transition-all hover:scale-105 duration-200 bg-card/50 backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-3">
