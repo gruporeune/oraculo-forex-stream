@@ -42,26 +42,60 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className={open ? "w-60" : "w-14"}
+      className={open ? "w-72" : "w-16"}
       collapsible="icon"
     >
-      <SidebarContent className="bg-purple-900 backdrop-blur-xl border-r border-purple-500/20 flex flex-col">
-        <div className="flex-1">
+      <SidebarContent className="bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950 backdrop-blur-2xl border-r border-white/5 flex flex-col shadow-2xl">
+        {/* Logo Section */}
+        {open && (
+          <div className="p-6 border-b border-white/5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <img 
+                  src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
+                  alt="Oráculo" 
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-white font-bold text-lg">Oráculo</h2>
+                <p className="text-slate-400 text-xs">Trading Platform</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 py-4">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-white">Menu Principal</SidebarGroupLabel>
+            {open && <SidebarGroupLabel className="text-slate-400 text-xs uppercase tracking-wider px-4 mb-2">Navegação</SidebarGroupLabel>}
 
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className="space-y-1 px-2">
                 {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
                     <NavLink 
                       to={item.url} 
                       end 
-                      className={({ isActive }) => `group flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
+                      className={({ isActive }) => `
+                        group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
+                        ${isActive 
+                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30' 
+                          : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                        }
+                      `}
                     >
-                      <item.icon className="w-4 h-4 text-white group-hover:text-black transition-colors" />
-                      {open && <span className="text-white group-hover:text-black transition-colors">{item.title}</span>}
+                      <div className={`
+                        w-9 h-9 rounded-lg flex items-center justify-center transition-all
+                        ${isActive ? 'bg-white/10' : 'bg-slate-800/50 group-hover:bg-slate-700/50'}
+                      `}>
+                        <item.icon className="w-5 h-5" />
+                      </div>
+                      {open && (
+                        <span className="font-medium text-sm truncate flex-1">
+                          {item.title}
+                        </span>
+                      )}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -71,32 +105,40 @@ export function AppSidebar() {
           </SidebarGroup>
         </div>
 
-        {/* Support Agent Section */}
+        {/* Modern Support Agent Section */}
         {open && (
-          <div className="p-4 border-t border-purple-500/20">
-            <div className="bg-purple-800/50 rounded-lg p-4 space-y-3">
-              <div className="flex items-center gap-3">
-                <img 
-                  src={supportAgent} 
-                  alt="Damarys - Atendente" 
-                  className="w-16 h-16 rounded-full object-cover border-2 border-purple-400"
-                />
-                <div className="flex-1">
-                  <p className="text-white text-sm font-medium">Olá eu me chamo Damarys</p>
-                  <p className="text-purple-200/70 text-xs">Sua atendente particular</p>
+          <div className="p-4 border-t border-white/5">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 p-4 backdrop-blur-sm border border-white/10">
+              {/* Decorative gradient orb */}
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/30 rounded-full blur-3xl"></div>
+              
+              <div className="relative space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <img 
+                      src={supportAgent} 
+                      alt="Damarys - Atendente" 
+                      className="w-12 h-12 rounded-xl object-cover border-2 border-purple-400/50 shadow-lg"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900"></div>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-sm font-semibold">Damarys</p>
+                    <p className="text-slate-300 text-xs">Atendente Online</p>
+                  </div>
                 </div>
+                <p className="text-slate-300 text-xs leading-relaxed">
+                  Precisa de ajuda? Estou disponível no WhatsApp!
+                </p>
+                <Button 
+                  onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-600 text-white shadow-lg hover:shadow-green-500/30 transition-all rounded-xl"
+                  size="sm"
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Chamar no WhatsApp
+                </Button>
               </div>
-              <p className="text-white/80 text-xs">
-                Qualquer dúvida me chame no whatsapp.
-              </p>
-              <Button 
-                onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
-                className="w-full bg-green-600 hover:bg-green-700 text-white"
-                size="sm"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                WhatsApp
-              </Button>
             </div>
           </div>
         )}

@@ -81,35 +81,48 @@ export default function DashboardPage() {
         <AppSidebar />
         
         <div className="flex-1 flex flex-col w-full">
-          {/* Header */}
-          <header className="border-b border-purple-500/20 bg-purple-900 backdrop-blur-xl">
-            <div className="px-2 md:px-4 py-2 md:py-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 md:gap-4">
-                  <SidebarTrigger className="text-white" />
-                  <div className="flex items-center">
-                    <img 
-                      src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
-                      alt="Oráculo Logo" 
-                      className="h-8 md:h-10 w-auto object-contain"
-                    />
+          {/* Modern Glassmorphic Header */}
+          <header className="sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-indigo-900/80 backdrop-blur-2xl shadow-lg">
+            <div className="px-3 md:px-6 py-3 md:py-4">
+              <div className="flex items-center justify-between gap-3">
+                {/* Left Section */}
+                <div className="flex items-center gap-3 md:gap-4">
+                  <SidebarTrigger className="text-white hover:bg-white/10 rounded-lg p-2 transition-all" />
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                      <img 
+                        src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
+                        alt="Oráculo" 
+                        className="w-6 h-6 md:w-7 md:h-7 object-contain"
+                      />
+                    </div>
+                    <span className="hidden sm:block text-lg md:text-xl font-bold text-white">Oráculo</span>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-2 md:gap-4">
+                {/* Right Section */}
+                <div className="flex items-center gap-2 md:gap-3">
                   <LanguageSelector />
-                  <div className="hidden md:flex items-center gap-2 text-white">
-                    <User className="w-5 h-5" />
-                    <span className="text-sm">{profile?.full_name || user.email}</span>
+                  
+                  {/* User Profile Dropdown */}
+                  <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-white max-w-[120px] truncate">
+                      {profile?.full_name || user.email}
+                    </span>
                   </div>
+                  
+                  {/* Logout Button */}
                   <Button 
                     variant="ghost" 
                     size="sm" 
                     onClick={handleLogout}
-                    className="text-purple-200 hover:text-white hover:bg-purple-800"
+                    className="text-white hover:bg-red-500/20 hover:text-red-200 rounded-xl border border-transparent hover:border-red-500/30 transition-all"
                   >
                     <LogOut className="w-4 h-4 md:mr-2" />
-                    <span className="hidden md:inline">{t('nav.logout')}</span>
+                    <span className="hidden md:inline font-medium">{t('nav.logout')}</span>
                   </Button>
                 </div>
               </div>
