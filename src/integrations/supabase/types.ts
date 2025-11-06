@@ -229,12 +229,15 @@ export type Database = {
           available_balance: number | null
           avatar_url: string | null
           broker_id: string | null
+          cpf: string | null
           cycle_start_time: string | null
           daily_commissions: number | null
           daily_earnings: number | null
           daily_referral_commissions: number | null
           daily_signals_used: number | null
+          date_of_birth: string | null
           full_name: string | null
+          full_name_verified: string | null
           id: string
           last_reset_date: string | null
           phone: string | null
@@ -253,12 +256,15 @@ export type Database = {
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null
+          cpf?: string | null
           cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
           daily_referral_commissions?: number | null
           daily_signals_used?: number | null
+          date_of_birth?: string | null
           full_name?: string | null
+          full_name_verified?: string | null
           id: string
           last_reset_date?: string | null
           phone?: string | null
@@ -277,12 +283,15 @@ export type Database = {
           available_balance?: number | null
           avatar_url?: string | null
           broker_id?: string | null
+          cpf?: string | null
           cycle_start_time?: string | null
           daily_commissions?: number | null
           daily_earnings?: number | null
           daily_referral_commissions?: number | null
           daily_signals_used?: number | null
+          date_of_birth?: string | null
           full_name?: string | null
+          full_name_verified?: string | null
           id?: string
           last_reset_date?: string | null
           phone?: string | null

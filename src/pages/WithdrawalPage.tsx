@@ -38,8 +38,9 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
     
     if (dayOfWeek === 1) return "hoje (segunda-feira)";
     if (dayOfWeek === 4) return "hoje (quinta-feira)";
-    if (dayOfWeek < 1) return "segunda-feira";
-    if (dayOfWeek < 4) return "quinta-feira";
+    if (dayOfWeek === 0) return "segunda-feira";
+    if (dayOfWeek === 2 || dayOfWeek === 3) return "quinta-feira";
+    if (dayOfWeek === 5 || dayOfWeek === 6) return "segunda-feira";
     return "segunda-feira";
   };
   
@@ -310,10 +311,18 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             <CardHeader>
               <CardTitle>Solicitar Saque</CardTitle>
               <CardDescription className="text-white/80">
-                Os saques são processados via PIX.
+                Os saques são processados via PIX ou USDT.
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <Alert className="mb-4 bg-red-500/20 border-red-500/50">
+                <AlertCircle className="h-4 w-4 text-red-400" />
+                <AlertTitle className="text-red-200">ATENÇÃO - Chave PIX</AlertTitle>
+                <AlertDescription className="text-red-100">
+                  <strong>A chave PIX deve estar na sua titularidade!</strong> Só serão aceitos saques para chaves PIX cadastradas no seu CPF. 
+                  Solicitações com chaves de terceiros serão automaticamente rejeitadas.
+                </AlertDescription>
+              </Alert>
               <form onSubmit={handleSaque} className="space-y-4">
                 <Input 
                   placeholder="Nome completo" 

@@ -60,6 +60,8 @@ export default function RegisterPage() {
     username: "",
     email: "",
     phone: "",
+    cpf: "",
+    dateOfBirth: "",
     password: ""
   });
 
@@ -72,6 +74,27 @@ export default function RegisterPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate CPF
+    if (!validateCPF(formData.cpf)) {
+      alert("CPF inválido. Por favor, digite um CPF válido.");
+      return;
+    }
+    
+    // Validate date of birth (must be at least 18 years old)
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    if (age < 18) {
+      alert("Você precisa ter pelo menos 18 anos para se cadastrar.");
+      return;
+    }
+    
     // TODO: Implement registration logic with Supabase
     console.log("Registration data:", { ...formData, plan });
     // Redirect to dashboard after successful registration
@@ -80,6 +103,44 @@ export default function RegisterPage() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const validateCPF = (cpf: string): boolean => {
+    // Remove non-digits
+    cpf = cpf.replace(/[^\d]/g, '');
+    
+    if (cpf.length !== 11) return false;
+    
+    // Check if all digits are the same
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+    
+    // Validate first check digit
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let checkDigit = 11 - (sum % 11);
+    if (checkDigit >= 10) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(9))) return false;
+    
+    // Validate second check digit
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    checkDigit = 11 - (sum % 11);
+    if (checkDigit >= 10) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(10))) return false;
+    
+    return true;
+  };
+
+  const formatCPF = (value: string): string => {
+    const numbers = value.replace(/[^\d]/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
   };
 
   return (
@@ -162,10 +223,10 @@ export default function RegisterPage() {
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-2">
-                      <Label htmlFor="fullName">Nome Completo</Label>
+                      <Label htmlFor="fullName">Nome Completo Verdadeiro *</Label>
                       <Input
                         id="fullName"
-                        placeholder="Seu nome completo"
+                        placeholder="Seu nome completo conforme documento"
                         value={formData.fullName}
                         onChange={(e) => handleInputChange("fullName", e.target.value)}
                         required
@@ -174,19 +235,32 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="username">Nome de Usuário (ID)</Label>
+                      <Label htmlFor="cpf">CPF *</Label>
                       <Input
-                        id="username"
-                        placeholder="Escolha um username único"
-                        value={formData.username}
-                        onChange={(e) => handleInputChange("username", e.target.value)}
+                        id="cpf"
+                        placeholder="000.000.000-00"
+                        value={formData.cpf}
+                        onChange={(e) => handleInputChange("cpf", formatCPF(e.target.value))}
+                        required
+                        maxLength={14}
+                        className="bg-background/50 border-gold/20 focus:border-gold"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Data de Nascimento *</Label>
+                      <Input
+                        id="dateOfBirth"
+                        type="date"
+                        value={formData.dateOfBirth}
+                        onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
                         required
                         className="bg-background/50 border-gold/20 focus:border-gold"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Email *</Label>
                       <Input
                         id="email"
                         type="email"
@@ -199,12 +273,24 @@ export default function RegisterPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Telefone (com DDD)</Label>
+                      <Label htmlFor="phone">Telefone com DDD *</Label>
                       <Input
                         id="phone"
                         placeholder="(11) 99999-9999"
                         value={formData.phone}
                         onChange={(e) => handleInputChange("phone", e.target.value)}
+                        required
+                        className="bg-background/50 border-gold/20 focus:border-gold"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="username">Nome de Usuário (ID) *</Label>
+                      <Input
+                        id="username"
+                        placeholder="Escolha um username único"
+                        value={formData.username}
+                        onChange={(e) => handleInputChange("username", e.target.value)}
                         required
                         className="bg-background/50 border-gold/20 focus:border-gold"
                       />

@@ -30,6 +30,7 @@ interface UserProfile {
   phone: string | null;
   referred_by: string | null;
   referrer_username?: string | null;
+  total_withdrawals?: number;
 }
 
 interface UserPlan {
@@ -166,6 +167,26 @@ export default function UsersAdminPage() {
 
       console.log('✅ Total de usuários carregados:', allProfiles.length);
 
+      // Buscar total de saques aprovados/completos para cada usuário
+      const { data: withdrawalsData, error: withdrawalsError } = await supabase
+        .from('withdrawal_requests')
+        .select('user_id, amount, status');
+
+      if (withdrawalsError) {
+        console.error('Erro ao carregar saques:', withdrawalsError);
+      }
+
+      // Calcular total de saques por usuário
+      const withdrawalsByUser = withdrawalsData?.reduce((acc: any, withdrawal: any) => {
+        if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
+          if (!acc[withdrawal.user_id]) {
+            acc[withdrawal.user_id] = 0;
+          }
+          acc[withdrawal.user_id] += Number(withdrawal.amount) || 0;
+        }
+        return acc;
+      }, {}) || {};
+
       // Get real creation dates using our secure function
       const usersWithCreatedAt = await Promise.all(
         allProfiles.map(async (profile) => {
@@ -175,13 +196,15 @@ export default function UsersAdminPage() {
             
             return {
               ...profile,
-              created_at: creationDate || profile.updated_at
+              created_at: creationDate || profile.updated_at,
+              total_withdrawals: withdrawalsByUser[profile.id] || 0
             };
           } catch (error) {
             // Fallback to updated_at if function fails
             return {
               ...profile,
-              created_at: profile.updated_at
+              created_at: profile.updated_at,
+              total_withdrawals: withdrawalsByUser[profile.id] || 0
             };
           }
         })
@@ -634,6 +657,7 @@ export default function UsersAdminPage() {
                       <TableHead className="text-gray-300">Plano Principal</TableHead>
                       <TableHead className="text-gray-300">Planos Extras</TableHead>
                       <TableHead className="text-gray-300">Saldo Disponível</TableHead>
+                      <TableHead className="text-gray-300">Total Sacado</TableHead>
                       <TableHead className="text-gray-300">Ganho Hoje</TableHead>
                       <TableHead className="text-gray-300">Comissões Hoje</TableHead>
                       <TableHead className="text-gray-300">Data de Cadastro</TableHead>
@@ -687,6 +711,9 @@ export default function UsersAdminPage() {
                           </TableCell>
                           <TableCell className="text-green-400 font-medium">
                             R$ {(user.available_balance || 0).toFixed(2)}
+                          </TableCell>
+                          <TableCell className="text-orange-400 font-bold">
+                            R$ {(user.total_withdrawals || 0).toFixed(2)}
                           </TableCell>
                           <TableCell className="text-yellow-400 font-medium">
                             R$ {(user.daily_earnings || 0).toFixed(2)}
