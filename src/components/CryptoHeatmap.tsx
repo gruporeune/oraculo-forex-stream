@@ -1,25 +1,25 @@
 import { useEffect, useRef } from "react";
 
-export function BrazilianStocksCarousel() {
+export function CryptoHeatmap() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-crypto-coins-heatmap.js';
     script.async = true;
     script.innerHTML = JSON.stringify({
-      symbols: [
-        { proName: "BMFBOVESPA:IBOV", title: "Ibovespa" },
-        { proName: "FX_IDC:USDBRL", title: "Dólar/Real" },
-        { proName: "FX_IDC:EURBRL", title: "Euro/Real" },
-        { proName: "BINANCE:BTCUSDT", title: "Bitcoin" },
-        { proName: "NASDAQ:AAPL", title: "Apple" }
-      ],
-      showSymbolLogo: true,
+      dataSource: "Crypto",
+      blockSize: "market_cap_calc",
+      blockColor: "change",
+      locale: "br",
+      symbolUrl: "",
       colorTheme: "light",
-      isTransparent: false,
-      displayMode: "adaptive",
-      locale: "br"
+      hasTopBar: false,
+      isDataSetEnabled: false,
+      isZoomEnabled: true,
+      hasSymbolTooltip: true,
+      width: "100%",
+      height: "400"
     });
 
     if (containerRef.current) {
@@ -36,7 +36,7 @@ export function BrazilianStocksCarousel() {
   return (
     <div className="py-6">
       <h3 className="text-lg font-semibold text-gray-800 mb-4 px-4">
-        Cotações em Tempo Real
+        Mapa de Calor - Criptomoedas
       </h3>
       <div className="tradingview-widget-container" ref={containerRef}>
         <div className="tradingview-widget-container__widget"></div>
