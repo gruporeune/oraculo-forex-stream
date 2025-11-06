@@ -21,6 +21,8 @@ interface PlanOperation {
   cycle_start_time: string | null;
   daily_signals_used: number;
   total_auto_earnings: number;
+  purchase_date: string;
+  created_at: string;
 }
 
 interface RecentOperation {
@@ -45,6 +47,52 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const [recentOperations, setRecentOperations] = useState<{[key: string]: RecentOperation[]}>({});
   const { toast } = useToast();
 
+  // Calculate and update total_auto_earnings from historical signals
+  useEffect(() => {
+    const calculateHistoricalEarnings = async () => {
+      for (const plan of userPlans) {
+        try {
+          // Get all automatic signals for this user created after plan purchase
+          const { data: signals, error } = await supabase
+            .from('signals')
+            .select('profit, created_at')
+            .eq('user_id', user.id)
+            .eq('is_automatic', true)
+            .gte('created_at', plan.purchase_date || plan.created_at);
+
+          if (error) {
+            console.error('Error fetching historical signals:', error);
+            continue;
+          }
+
+          // Sum only positive profits (wins)
+          const totalEarnings = (signals || []).reduce((sum, signal) => {
+            return sum + (signal.profit > 0 ? signal.profit : 0);
+          }, 0);
+
+          // Update the plan with calculated total
+          if (totalEarnings !== plan.total_auto_earnings) {
+            await supabase
+              .from('user_plans')
+              .update({ total_auto_earnings: totalEarnings })
+              .eq('id', plan.id);
+            
+            console.log(`Updated total_auto_earnings for plan ${plan.plan_name}: R$ ${totalEarnings.toFixed(2)}`);
+          }
+        } catch (error) {
+          console.error('Error calculating historical earnings:', error);
+        }
+      }
+      
+      // Refresh plans after calculation
+      onPlansUpdate();
+    };
+
+    if (userPlans.length > 0) {
+      calculateHistoricalEarnings();
+    }
+  }, [user.id]); // Run only when user changes or component mounts
+
   // Check if it's weekend in Brazil timezone
   const isWeekendInBrazil = () => {
     const now = new Date();
@@ -55,19 +103,18 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   };
 
   const planLimits = {
-    partner: { dailyTarget: 2.00, investedAmount: 200.00 },
-    master: { dailyTarget: 6.00, investedAmount: 600.00 },
-    pro: { dailyTarget: 10.00, investedAmount: 1000.00 },
-    premium: { dailyTarget: 41.25, investedAmount: 2750.00 },
-    platinum: { dailyTarget: 100.00, investedAmount: 5000.00 }
+    partner: { dailyTarget: 2.00, investedAmount: 200.00, maxTotalEarnings: 600.00 },
+    master: { dailyTarget: 6.00, investedAmount: 600.00, maxTotalEarnings: 1800.00 },
+    pro: { dailyTarget: 10.00, investedAmount: 1000.00, maxTotalEarnings: 3000.00 },
+    premium: { dailyTarget: 41.25, investedAmount: 2750.00, maxTotalEarnings: 8250.00 },
+    platinum: { dailyTarget: 100.00, investedAmount: 5000.00, maxTotalEarnings: 15000.00 }
   };
 
-  // Check if plan reached 200% profit (2x invested amount)
-  const hasReached200Percent = (plan: PlanOperation) => {
+  // Check if plan reached max earnings (300% of invested amount)
+  const hasReachedMaxEarnings = (plan: PlanOperation) => {
     const limits = planLimits[plan.plan_name as keyof typeof planLimits];
     if (!limits) return false;
-    const targetProfit = limits.investedAmount * 2; // 200% = 2x o valor investido
-    return (plan.total_auto_earnings || 0) >= targetProfit;
+    return (plan.total_auto_earnings || 0) >= limits.maxTotalEarnings;
   };
 
   // Automatic operations effect
@@ -82,7 +129,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
         plan.auto_operations_started && 
         !plan.auto_operations_paused && 
         !hasReachedTarget(plan) &&
-        !hasReached200Percent(plan) // Block if reached 200%
+        !hasReachedMaxEarnings(plan) // Block if reached max earnings (300%)
       );
 
       for (const plan of activePlans) {
@@ -268,9 +315,8 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       const earnedProfit = operationProfit > 0 ? operationProfit : 0;
       const newTotalAutoEarnings = currentTotalAutoEarnings + earnedProfit;
       
-      // Check if reached 200% profit limit
-      const targetProfit = limits.investedAmount * 2;
-      const hasReached200 = newTotalAutoEarnings >= targetProfit;
+      // Check if reached max total earnings limit (300%)
+      const hasReachedMax = newTotalAutoEarnings >= limits.maxTotalEarnings;
       
       // If already at or above target, stop here
       if (currentEarnings >= limits.dailyTarget) {
@@ -299,16 +345,16 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
         updated_at: new Date().toISOString()
       };
 
-      // If target reached OR 200% limit reached, stop operations
-      if (willReachTarget || hasReached200) {
+      // If target reached OR max earnings limit reached, stop operations
+      if (willReachTarget || hasReachedMax) {
         updateData.auto_operations_started = false;
         updateData.auto_operations_paused = false;
         updateData.cycle_start_time = new Date().toISOString();
         
-        if (hasReached200) {
+        if (hasReachedMax) {
           toast({
-            title: "🎉 Meta de 200% atingida!",
-            description: `Parabéns! Você atingiu 200% de lucro no plano ${plan.plan_name.toUpperCase()}. Para continuar ganhando, adquira o plano novamente.`,
+            title: "🎉 Meta de retorno total atingida!",
+            description: `Parabéns! Você atingiu R$ ${limits.maxTotalEarnings.toFixed(2)} de retorno total no plano ${plan.plan_name.toUpperCase()}. Para continuar ganhando, renove o plano.`,
             duration: 10000
           });
         }
@@ -559,33 +605,33 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                 </div>
               </div>
 
-              {/* 200% Profit Limit Progress */}
+              {/* Total Earnings Progress (300% limit) */}
               {limits && (
                 <div className="border-t border-white/10 pt-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-white/70 text-sm">Meta de 200% de Lucro</span>
+                    <span className="text-white/70 text-sm">Ganhos Totais Acumulados (Meta: {formatCurrency(limits.maxTotalEarnings)})</span>
                     <span className="text-white font-medium">
-                      {formatCurrency(plan.total_auto_earnings || 0)} / {formatCurrency(limits.investedAmount * 2)}
+                      {formatCurrency(plan.total_auto_earnings || 0)}
                     </span>
                   </div>
                   <Progress 
-                    value={Math.min(((plan.total_auto_earnings || 0) / (limits.investedAmount * 2)) * 100, 100)} 
+                    value={Math.min(((plan.total_auto_earnings || 0) / limits.maxTotalEarnings) * 100, 100)} 
                     className="h-2"
                   />
                   <div className="flex justify-between items-center mt-1">
                     <span className="text-white/50 text-xs">
-                      {((plan.total_auto_earnings || 0) / (limits.investedAmount * 2) * 100).toFixed(1)}%
+                      {((plan.total_auto_earnings || 0) / limits.maxTotalEarnings * 100).toFixed(1)}%
                     </span>
-                    <span className="text-white/50 text-xs">200%</span>
+                    <span className="text-white/50 text-xs">100%</span>
                   </div>
-                  {hasReached200Percent(plan) && (
+                  {hasReachedMaxEarnings(plan) && (
                     <div className="mt-3 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg">
                       <div className="flex items-start gap-2">
                         <AlertCircle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-yellow-200 text-sm font-medium">Meta de 200% Atingida!</p>
+                          <p className="text-yellow-200 text-sm font-medium">Meta de Retorno Total Atingida!</p>
                           <p className="text-yellow-100/80 text-xs mt-1">
-                            Você atingiu o limite de lucro deste plano. Para continuar ganhando com operações automáticas, adquira o plano novamente.
+                            Você atingiu o limite de {formatCurrency(limits.maxTotalEarnings)} deste plano. Para continuar ganhando com operações automáticas, renove o plano.
                           </p>
                         </div>
                       </div>
@@ -595,7 +641,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
               )}
 
               {/* AI Analysis Effect */}
-              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && !hasReached200Percent(plan) && (
+              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && !hasReachedMaxEarnings(plan) && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
@@ -658,7 +704,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
               )}
 
               {/* Recent Operations */}
-              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && !hasReached200Percent(plan) && recentOperations[plan.id] && recentOperations[plan.id].length > 0 && (
+              {plan.auto_operations_started && !plan.auto_operations_paused && !targetReached && !hasReachedMaxEarnings(plan) && recentOperations[plan.id] && recentOperations[plan.id].length > 0 && (
                 <div className="space-y-2">
                   <h4 className="text-white/80 text-sm font-medium">Operações Recentes:</h4>
                   {recentOperations[plan.id].slice(0, 2).map((operation) => (
@@ -689,15 +735,15 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
 
               {/* Status and Controls */}
               <div className="space-y-4">
-                {hasReached200Percent(plan) ? (
+                {hasReachedMaxEarnings(plan) ? (
                   <div className="text-center p-4 bg-yellow-600/20 rounded-lg border border-yellow-500/50">
                     <AlertCircle className="w-8 h-8 text-yellow-400 mx-auto mb-2" />
-                    <p className="text-white font-medium mb-1">Limite de 200% Atingido</p>
+                    <p className="text-white font-medium mb-1">Meta de Retorno Total Atingida</p>
                     <p className="text-white/70 text-sm mb-3">
-                      Você atingiu o limite máximo de lucro deste plano ({formatCurrency(limits?.investedAmount ? limits.investedAmount * 2 : 0)})
+                      Você atingiu o limite máximo de retorno deste plano ({formatCurrency(limits?.maxTotalEarnings || 0)})
                     </p>
                     <p className="text-yellow-200 text-sm font-medium">
-                      Para continuar ganhando, adquira o plano novamente.
+                      Para continuar ganhando, renove o plano.
                     </p>
                   </div>
                 ) : targetReached && countdown ? (
@@ -726,7 +772,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                         {!plan.auto_operations_started ? (
                           <Button
                             onClick={() => startOperations(plan.id)}
-                            disabled={isLoading[plan.id] || hasReached200Percent(plan)}
+                            disabled={isLoading[plan.id] || hasReachedMaxEarnings(plan)}
                             className="w-full bg-green-600 hover:bg-green-700 text-white"
                           >
                             <Play className="w-4 h-4 mr-2" />
@@ -735,7 +781,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                         ) : plan.auto_operations_paused ? (
                           <Button
                             onClick={() => resumeOperations(plan.id)}
-                            disabled={isLoading[plan.id] || hasReached200Percent(plan)}
+                            disabled={isLoading[plan.id] || hasReachedMaxEarnings(plan)}
                             className="w-full bg-green-600 hover:bg-green-700 text-white"
                           >
                             <Play className="w-4 h-4 mr-2" />
