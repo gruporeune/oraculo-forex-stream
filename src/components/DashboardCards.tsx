@@ -66,42 +66,45 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       {/* SEUS PLANOS */}
-      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
-        <CardHeader className="pb-2">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <CardHeader className="pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Package className="w-4 h-4" />
             {t('dashboard.your.plans')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="text-lg font-bold text-white">{getPlanCounts()}</div>
           <p className="text-xs text-white/70">{totalSignals} {t('dashboard.signals.per.day')}</p>
         </CardContent>
       </Card>
 
       {/* SEUS SINAIS */}
-      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
-        <CardHeader className="pb-2">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <CardHeader className="pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
             {t('dashboard.your.signals')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="text-2xl font-bold text-white">{remainingSignals}/{totalSignals}</div>
           <p className="text-xs text-white/70">{t('dashboard.available.today')}</p>
         </CardContent>
       </Card>
 
       {/* GANHO DO DIA */}
-      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
-        <CardHeader className="pb-2">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <CardHeader className="pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <DollarSign className="w-4 h-4" />
             {t('dashboard.daily.earnings')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.daily_earnings || 0)}
           </div>
@@ -110,14 +113,15 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* COMISSÕES DO DIA */}
-      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
-        <CardHeader className="pb-2">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <CardHeader className="pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-4 h-4" />
             {t('dashboard.today.commissions')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.daily_referral_commissions || 0)}
           </div>
@@ -126,14 +130,15 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SALDO DISPONÍVEL */}
-      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
-        <CardHeader className="pb-2">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <CardHeader className="pb-2 relative z-10">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Wallet className="w-4 h-4" />
             {t('dashboard.available.balance')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative z-10">
           <div className="text-2xl font-bold text-white">
             {formatCurrency(profile?.available_balance || 0)}
           </div>

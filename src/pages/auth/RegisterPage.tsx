@@ -24,6 +24,8 @@ export default function RegisterPage() {
     username: "",
     email: "",
     phone: "",
+    cpf: "",
+    dateOfBirth: "",
     password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +66,38 @@ export default function RegisterPage() {
     }));
   };
 
+  const validateCPF = (cpf: string): boolean => {
+    cpf = cpf.replace(/[^\d]/g, '');
+    if (cpf.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(cpf)) return false;
+    
+    let sum = 0;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(cpf.charAt(i)) * (10 - i);
+    }
+    let checkDigit = 11 - (sum % 11);
+    if (checkDigit >= 10) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(9))) return false;
+    
+    sum = 0;
+    for (let i = 0; i < 10; i++) {
+      sum += parseInt(cpf.charAt(i)) * (11 - i);
+    }
+    checkDigit = 11 - (sum % 11);
+    if (checkDigit >= 10) checkDigit = 0;
+    if (checkDigit !== parseInt(cpf.charAt(10))) return false;
+    
+    return true;
+  };
+
+  const formatCPF = (value: string): string => {
+    const numbers = value.replace(/[^\d]/g, '');
+    if (numbers.length <= 3) return numbers;
+    if (numbers.length <= 6) return `${numbers.slice(0, 3)}.${numbers.slice(3)}`;
+    if (numbers.length <= 9) return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6)}`;
+    return `${numbers.slice(0, 3)}.${numbers.slice(3, 6)}.${numbers.slice(6, 9)}-${numbers.slice(9, 11)}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -71,6 +105,24 @@ export default function RegisterPage() {
     setSuccess(null);
     
     try {
+      // Validate CPF
+      if (!validateCPF(formData.cpf)) {
+        throw new Error('CPF inválido. Por favor, digite um CPF válido.');
+      }
+      
+      // Validate date of birth (must be at least 18 years old)
+      const birthDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      if (age < 18) {
+        throw new Error('Você precisa ter pelo menos 18 anos para se cadastrar.');
+      }
+      
       // Check if username is already taken
       const { data: existingUser, error: usernameCheckError } = await supabase
         .from('profiles')
@@ -114,6 +166,8 @@ export default function RegisterPage() {
             full_name: formData.fullName,
             username: formData.username,
             phone: formData.phone,
+            cpf: formData.cpf,
+            date_of_birth: formData.dateOfBirth,
           }
         }
       });
@@ -155,6 +209,8 @@ export default function RegisterPage() {
             full_name: formData.fullName,
             username: formData.username,
             phone: formData.phone,
+            cpf: formData.cpf,
+            date_of_birth: formData.dateOfBirth,
             referred_by: referrerId,
             updated_at: new Date().toISOString(),
           });
@@ -375,6 +431,55 @@ export default function RegisterPage() {
                     value={formData.phone}
                     onChange={handleInputChange}
                     onFocus={() => setFocusedInput("phone")}
+                    onBlur={() => setFocusedInput(null)}
+                    className="w-full bg-white/5 border-white/10 focus:border-white/20 text-white placeholder:text-white/30 h-11 pl-10 pr-3 focus:bg-white/10"
+                    required
+                  />
+                </div>
+              </motion.div>
+
+              {/* CPF input */}
+              <motion.div 
+                className="relative"
+                whileFocus={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-white/40 text-sm">🆔</span>
+                  
+                  <Input
+                    type="text"
+                    name="cpf"
+                    placeholder="000.000.000-00"
+                    value={formData.cpf}
+                    onChange={(e) => {
+                      const formatted = formatCPF(e.target.value);
+                      setFormData(prev => ({ ...prev, cpf: formatted }));
+                    }}
+                    onFocus={() => setFocusedInput("cpf")}
+                    onBlur={() => setFocusedInput(null)}
+                    className="w-full bg-white/5 border-white/10 focus:border-white/20 text-white placeholder:text-white/30 h-11 pl-10 pr-3 focus:bg-white/10"
+                    required
+                    maxLength={14}
+                  />
+                </div>
+              </motion.div>
+
+              {/* Date of Birth input */}
+              <motion.div 
+                className="relative"
+                whileFocus={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                <div className="relative flex items-center">
+                  <span className="absolute left-3 text-white/40 text-sm">📅</span>
+                  
+                  <Input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleInputChange}
+                    onFocus={() => setFocusedInput("dateOfBirth")}
                     onBlur={() => setFocusedInput(null)}
                     className="w-full bg-white/5 border-white/10 focus:border-white/20 text-white placeholder:text-white/30 h-11 pl-10 pr-3 focus:bg-white/10"
                     required
