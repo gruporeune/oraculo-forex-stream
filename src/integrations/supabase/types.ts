@@ -476,6 +476,7 @@ export type Database = {
           last_reset_date: string
           plan_name: string
           purchase_date: string
+          total_auto_earnings: number | null
           updated_at: string
           user_id: string
         }
@@ -492,6 +493,7 @@ export type Database = {
           last_reset_date?: string
           plan_name: string
           purchase_date?: string
+          total_auto_earnings?: number | null
           updated_at?: string
           user_id: string
         }
@@ -508,6 +510,7 @@ export type Database = {
           last_reset_date?: string
           plan_name?: string
           purchase_date?: string
+          total_auto_earnings?: number | null
           updated_at?: string
           user_id?: string
         }
