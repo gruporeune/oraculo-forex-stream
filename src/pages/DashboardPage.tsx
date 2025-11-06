@@ -77,12 +77,12 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-black via-purple-900/20 to-black text-white">
+      <div className="min-h-screen flex w-full bg-white">
         <AppSidebar />
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="border-b border-white/10 bg-black/50 backdrop-blur-xl">
+          <header className="border-b border-purple-500/20 bg-purple-900 backdrop-blur-xl">
             <div className="px-4 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -98,7 +98,7 @@ export default function DashboardPage() {
                 
                 <div className="flex items-center space-x-4">
                   <LanguageSelector />
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-2 text-white">
                     <User className="w-5 h-5" />
                     <span>{profile?.full_name || user.email}</span>
                   </div>
@@ -106,7 +106,7 @@ export default function DashboardPage() {
                     variant="ghost" 
                     size="sm" 
                     onClick={handleLogout}
-                    className="text-white/70 hover:text-white"
+                    className="text-purple-200 hover:text-white hover:bg-purple-800"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
                     {t('nav.logout')}

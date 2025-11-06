@@ -10,6 +10,8 @@ import polariumLogo from "@/assets/brokers/polarium.png";
 import pocketOptionLogo from "@/assets/brokers/pocket-option.png";
 import binollaLogo from "@/assets/brokers/binolla.png";
 import olympTradeLogo from "@/assets/brokers/olymp-trade.png";
+import derivLogo from "@/assets/brokers/deriv.png";
+import binomoLogo from "@/assets/brokers/binomo.png";
 
 interface Logo {
   id: string;
@@ -53,6 +55,18 @@ const logos: Logo[] = [
     id: "olymp-trade",
     description: "Olymp Trade",
     image: olympTradeLogo,
+    className: "h-8 w-auto",
+  },
+  {
+    id: "deriv",
+    description: "Deriv",
+    image: derivLogo,
+    className: "h-8 w-auto",
+  },
+  {
+    id: "binomo",
+    description: "Binomo",
+    image: binomoLogo,
     className: "h-8 w-auto",
   },
 ];

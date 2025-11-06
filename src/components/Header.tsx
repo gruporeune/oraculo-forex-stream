@@ -18,7 +18,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-purple-900 backdrop-blur-md border-b border-purple-500/20">
       <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
@@ -37,19 +37,19 @@ export function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             <button
               onClick={() => scrollToSection('benefits')}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-purple-200 hover:text-white transition-colors"
             >
               Benefícios
             </button>
             <button
               onClick={() => scrollToSection('resources')}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-purple-200 hover:text-white transition-colors"
             >
               Recursos
             </button>
             <button
               onClick={() => scrollToSection('how-to-start')}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-purple-200 hover:text-white transition-colors"
             >
               Como Começar
             </button>
@@ -60,13 +60,13 @@ export function Header() {
           <div className="hidden md:flex items-center space-x-4">
             <Button
               variant="ghost"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-purple-200 hover:text-white hover:bg-purple-800"
               onClick={() => window.location.href = '/login'}
             >
               Entrar
             </Button>
             <Button 
-              className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white"
+              className="bg-purple-600 hover:bg-purple-700 text-white"
               onClick={() => window.location.href = '/register'}
             >
               Registrar
@@ -75,7 +75,7 @@ export function Header() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden"
+            className="md:hidden text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -93,19 +93,19 @@ export function Header() {
             <nav className="flex flex-col space-y-4 mt-4">
               <button
                 onClick={() => scrollToSection('benefits')}
-                className="text-left text-muted-foreground hover:text-foreground transition-colors"
+                className="text-left text-purple-200 hover:text-white transition-colors"
               >
                 Benefícios
               </button>
               <button
                 onClick={() => scrollToSection('resources')}
-                className="text-left text-muted-foreground hover:text-foreground transition-colors"
+                className="text-left text-purple-200 hover:text-white transition-colors"
               >
                 Recursos
               </button>
               <button
                 onClick={() => scrollToSection('how-to-start')}
-                className="text-left text-muted-foreground hover:text-foreground transition-colors"
+                className="text-left text-purple-200 hover:text-white transition-colors"
               >
                 Como Começar
               </button>
@@ -115,13 +115,13 @@ export function Header() {
               <div className="flex flex-col space-y-2 pt-4">
                 <Button 
                   variant="ghost" 
-                  className="justify-start"
+                  className="justify-start text-purple-200 hover:text-white hover:bg-purple-800"
                   onClick={() => window.location.href = '/login'}
                 >
                   Entrar
                 </Button>
                 <Button 
-                  className="bg-gradient-to-r from-purple-600 to-purple-500 text-white justify-start"
+                  className="bg-purple-600 hover:bg-purple-700 text-white justify-start"
                   onClick={() => window.location.href = '/register'}
                 >
                   Registrar
