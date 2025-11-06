@@ -47,51 +47,75 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const [recentOperations, setRecentOperations] = useState<{[key: string]: RecentOperation[]}>({});
   const { toast } = useToast();
 
+  const [calculatedPlans, setCalculatedPlans] = useState<Set<string>>(new Set());
+
   // Calculate and update total_auto_earnings from historical signals
   useEffect(() => {
     const calculateHistoricalEarnings = async () => {
+      let hasUpdates = false;
+
       for (const plan of userPlans) {
+        // Skip if already calculated for this plan
+        if (calculatedPlans.has(plan.id)) {
+          continue;
+        }
+
         try {
-          // Get all automatic signals for this user created after plan purchase
+          console.log(`[${plan.plan_name.toUpperCase()}] Calculando ganhos históricos...`);
+          
+          // Get all automatic signals for this user and plan
           const { data: signals, error } = await supabase
             .from('signals')
             .select('profit, created_at')
             .eq('user_id', user.id)
             .eq('is_automatic', true)
-            .gte('created_at', plan.purchase_date || plan.created_at);
+            .order('created_at', { ascending: true });
 
           if (error) {
             console.error('Error fetching historical signals:', error);
             continue;
           }
 
-          // Sum only positive profits (wins)
+          console.log(`[${plan.plan_name.toUpperCase()}] Encontrados ${signals?.length || 0} sinais automáticos`);
+
+          // Sum only positive profits (wins) from all automatic signals
           const totalEarnings = (signals || []).reduce((sum, signal) => {
-            return sum + (signal.profit > 0 ? signal.profit : 0);
+            const profit = Number(signal.profit) || 0;
+            return sum + (profit > 0 ? profit : 0);
           }, 0);
 
-          // Update the plan with calculated total
-          if (totalEarnings !== plan.total_auto_earnings) {
-            await supabase
-              .from('user_plans')
-              .update({ total_auto_earnings: totalEarnings })
-              .eq('id', plan.id);
-            
-            console.log(`Updated total_auto_earnings for plan ${plan.plan_name}: R$ ${totalEarnings.toFixed(2)}`);
+          console.log(`[${plan.plan_name.toUpperCase()}] Total calculado: R$ ${totalEarnings.toFixed(2)}`);
+
+          // Always update the database with calculated total
+          const { error: updateError } = await supabase
+            .from('user_plans')
+            .update({ total_auto_earnings: totalEarnings })
+            .eq('id', plan.id);
+          
+          if (updateError) {
+            console.error('Error updating total_auto_earnings:', updateError);
+          } else {
+            console.log(`[${plan.plan_name.toUpperCase()}] ✅ Atualizado total_auto_earnings: R$ ${totalEarnings.toFixed(2)}`);
+            hasUpdates = true;
+            // Mark this plan as calculated
+            setCalculatedPlans(prev => new Set([...prev, plan.id]));
           }
         } catch (error) {
           console.error('Error calculating historical earnings:', error);
         }
       }
       
-      // Refresh plans after calculation
-      onPlansUpdate();
+      // Refresh plans after calculation only if we had updates
+      if (hasUpdates) {
+        console.log('Refreshing plans after calculation...');
+        onPlansUpdate();
+      }
     };
 
-    if (userPlans.length > 0) {
+    if (userPlans.length > 0 && user.id) {
       calculateHistoricalEarnings();
     }
-  }, [user.id]); // Run only when user changes or component mounts
+  }, [userPlans, user.id]); // Run when userPlans or user changes
 
   // Check if it's weekend in Brazil timezone
   const isWeekendInBrazil = () => {
