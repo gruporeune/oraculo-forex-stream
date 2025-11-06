@@ -48,7 +48,7 @@ export function AppSidebar() {
       <SidebarContent className="bg-purple-900 backdrop-blur-xl border-r border-purple-500/20 flex flex-col">
         <div className="flex-1">
           <SidebarGroup>
-            <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-white">Menu Principal</SidebarGroupLabel>
 
             <SidebarGroupContent>
               <SidebarMenu>

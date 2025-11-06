@@ -143,13 +143,13 @@ export default function PlansPage() {
       className="space-y-6"
     >
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-4">
+        <h1 className="text-4xl font-bold text-purple-900 mb-4">
           {t('plans.title')}{" "}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
             
           </span>
         </h1>
-        <p className="text-white/70 text-lg max-w-2xl mx-auto mb-6">
+        <p className="text-gray-600 text-lg max-w-2xl mx-auto mb-6">
           {t('plans.subtitle')}
         </p>
         
@@ -160,7 +160,7 @@ export default function PlansPage() {
             <h3 className="text-yellow-400 font-bold text-lg">{t('plans.important')}</h3>
             <Star className="w-5 h-5 text-yellow-400" />
           </div>
-          <p className="text-white/90 text-base">
+          <p className="text-gray-700 text-base">
             {t('plans.important.text')}
           </p>
         </div>

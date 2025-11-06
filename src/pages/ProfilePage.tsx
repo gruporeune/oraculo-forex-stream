@@ -110,8 +110,8 @@ export default function ProfilePage({ user, profile, onProfileUpdate }: ProfileP
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Perfil</h2>
-        <p className="text-white/70">Gerencie suas informações pessoais</p>
+        <h2 className="text-3xl font-bold text-purple-900 mb-2">Perfil</h2>
+        <p className="text-gray-600">Gerencie suas informações pessoais</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

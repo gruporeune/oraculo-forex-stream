@@ -338,8 +338,8 @@ export default function NetworkPage({ user, profile }: NetworkPageProps) {
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">Rede de Indicações</h2>
-        <p className="text-white/70">Gerencie sua rede e acompanhe suas comissões</p>
+        <h2 className="text-3xl font-bold text-purple-900 mb-2">Rede de Indicações</h2>
+        <p className="text-gray-600">Gerencie sua rede e acompanhe suas comissões</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

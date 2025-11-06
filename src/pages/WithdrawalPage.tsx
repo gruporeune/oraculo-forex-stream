@@ -277,7 +277,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   return (
     <div className="p-6 space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-white mb-6">Saques</h1>
+        <h1 className="text-3xl font-bold text-purple-900 mb-6">Saques</h1>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

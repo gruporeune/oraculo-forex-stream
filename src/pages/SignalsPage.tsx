@@ -304,8 +304,8 @@ export default function SignalsPage({ user, profile, onProfileUpdate }: SignalsP
       className="space-y-6"
     >
       <div>
-        <h2 className="text-3xl font-bold text-white mb-2">{t('signals.title')}</h2>
-        <p className="text-white/70">{t('signals.subtitle')}</p>
+        <h2 className="text-3xl font-bold text-purple-900 mb-2">{t('signals.title')}</h2>
+        <p className="text-gray-600">{t('signals.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

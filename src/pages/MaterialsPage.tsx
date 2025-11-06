@@ -151,11 +151,11 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
   return (
     <div className="p-4 md:p-6 space-y-6">
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-        <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+        <h1 className="text-3xl font-bold text-purple-900 flex items-center gap-3">
           <Package className="w-8 h-8 text-blue-400" />
           Materiais Extras
         </h1>
-        <p className="text-white/70 mt-2">Baixe ebooks, indicadores e outros recursos para turbinar seus resultados.</p>
+        <p className="text-gray-600 mt-2">Baixe ebooks, indicadores e outros recursos para turbinar seus resultados.</p>
       </motion.div>
 
       {loadingMaterials ? (
@@ -287,53 +287,6 @@ const MaterialsPage = ({ user, profile }: MaterialsPageProps) => {
         </Card>
       </motion.div>
 
-      {/* Tutorial Section */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.4 }}>
-        <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20 text-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-3">
-              <Package className="w-6 h-6 text-blue-400" />
-              Como Adicionar Novos Materiais
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <div className="space-y-2">
-              <h4 className="font-semibold text-blue-300">1. Adicionar Material no Banco de Dados:</h4>
-              <p className="text-white/70 pl-4">
-                Acesse o Supabase Dashboard → Table Editor → Tabela "materials" → Insert → New Row
-              </p>
-            </div>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold text-blue-300">2. Campos Obrigatórios:</h4>
-              <ul className="text-white/70 pl-4 space-y-1">
-                <li>• <strong>title:</strong> Nome do material</li>
-                <li>• <strong>description:</strong> Descrição detalhada</li>
-                <li>• <strong>file_type:</strong> Tipo do arquivo (pdf, doc, etc.)</li>
-                <li>• <strong>file_url:</strong> Link direto para download</li>
-                <li>• <strong>allowed_plans:</strong> ["free", "partner", "master", "premium", "platinum"]</li>
-                <li>• <strong>price_brl:</strong> Preço original (ex: 89.00)</li>
-                <li>• <strong>author:</strong> Nome do autor</li>
-                <li>• <strong>is_free:</strong> true (para mostrar como GRÁTIS)</li>
-              </ul>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="font-semibold text-blue-300">3. Adicionar Imagem de Capa:</h4>
-              <p className="text-white/70 pl-4">
-                Salve a imagem em src/assets/ → Importe no código → Configure o campo image_url
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <h4 className="font-semibold text-blue-300">4. Linkar Arquivo para Download:</h4>
-              <p className="text-white/70 pl-4">
-                No campo <strong>file_url</strong>, coloque o link direto do arquivo hospedado (Google Drive, Dropbox, etc.)
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
     </div>
   );
 };
