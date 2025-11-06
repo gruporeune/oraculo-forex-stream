@@ -49,18 +49,12 @@ export function AppSidebar() {
         {/* Logo Section */}
         {open && (
           <div className="p-6 border-b border-white/5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                <img 
-                  src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
-                  alt="Oráculo" 
-                  className="w-6 h-6 object-contain"
-                />
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-1">
+                <h2 className="text-white font-bold text-lg tracking-wider">ORÁCULO</h2>
+                <h2 className="text-red-500 font-bold text-lg tracking-wider">OPTION</h2>
               </div>
-              <div>
-                <h2 className="text-white font-bold text-lg">Oráculo</h2>
-                <p className="text-slate-400 text-xs">Trading Platform</p>
-              </div>
+              <p className="text-slate-400 text-xs">Trading Platform</p>
             </div>
           </div>
         )}

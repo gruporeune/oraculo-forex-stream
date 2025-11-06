@@ -88,15 +88,9 @@ export default function DashboardPage() {
                 {/* Left Section */}
                 <div className="flex items-center gap-3 md:gap-4">
                   <SidebarTrigger className="text-white hover:bg-white/10 rounded-lg p-2 transition-all" />
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
-                      <img 
-                        src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
-                        alt="Oráculo" 
-                        className="w-6 h-6 md:w-7 md:h-7 object-contain"
-                      />
-                    </div>
-                    <span className="hidden sm:block text-lg md:text-xl font-bold text-white">Oráculo</span>
+                  <div className="flex items-center gap-1">
+                    <span className="text-lg md:text-xl font-bold text-white tracking-wider">ORÁCULO</span>
+                    <span className="text-lg md:text-xl font-bold text-red-500 tracking-wider">OPTION</span>
                   </div>
                 </div>
                 
