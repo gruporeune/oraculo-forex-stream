@@ -80,7 +80,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SEUS SINAIS */}
-      <Card className="bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50">
+      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <TrendingUp className="w-4 h-4" />
@@ -94,7 +94,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* GANHO DO DIA */}
-      <Card className="bg-gradient-to-br from-green-600/20 to-green-400/20 border-green-500/50">
+      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <DollarSign className="w-4 h-4" />
@@ -126,7 +126,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SALDO DISPONÍVEL */}
-      <Card className="bg-gradient-to-br from-yellow-600/20 to-yellow-400/20 border-yellow-500/50">
+      <Card className="bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-white/70 flex items-center gap-2">
             <Wallet className="w-4 h-4" />
@@ -140,7 +140,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
           <Button 
             size="sm" 
             onClick={onWithdraw}
-            className="mt-2 w-full bg-yellow-600 hover:bg-yellow-700 text-black"
+            className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white"
           >
             {t('dashboard.withdraw')}
           </Button>

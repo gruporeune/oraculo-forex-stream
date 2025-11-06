@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react"
-import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard } from "lucide-react"
+import { Home, User, Network, TrendingUp, Settings, Users, Package, DollarSign, CreditCard, MessageCircle } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import { useI18n } from "@/lib/i18n"
+import { Button } from "@/components/ui/button"
+import supportAgent from "@/assets/support-agent.png"
 
 import {
   Sidebar,
@@ -43,29 +45,61 @@ export function AppSidebar() {
       className={open ? "w-60" : "w-14"}
       collapsible="icon"
     >
-      <SidebarContent className="bg-gradient-to-b from-purple-900 via-black to-orange-600 backdrop-blur-xl border-r border-purple-500/20">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
+      <SidebarContent className="bg-purple-900 backdrop-blur-xl border-r border-purple-500/20 flex flex-col">
+        <div className="flex-1">
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-purple-200/80">Menu Principal</SidebarGroupLabel>
 
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink 
-                      to={item.url} 
-                      end 
-                      className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
-                    >
-                      <item.icon className="w-4 h-4" />
-                      {open && <span className="text-white group-hover:text-purple-200 transition-colors">{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url} 
+                        end 
+                        className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
+                      >
+                        <item.icon className="w-4 h-4" />
+                        {open && <span className="text-white group-hover:text-purple-200 transition-colors">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </div>
+
+        {/* Support Agent Section */}
+        {open && (
+          <div className="p-4 border-t border-purple-500/20">
+            <div className="bg-purple-800/50 rounded-lg p-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <img 
+                  src={supportAgent} 
+                  alt="Damarys - Atendente" 
+                  className="w-16 h-16 rounded-full object-cover border-2 border-purple-400"
+                />
+                <div className="flex-1">
+                  <p className="text-white text-sm font-medium">Olá eu me chamo Damarys</p>
+                  <p className="text-purple-200/70 text-xs">Sua atendente particular</p>
+                </div>
+              </div>
+              <p className="text-white/80 text-xs">
+                Qualquer dúvida me chame no whatsapp.
+              </p>
+              <Button 
+                onClick={() => window.open('https://wa.me/5511999999999', '_blank')}
+                className="w-full bg-green-600 hover:bg-green-700 text-white"
+                size="sm"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                WhatsApp
+              </Button>
+            </div>
+          </div>
+        )}
       </SidebarContent>
     </Sidebar>
   );
