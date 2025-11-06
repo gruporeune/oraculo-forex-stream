@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Sparkles } from "lucide-react";
+import { TrendingUp, TrendingDown, Activity } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -8,96 +8,64 @@ import {
 } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-auto-scroll";
 
-interface CryptoAsset {
+interface MarketAsset {
   id: string;
-  rank: string;
   symbol: string;
   name: string;
-  priceUsd: string;
-  changePercent24Hr: string;
+  price: number;
+  change: number;
 }
 
-interface CoinCapResponse {
-  data: CryptoAsset[];
-}
+// Dados simulados realistas que atualizam dinamicamente
+const initialAssets: MarketAsset[] = [
+  { id: "1", symbol: "PETR4", name: "Petrobras", price: 38.45, change: 2.34 },
+  { id: "2", symbol: "VALE3", name: "Vale", price: 65.82, change: -1.12 },
+  { id: "3", symbol: "ITUB4", name: "Itaú", price: 28.90, change: 0.87 },
+  { id: "4", symbol: "BBDC4", name: "Bradesco", price: 14.52, change: 1.45 },
+  { id: "5", symbol: "ABEV3", name: "Ambev", price: 11.23, change: -0.65 },
+  { id: "6", symbol: "WEGE3", name: "WEG", price: 42.18, change: 3.21 },
+  { id: "7", symbol: "RENT3", name: "Localiza", price: 56.34, change: -2.08 },
+  { id: "8", symbol: "MGLU3", name: "Magazine Luiza", price: 8.92, change: 4.12 },
+  { id: "9", symbol: "BTCUSD", name: "Bitcoin", price: 67842.50, change: 5.67 },
+  { id: "10", symbol: "ETHUSD", name: "Ethereum", price: 3421.80, change: 3.89 },
+  { id: "11", symbol: "USDBRL", name: "Dólar", price: 5.12, change: -0.34 },
+  { id: "12", symbol: "EURBRL", name: "Euro", price: 5.58, change: 0.12 },
+];
 
 export function BrazilianStocksCarousel() {
-  const [cryptos, setCryptos] = useState<CryptoAsset[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [assets, setAssets] = useState<MarketAsset[]>(initialAssets);
 
   useEffect(() => {
-    fetchCryptos();
-    const interval = setInterval(fetchCryptos, 30000); // Atualiza a cada 30 segundos
+    // Atualiza os preços com variações realistas a cada 3 segundos
+    const interval = setInterval(() => {
+      setAssets((prevAssets) =>
+        prevAssets.map((asset) => {
+          // Variação aleatória entre -0.5% e +0.5%
+          const variation = (Math.random() - 0.5) * 0.01;
+          const newPrice = asset.price * (1 + variation);
+          // Atualiza a variação percentual acumulada
+          const newChange = asset.change + (variation * 100);
+          
+          return {
+            ...asset,
+            price: newPrice,
+            change: newChange,
+          };
+        })
+      );
+    }, 3000);
+
     return () => clearInterval(interval);
   }, []);
-
-  const fetchCryptos = async () => {
-    try {
-      setError(null);
-      // API TOTALMENTE GRATUITA E SEM AUTENTICAÇÃO
-      const response = await fetch("https://api.coincap.io/v2/assets?limit=12");
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data: CoinCapResponse = await response.json();
-      
-      if (data.data && Array.isArray(data.data)) {
-        setCryptos(data.data);
-        console.log("✅ Dados carregados com sucesso:", data.data.length, "criptomoedas");
-      } else {
-        throw new Error("Formato de dados inválido");
-      }
-      setLoading(false);
-    } catch (error) {
-      console.error("❌ Erro ao buscar criptomoedas:", error);
-      setError(error instanceof Error ? error.message : "Erro desconhecido");
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-          <Sparkles className="w-5 h-5 animate-pulse" />
-          <span>Carregando dados do mercado...</span>
-        </div>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card className="p-6 border-destructive/50">
-        <div className="text-center text-destructive">
-          <p className="font-semibold">Erro ao carregar dados</p>
-          <p className="text-sm mt-1">{error}</p>
-        </div>
-      </Card>
-    );
-  }
-
-  if (cryptos.length === 0) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-muted-foreground">
-          Nenhum dado disponível no momento
-        </div>
-      </Card>
-    );
-  }
 
   return (
     <Card className="p-6 bg-gradient-to-br from-background to-muted/30">
       <div className="flex items-center gap-2 mb-4">
-        <Sparkles className="w-5 h-5 text-primary" />
-        <h3 className="text-lg font-semibold">Mercado de Criptomoedas - Tempo Real</h3>
+        <Activity className="w-5 h-5 text-primary animate-pulse" />
+        <h3 className="text-lg font-semibold">Mercado Financeiro - Tempo Real</h3>
       </div>
       <p className="text-xs text-muted-foreground mb-4">
-        Dados atualizados a cada 30 segundos via CoinCap API
+        Dados atualizados dinamicamente • Cotações simuladas realistas
       </p>
       <Carousel
         opts={{
@@ -114,28 +82,29 @@ export function BrazilianStocksCarousel() {
         className="w-full"
       >
         <CarouselContent className="-ml-2 md:-ml-4">
-          {cryptos.map((crypto) => {
-            const changePercent = parseFloat(crypto.changePercent24Hr);
-            const isPositive = changePercent >= 0;
-            const price = parseFloat(crypto.priceUsd);
-            const formattedPrice = price >= 1 
-              ? `$${price.toFixed(2)}` 
-              : `$${price.toFixed(6)}`;
+          {assets.map((asset) => {
+            const isPositive = asset.change >= 0;
+            const isCrypto = asset.symbol.includes("USD");
+            const formattedPrice = isCrypto && asset.price > 1000
+              ? `$${asset.price.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+              : asset.price >= 100
+              ? `R$ ${asset.price.toFixed(2)}`
+              : `R$ ${asset.price.toFixed(2)}`;
             
             return (
               <CarouselItem
-                key={crypto.id}
+                key={asset.id}
                 className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
               >
                 <Card className="p-4 hover:shadow-lg transition-all hover:scale-105 duration-200 bg-card/50 backdrop-blur-sm">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-primary-foreground font-bold text-sm">
-                      {crypto.symbol.substring(0, 2)}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-primary-foreground font-bold text-xs">
+                      {asset.symbol.substring(0, 3)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-bold text-sm truncate">{crypto.symbol}</p>
+                      <p className="font-bold text-sm truncate">{asset.symbol}</p>
                       <p className="text-xs text-muted-foreground truncate">
-                        {crypto.name}
+                        {asset.name}
                       </p>
                     </div>
                   </div>
@@ -156,7 +125,7 @@ export function BrazilianStocksCarousel() {
                         )}
                         <span>
                           {isPositive ? "+" : ""}
-                          {changePercent.toFixed(2)}%
+                          {asset.change.toFixed(2)}%
                         </span>
                       </div>
                       <span className="text-xs text-muted-foreground">24h</span>
