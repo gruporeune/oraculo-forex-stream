@@ -7,8 +7,6 @@ import { EarningsHistory } from '@/components/EarningsHistory';
 import { useI18n } from '@/lib/i18n';
 import { BrokersCarousel } from '@/components/BrokersCarousel';
 import { BrazilianStocksCarousel } from '@/components/BrazilianStocksCarousel';
-import { CryptoHeatmap } from '@/components/CryptoHeatmap';
-import { TechnicalSummary } from '@/components/TechnicalSummary';
 import { useToast } from '@/hooks/use-toast';
 
 interface DashboardHomePageProps {
@@ -94,7 +92,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         <BrokersCarousel />
       </motion.div>
 
-      {/* TradingView Ticker Tape */}
+      {/* Brazilian Stocks Carousel */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -102,26 +100,6 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
         className="mb-8"
       >
         <BrazilianStocksCarousel />
-      </motion.div>
-
-      {/* Crypto Heatmap */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.4 }}
-        className="mb-8"
-      >
-        <CryptoHeatmap />
-      </motion.div>
-
-      {/* Technical Summary */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.5 }}
-        className="mb-8"
-      >
-        <TechnicalSummary />
       </motion.div>
 
       {/* Multiple Plans Automatic Operations */}
