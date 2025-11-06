@@ -77,10 +77,10 @@ export default function DashboardPage() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-white">
+      <div className="min-h-screen flex w-full bg-white overflow-x-hidden">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col w-full">
+        <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
           {/* Modern Glassmorphic Header */}
           <header className="sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-indigo-900/80 backdrop-blur-2xl shadow-lg">
             <div className="px-3 md:px-6 py-3 md:py-4">
@@ -124,7 +124,7 @@ export default function DashboardPage() {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-2 md:p-4 lg:p-6 overflow-x-hidden">
+          <main className="flex-1 p-2 md:p-4 lg:p-6 overflow-x-hidden max-w-full w-full">
             <Routes>
               <Route 
                 path="/" 

@@ -275,39 +275,39 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 max-w-full overflow-x-hidden">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-3xl font-bold text-purple-900 mb-6">Saques</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">Saques</h1>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-full">
+        <div className="lg:col-span-2 space-y-6 max-w-full">
           {!isWithdrawalDay() && (
-            <Alert className="bg-yellow-500/20 border-yellow-500/50 text-yellow-100">
-              <Calendar className="h-4 w-4 text-yellow-400" />
-              <AlertTitle className="text-yellow-200">Dia não permitido para saques</AlertTitle>
-              <AlertDescription className="text-yellow-100">
+            <Alert className="bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border-yellow-500/70 text-white">
+              <Calendar className="h-4 w-4 text-yellow-300" />
+              <AlertTitle className="text-yellow-100 font-bold">Dia não permitido para saques</AlertTitle>
+              <AlertDescription className="text-white">
                 Saques só podem ser solicitados nas <strong>segundas-feiras</strong> e <strong>quintas-feiras</strong> no horário de Brasília. 
                 Próximo dia disponível: <strong>{getNextWithdrawalDay()}</strong>.
               </AlertDescription>
             </Alert>
           )}
           
-          <Card className="bg-black/40 border-white/10 text-white bg-gradient-to-r from-orange-500/20 to-yellow-500/20">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-600/40 to-teal-600/40 border-emerald-500/70 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all duration-300">
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <Wallet className="mr-2 text-orange-400" />
+              <CardTitle className="flex items-center text-white">
+                <Wallet className="mr-2 text-emerald-300" />
                 Saldo Disponível para Saque
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-orange-400">
+              <div className="text-3xl font-bold text-emerald-200">
                 {formatCurrency(profile?.available_balance || 0)}
               </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-black/40 border-white/10 text-white">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/40 to-pink-600/40 border-purple-500/70 text-white">
             <CardHeader>
               <CardTitle>Solicitar Saque</CardTitle>
               <CardDescription className="text-white/80">
@@ -315,10 +315,10 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Alert className="mb-4 bg-red-500/20 border-red-500/50">
-                <AlertCircle className="h-4 w-4 text-red-400" />
-                <AlertTitle className="text-red-200">ATENÇÃO - Chave PIX</AlertTitle>
-                <AlertDescription className="text-red-100">
+              <Alert className="mb-4 bg-gradient-to-r from-red-600/40 to-rose-600/40 border-red-500/70">
+                <AlertCircle className="h-4 w-4 text-red-300" />
+                <AlertTitle className="text-red-100 font-bold">ATENÇÃO - Chave PIX</AlertTitle>
+                <AlertDescription className="text-white">
                   <strong>A chave PIX deve estar na sua titularidade!</strong> Só serão aceitos saques para chaves PIX cadastradas no seu CPF. 
                   Solicitações com chaves de terceiros serão automaticamente rejeitadas.
                 </AlertDescription>
@@ -474,28 +474,28 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
           </Card>
         </div>
         
-        <Card className="bg-black/40 border-white/10 text-white lg:col-span-1">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-orange-600/40 to-amber-600/40 border-orange-500/70 text-white lg:col-span-1 hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] transition-all duration-300">
           <CardHeader>
-            <CardTitle className="flex items-center">
-              <Info className="mr-2" />
+            <CardTitle className="flex items-center text-white">
+              <Info className="mr-2 text-orange-300" />
               Regras e Informações
             </CardTitle>
           </CardHeader>
-            <CardContent className="space-y-3 text-sm text-white/90">
-            <div className="space-y-2 p-3 bg-blue-500/20 border border-blue-500/30 rounded-lg mb-4">
-              <h4 className="font-semibold text-blue-400 flex items-center">
+            <CardContent className="space-y-3 text-sm text-white">
+            <div className="space-y-2 p-3 bg-blue-500/30 border border-blue-400/50 rounded-lg mb-4">
+              <h4 className="font-semibold text-blue-200 flex items-center">
                 <Calendar className="mr-2 h-4 w-4" />
                 Dias de Saque
               </h4>
-              <p className="text-blue-200">• Saques permitidos apenas nas <span className="font-bold">segundas-feiras</span> e <span className="font-bold">quintas-feiras</span>.</p>
-              <p className="text-blue-200">• Horário de Brasília (UTC-3).</p>
+              <p className="text-blue-100">• Saques permitidos apenas nas <span className="font-bold">segundas-feiras</span> e <span className="font-bold">quintas-feiras</span>.</p>
+              <p className="text-blue-100">• Horário de Brasília (UTC-3).</p>
             </div>
-            <div className="space-y-2 p-3 bg-orange-500/20 border border-orange-500/30 rounded-lg mb-4">
-              <h4 className="font-semibold text-orange-400 flex items-center">
+            <div className="space-y-2 p-3 bg-amber-500/30 border border-amber-400/50 rounded-lg mb-4">
+              <h4 className="font-semibold text-amber-200 flex items-center">
                 <Info className="mr-2 h-4 w-4" />
                 Limite Diário
               </h4>
-              <p className="text-orange-200">• <span className="font-bold">Apenas 1 saque por dia</span> é permitido.</p>
+              <p className="text-amber-100">• <span className="font-bold">Apenas 1 saque por dia</span> é permitido.</p>
             </div>
             <div className="space-y-2">
               <h4 className="font-semibold text-white">PIX (Reais):</h4>
@@ -519,10 +519,10 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
         </Card>
       </div>
 
-      <Card className="bg-black/40 border-white/10 text-white">
+      <Card className="relative overflow-hidden bg-gradient-to-br from-violet-600/40 to-fuchsia-600/40 border-violet-500/70 text-white hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] transition-all duration-300">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <FileText className="mr-2" />
+          <CardTitle className="flex items-center text-white">
+            <FileText className="mr-2 text-violet-300" />
             Histórico de Saques
           </CardTitle>
         </CardHeader>
