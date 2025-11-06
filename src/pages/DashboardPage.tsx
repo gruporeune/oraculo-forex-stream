@@ -80,27 +80,27 @@ export default function DashboardPage() {
       <div className="min-h-screen flex w-full bg-white">
         <AppSidebar />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col w-full">
           {/* Header */}
           <header className="border-b border-purple-500/20 bg-purple-900 backdrop-blur-xl">
-            <div className="px-4 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+            <div className="px-2 md:px-4 py-2 md:py-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 md:gap-4">
                   <SidebarTrigger className="text-white" />
                   <div className="flex items-center">
                     <img 
                       src="/lovable-uploads/0f71c9c7-c3f5-4df5-acf4-814a81ec933b.png" 
                       alt="Oráculo Logo" 
-                      className="h-10 w-auto object-contain"
+                      className="h-8 md:h-10 w-auto object-contain"
                     />
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center gap-2 md:gap-4">
                   <LanguageSelector />
-                  <div className="flex items-center space-x-2 text-white">
+                  <div className="hidden md:flex items-center gap-2 text-white">
                     <User className="w-5 h-5" />
-                    <span>{profile?.full_name || user.email}</span>
+                    <span className="text-sm">{profile?.full_name || user.email}</span>
                   </div>
                   <Button 
                     variant="ghost" 
@@ -108,8 +108,8 @@ export default function DashboardPage() {
                     onClick={handleLogout}
                     className="text-purple-200 hover:text-white hover:bg-purple-800"
                   >
-                    <LogOut className="w-4 h-4 mr-2" />
-                    {t('nav.logout')}
+                    <LogOut className="w-4 h-4 md:mr-2" />
+                    <span className="hidden md:inline">{t('nav.logout')}</span>
                   </Button>
                 </div>
               </div>
@@ -117,7 +117,7 @@ export default function DashboardPage() {
           </header>
 
           {/* Main Content */}
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-2 md:p-4 lg:p-6 overflow-x-hidden">
             <Routes>
               <Route 
                 path="/" 
