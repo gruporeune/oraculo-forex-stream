@@ -38,7 +38,7 @@ export function AppSidebar() {
 
   const isActive = (path: string) => currentPath === path
   const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-purple-600/30 text-white border-purple-500/50" : "text-white hover:bg-purple-800/30 hover:text-white"
+    isActive ? "bg-purple-600/30 text-white border-purple-500/50" : "text-white hover:bg-purple-800/30 hover:text-black"
 
   return (
     <Sidebar
@@ -58,10 +58,10 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       end 
-                      className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
+                      className={({ isActive }) => `group flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${getNavCls({ isActive })}`}
                     >
-                      <item.icon className="w-4 h-4 text-white" />
-                      {open && <span className="text-white">{item.title}</span>}
+                      <item.icon className="w-4 h-4 text-white group-hover:text-black transition-colors" />
+                      {open && <span className="text-white group-hover:text-black transition-colors">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
