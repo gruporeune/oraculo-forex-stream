@@ -58,6 +58,21 @@ serve(async (req) => {
         console.log('📤 Transfer created, marking as processing');
         break;
       
+      case 'TRANSFER_PENDING':
+        newStatus = 'processing';
+        console.log('⏳ Transfer pending authorization');
+        break;
+      
+      case 'TRANSFER_AUTHORIZED':
+        newStatus = 'processing';
+        console.log('✅ Transfer authorized (approved), processing...');
+        break;
+      
+      case 'TRANSFER_BANK_PROCESSING':
+        newStatus = 'processing';
+        console.log('🏦 Transfer being processed by bank');
+        break;
+      
       case 'TRANSFER_DONE':
       case 'TRANSFER_CONFIRMED':
         newStatus = 'completed';
