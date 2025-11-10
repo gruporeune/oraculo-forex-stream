@@ -960,23 +960,64 @@ export default function AdminWithdrawalsPage() {
 
                                                 if (error) {
                                                   console.error('Erro ao processar via Asaas:', error);
+                                                  
+                                                  // Verificar se é erro de saldo insuficiente
+                                                  let errorMessage = error.message || "Erro ao processar saque via Asaas";
+                                                  
+                                                  if (errorMessage.includes('SALDO INSUFICIENTE') || errorMessage.includes('Saldo insuficiente')) {
+                                                    toast({
+                                                      title: "⚠️ Saldo Insuficiente na Asaas",
+                                                      description: "A conta Asaas não tem saldo suficiente para processar este saque. Adicione saldo na sua conta Asaas e tente novamente.",
+                                                      variant: "destructive",
+                                                      duration: 10000,
+                                                    });
+                                                    fetchWithdrawals(); // Atualizar para ver as notas do admin
+                                                    return;
+                                                  }
+                                                  
                                                   throw error;
                                                 }
 
+                                                if (!data?.success) {
+                                                  const errorMsg = data?.error || "Erro desconhecido ao processar saque";
+                                                  
+                                                  if (errorMsg.includes('SALDO INSUFICIENTE') || errorMsg.includes('Saldo insuficiente')) {
+                                                    toast({
+                                                      title: "⚠️ Saldo Insuficiente na Asaas",
+                                                      description: "A conta Asaas não tem saldo suficiente. Adicione saldo e tente novamente.",
+                                                      variant: "destructive",
+                                                      duration: 10000,
+                                                    });
+                                                  } else {
+                                                    toast({
+                                                      title: "Erro",
+                                                      description: errorMsg,
+                                                      variant: "destructive",
+                                                    });
+                                                  }
+                                                  fetchWithdrawals();
+                                                  return;
+                                                }
+
                                                 toast({
-                                                  title: "Sucesso",
-                                                  description: "Saque enviado para processamento na Asaas",
+                                                  title: "✅ Sucesso",
+                                                  description: "Saque enviado para processamento na Asaas. O status será atualizado automaticamente via webhook.",
                                                 });
 
                                                 fetchWithdrawals();
                                                 setSelectedWithdrawal(null);
                                               } catch (error: any) {
                                                 console.error('Erro:', error);
+                                                const errorMsg = error.message || "Erro ao processar saque via Asaas";
+                                                
                                                 toast({
-                                                  title: "Erro",
-                                                  description: error.message || "Erro ao processar saque via Asaas",
+                                                  title: "Erro ao Processar Saque",
+                                                  description: errorMsg,
                                                   variant: "destructive",
+                                                  duration: 8000,
                                                 });
+                                                
+                                                fetchWithdrawals(); // Atualizar para ver possíveis notas do admin
                                               }
                                             }}
                                             className="w-full bg-blue-600 hover:bg-blue-700"

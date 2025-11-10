@@ -85,17 +85,39 @@ serve(async (req) => {
     if (!asaasResponse.ok) {
       console.error('❌ Asaas API error:', responseText);
       
-      // Atualizar saque com erro
+      // Parse error message
+      let errorMessage = 'Erro desconhecido';
+      let detailedError = responseText;
+      
+      try {
+        const errorData = JSON.parse(responseText);
+        if (errorData.errors && errorData.errors.length > 0) {
+          const firstError = errorData.errors[0];
+          
+          // Traduzir erros comuns
+          if (firstError.code === 'invalid_action' && firstError.description.includes('Saldo insuficiente')) {
+            errorMessage = '⚠️ SALDO INSUFICIENTE NA CONTA ASAAS';
+            detailedError = 'A conta Asaas não possui saldo suficiente para realizar esta transferência. Por favor, adicione saldo na sua conta Asaas antes de processar saques.';
+          } else {
+            errorMessage = firstError.description || firstError.code;
+            detailedError = `${firstError.code}: ${firstError.description}`;
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing Asaas error:', e);
+      }
+      
+      // Atualizar saque com erro detalhado
       await supabase
         .from('withdrawal_requests')
         .update({
-          status: 'rejected',
-          admin_notes: `Erro ao processar pela Asaas: ${responseText}`,
+          status: 'pending', // Manter como pending para tentar novamente
+          admin_notes: `❌ ${errorMessage}\n\n${detailedError}\n\nResposta completa: ${responseText}`,
           updated_at: new Date().toISOString()
         })
         .eq('id', withdrawal_request_id);
       
-      throw new Error(`Asaas API error: ${responseText}`);
+      throw new Error(errorMessage);
     }
 
     const asaasData = JSON.parse(responseText);
