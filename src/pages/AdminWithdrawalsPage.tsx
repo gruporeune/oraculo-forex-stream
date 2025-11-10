@@ -1000,8 +1000,9 @@ export default function AdminWithdrawalsPage() {
                                                 }
 
                                                 toast({
-                                                  title: "✅ Sucesso",
-                                                  description: "Saque enviado para processamento na Asaas. O status será atualizado automaticamente via webhook.",
+                                                  title: "✅ Transferência Criada",
+                                                  description: "Saque enviado para Asaas com sucesso! Agora você precisa aprovar a transferência no painel da Asaas. Após aprovação, o status será atualizado automaticamente.",
+                                                  duration: 10000,
                                                 });
 
                                                 fetchWithdrawals();

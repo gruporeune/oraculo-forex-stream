@@ -100,14 +100,20 @@ serve(async (req) => {
     }
 
     // Atualizar status da solicitação
+    const updateData: any = {
+      status: newStatus,
+      transfer_data: transfer,
+      admin_notes: `Status atualizado via webhook: ${event} em ${new Date().toISOString()}`
+    };
+
+    // Só atualizar processed_at quando completar ou rejeitar
+    if (newStatus === 'completed' || newStatus === 'rejected') {
+      updateData.processed_at = new Date().toISOString();
+    }
+
     const { error: updateError } = await supabase
       .from('withdrawal_requests')
-      .update({
-        status: newStatus,
-        transfer_data: transfer,
-        processed_at: new Date().toISOString(),
-        admin_notes: `Status atualizado via webhook: ${event}`
-      })
+      .update(updateData)
       .eq('id', withdrawal.id);
 
     if (updateError) {

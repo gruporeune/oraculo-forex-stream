@@ -112,8 +112,7 @@ serve(async (req) => {
         .from('withdrawal_requests')
         .update({
           status: 'pending', // Manter como pending para tentar novamente
-          admin_notes: `❌ ${errorMessage}\n\n${detailedError}\n\nResposta completa: ${responseText}`,
-          updated_at: new Date().toISOString()
+          admin_notes: `❌ ${errorMessage}\n\n${detailedError}\n\nResposta completa: ${responseText}`
         })
         .eq('id', withdrawal_request_id);
       
@@ -130,7 +129,7 @@ serve(async (req) => {
         status: 'processing',
         secretpay_transfer_id: asaasData.id,
         transfer_data: asaasData,
-        updated_at: new Date().toISOString()
+        admin_notes: `✅ Transferência criada na Asaas com ID: ${asaasData.id}\nStatus: ${asaasData.status}\nAguardando aprovação no painel Asaas.`
       })
       .eq('id', withdrawal_request_id);
 
