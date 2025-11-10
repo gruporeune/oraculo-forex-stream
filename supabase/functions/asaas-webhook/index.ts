@@ -17,17 +17,28 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const payload = await req.json();
-    console.log('🔔 Asaas webhook received:', JSON.stringify(payload, null, 2));
+    console.log('🔔 Asaas webhook received at:', new Date().toISOString());
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
 
     const { event, payment } = payload;
 
-    if (!payment || !payment.id) {
-      console.error('Invalid webhook payload');
-      return new Response(JSON.stringify({ error: 'Invalid payload' }), { 
+    if (!event) {
+      console.error('❌ Event missing in payload');
+      return new Response(JSON.stringify({ error: 'Event missing' }), { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400
       });
     }
+
+    if (!payment || !payment.id) {
+      console.error('❌ Payment data missing or invalid');
+      return new Response(JSON.stringify({ error: 'Invalid payment data' }), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 400
+      });
+    }
+
+    console.log(`🎯 Processing event: ${event} for payment ID: ${payment.id}`);
 
     // Buscar transação no banco
     const { data: transaction, error: fetchError } = await supabase

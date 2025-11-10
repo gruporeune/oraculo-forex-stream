@@ -926,35 +926,103 @@ export default function AdminWithdrawalsPage() {
                                      />
                                    </div>
 
-                                   {/* Action Buttons */}
-                                   {selectedWithdrawal.status === 'pending' && (
-                                     <div className="flex gap-2 pt-4">
-                                       <Button
-                                         onClick={() => updateWithdrawalStatus(
-                                           selectedWithdrawal.id, 
-                                           'completed', 
-                                           adminNotes
-                                         )}
-                                         className="flex-1"
-                                       >
-                                         <CheckCircle className="w-4 h-4 mr-1" />
-                                         Aprovar Saque
-                                       </Button>
-                                       <Button
-                                         onClick={() => updateWithdrawalStatus(
-                                           selectedWithdrawal.id, 
-                                           'rejected', 
-                                           adminNotes, 
-                                           rejectionReason
-                                         )}
-                                         variant="destructive"
-                                         className="flex-1"
-                                       >
-                                         <XCircle className="w-4 h-4 mr-1" />
-                                         Rejeitar Saque
-                                       </Button>
-                                     </div>
-                                   )}
+                                    {/* Action Buttons */}
+                                    {selectedWithdrawal.status === 'pending' && (
+                                      <div className="flex flex-col gap-2 pt-4">
+                                        {/* Botão para processar via Asaas (apenas para PIX) */}
+                                        {selectedWithdrawal.withdrawal_type === 'pix' && (
+                                          <Button
+                                            onClick={async () => {
+                                              try {
+                                                if (!selectedWithdrawal.full_name) {
+                                                  toast({
+                                                    title: "Erro",
+                                                    description: "Nome completo não informado",
+                                                    variant: "destructive",
+                                                  });
+                                                  return;
+                                                }
+
+                                                toast({
+                                                  title: "Processando",
+                                                  description: "Enviando saque para Asaas...",
+                                                });
+
+                                                const { data, error } = await supabase.functions.invoke('create-asaas-withdrawal', {
+                                                  body: {
+                                                    withdrawal_request_id: selectedWithdrawal.id,
+                                                    amount: selectedWithdrawal.amount,
+                                                    pix_key: selectedWithdrawal.pix_key,
+                                                    pix_key_type: selectedWithdrawal.pix_key_type,
+                                                    full_name: selectedWithdrawal.full_name,
+                                                  }
+                                                });
+
+                                                if (error) {
+                                                  console.error('Erro ao processar via Asaas:', error);
+                                                  throw error;
+                                                }
+
+                                                toast({
+                                                  title: "Sucesso",
+                                                  description: "Saque enviado para processamento na Asaas",
+                                                });
+
+                                                fetchWithdrawals();
+                                                setSelectedWithdrawal(null);
+                                              } catch (error: any) {
+                                                console.error('Erro:', error);
+                                                toast({
+                                                  title: "Erro",
+                                                  description: error.message || "Erro ao processar saque via Asaas",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                            className="w-full bg-blue-600 hover:bg-blue-700"
+                                          >
+                                            💳 Processar via Asaas (Automático)
+                                          </Button>
+                                        )}
+                                        
+                                        <div className="flex gap-2">
+                                          <Button
+                                            onClick={() => updateWithdrawalStatus(
+                                              selectedWithdrawal.id, 
+                                              'completed', 
+                                              adminNotes
+                                            )}
+                                            className="flex-1"
+                                          >
+                                            <CheckCircle className="w-4 h-4 mr-1" />
+                                            Aprovar Manualmente
+                                          </Button>
+                                          <Button
+                                            onClick={() => {
+                                              if (!rejectionReason.trim()) {
+                                                toast({
+                                                  title: "Erro",
+                                                  description: "Por favor, informe o motivo da rejeição",
+                                                  variant: "destructive",
+                                                });
+                                                return;
+                                              }
+                                              updateWithdrawalStatus(
+                                                selectedWithdrawal.id, 
+                                                'rejected', 
+                                                adminNotes, 
+                                                rejectionReason
+                                              );
+                                            }}
+                                            variant="destructive"
+                                            className="flex-1"
+                                          >
+                                            <XCircle className="w-4 h-4 mr-1" />
+                                            Rejeitar Saque
+                                          </Button>
+                                        </div>
+                                      </div>
+                                    )}
 
                                    {selectedWithdrawal.status !== 'pending' && (
                                      <div className="flex gap-2 pt-4">

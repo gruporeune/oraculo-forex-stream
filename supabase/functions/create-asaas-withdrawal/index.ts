@@ -27,7 +27,15 @@ serve(async (req) => {
       user_document
     } = await req.json();
 
-    console.log('Creating Asaas withdrawal for request:', withdrawal_request_id);
+    console.log('🚀 Creating Asaas withdrawal at:', new Date().toISOString());
+    console.log('📋 Request ID:', withdrawal_request_id);
+    console.log('💰 Amount:', amount);
+    console.log('🔑 PIX Key:', pix_key);
+    console.log('📝 PIX Key Type:', pix_key_type);
+
+    if (!withdrawal_request_id || !amount || !pix_key || !pix_key_type) {
+      throw new Error('Missing required parameters');
+    }
 
     // Buscar solicitação de saque
     const { data: withdrawal, error: fetchError } = await supabase
@@ -37,33 +45,61 @@ serve(async (req) => {
       .single();
 
     if (fetchError || !withdrawal) {
+      console.error('❌ Withdrawal not found:', fetchError);
       throw new Error('Withdrawal request not found');
     }
 
+    console.log('✅ Withdrawal found:', withdrawal);
+
+    // Validar status
+    if (withdrawal.status !== 'pending') {
+      console.error('❌ Withdrawal already processed:', withdrawal.status);
+      throw new Error(`Withdrawal already ${withdrawal.status}`);
+    }
+
     // Criar transferência PIX na Asaas
+    console.log('📤 Sending request to Asaas API...');
+    const asaasPayload = {
+      value: amount,
+      pixAddressKey: pix_key,
+      pixAddressKeyType: pix_key_type.toUpperCase(), // CPF, CNPJ, EMAIL, PHONE, EVP
+      description: `Saque ORÁCULO - ${full_name || 'Usuário'}`,
+      scheduleDate: null // Transfer imediato
+    };
+    
+    console.log('📦 Asaas payload:', JSON.stringify(asaasPayload, null, 2));
+
     const asaasResponse = await fetch('https://api.asaas.com/v3/transfers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'access_token': asaasApiKey
       },
-      body: JSON.stringify({
-        value: amount,
-        pixAddressKey: pix_key,
-        pixAddressKeyType: pix_key_type.toUpperCase(), // CPF, CNPJ, EMAIL, PHONE, EVP
-        description: `Saque ORÁCULO - ${full_name}`,
-        scheduleDate: null // Transfer imediato
-      })
+      body: JSON.stringify(asaasPayload)
     });
 
+    const responseText = await asaasResponse.text();
+    console.log('📨 Asaas response status:', asaasResponse.status);
+    console.log('📨 Asaas response body:', responseText);
+
     if (!asaasResponse.ok) {
-      const errorText = await asaasResponse.text();
-      console.error('Asaas API error:', errorText);
-      throw new Error(`Asaas API error: ${errorText}`);
+      console.error('❌ Asaas API error:', responseText);
+      
+      // Atualizar saque com erro
+      await supabase
+        .from('withdrawal_requests')
+        .update({
+          status: 'rejected',
+          admin_notes: `Erro ao processar pela Asaas: ${responseText}`,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', withdrawal_request_id);
+      
+      throw new Error(`Asaas API error: ${responseText}`);
     }
 
-    const asaasData = await asaasResponse.json();
-    console.log('Asaas transfer created:', asaasData);
+    const asaasData = JSON.parse(responseText);
+    console.log('✅ Asaas transfer created:', asaasData);
 
     // Atualizar solicitação de saque com ID da transferência
     const { error: updateError } = await supabase

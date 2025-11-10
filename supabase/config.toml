@@ -38,3 +38,6 @@ verify_jwt = false
 
 [functions.create-asaas-withdrawal]
 verify_jwt = false
+
+[functions.asaas-withdrawal-webhook]
+verify_jwt = false
