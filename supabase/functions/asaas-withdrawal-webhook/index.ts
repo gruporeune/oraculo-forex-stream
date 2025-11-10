@@ -35,20 +35,23 @@ serve(async (req) => {
     // Buscar solicitação de saque no banco
     console.log(`🔍 Searching for withdrawal with transfer ID: ${transfer.id}`);
     
-    const { data: withdrawal, error: fetchError } = await supabase
+    let withdrawal = null;
+    let fetchError = null;
+
+    // Primeira tentativa: buscar pelo transfer_id
+    const { data: withdrawalById, error: errorById } = await supabase
       .from('withdrawal_requests')
       .select('*')
       .eq('secretpay_transfer_id', transfer.id)
       .maybeSingle();
 
-    if (fetchError) {
-      console.error('❌ Database error fetching withdrawal:', fetchError);
-      // Return 200 to prevent Asaas from pausing webhook
+    if (errorById) {
+      console.error('❌ Database error fetching withdrawal:', errorById);
       return new Response(
         JSON.stringify({ 
           success: false, 
           message: 'Database error',
-          error: fetchError.message 
+          error: errorById.message 
         }), 
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -57,15 +60,61 @@ serve(async (req) => {
       );
     }
 
+    withdrawal = withdrawalById;
+
+    // Se não encontrou pelo transfer_id, tentar busca inteligente
     if (!withdrawal) {
-      console.error('❌ Withdrawal request not found for transfer ID:', transfer.id);
-      console.log('💡 This might mean the transfer was created outside this system or the ID was not saved correctly');
+      console.log('🔍 Transfer ID not found, trying smart search with amount, pix_key and status...');
       
-      // Return 200 to prevent Asaas from pausing webhook, but log the issue
+      // Extrair PIX key do transfer
+      const pixKey = transfer.bankAccount?.pixAddressKey;
+      const amount = transfer.value;
+      
+      if (pixKey && amount) {
+        console.log(`🔎 Searching by: amount=${amount}, pix_key=${pixKey}`);
+        
+        // Buscar saques pendentes ou em processamento com mesmo valor e PIX key
+        const { data: withdrawalByDetails, error: errorByDetails } = await supabase
+          .from('withdrawal_requests')
+          .select('*')
+          .eq('amount', amount)
+          .eq('pix_key', pixKey.replace(/^\+55/, '')) // Remove +55 do início se existir
+          .in('status', ['pending', 'processing'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (errorByDetails) {
+          console.error('❌ Error in smart search:', errorByDetails);
+        } else if (withdrawalByDetails) {
+          withdrawal = withdrawalByDetails;
+          console.log('✅ Found withdrawal via smart search!', withdrawal.id);
+          
+          // Atualizar o registro com o transfer_id correto
+          await supabase
+            .from('withdrawal_requests')
+            .update({ secretpay_transfer_id: transfer.id })
+            .eq('id', withdrawal.id);
+          
+          console.log('💾 Updated withdrawal with correct transfer_id');
+        }
+      }
+    }
+
+    if (!withdrawal) {
+      console.error('❌ Withdrawal request not found even with smart search');
+      console.log('💡 Transfer data:', JSON.stringify({
+        id: transfer.id,
+        amount: transfer.value,
+        pixKey: transfer.bankAccount?.pixAddressKey,
+        status: transfer.status
+      }));
+      
+      // Return 200 to prevent Asaas from pausing webhook
       return new Response(
         JSON.stringify({ 
-          success: false, 
-          message: 'Withdrawal not found in database',
+          success: true, 
+          message: 'Withdrawal not found in database - webhook acknowledged',
           transfer_id: transfer.id 
         }), 
         { 
