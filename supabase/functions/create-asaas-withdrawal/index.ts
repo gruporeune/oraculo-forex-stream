@@ -123,7 +123,9 @@ serve(async (req) => {
     console.log('✅ Asaas transfer created:', asaasData);
 
     // Atualizar solicitação de saque com ID da transferência
-    const { error: updateError } = await supabase
+    console.log(`💾 Updating withdrawal ${withdrawal_request_id} with transfer ID: ${asaasData.id}`);
+    
+    const { data: updateData, error: updateError } = await supabase
       .from('withdrawal_requests')
       .update({
         status: 'processing',
@@ -131,12 +133,20 @@ serve(async (req) => {
         transfer_data: asaasData,
         admin_notes: `✅ Transferência criada na Asaas com ID: ${asaasData.id}\nStatus: ${asaasData.status}\nAguardando aprovação no painel Asaas.`
       })
-      .eq('id', withdrawal_request_id);
+      .eq('id', withdrawal_request_id)
+      .select();
 
     if (updateError) {
-      console.error('Error updating withdrawal request:', updateError);
-      throw updateError;
+      console.error('❌ Error updating withdrawal request:', updateError);
+      throw new Error(`Failed to update withdrawal: ${updateError.message}`);
     }
+
+    if (!updateData || updateData.length === 0) {
+      console.error('❌ No rows updated for withdrawal:', withdrawal_request_id);
+      throw new Error('Failed to update withdrawal record - no rows affected');
+    }
+
+    console.log('✅ Withdrawal updated successfully. Transfer ID saved:', updateData[0].secretpay_transfer_id);
 
     return new Response(
       JSON.stringify({

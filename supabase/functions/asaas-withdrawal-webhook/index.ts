@@ -33,18 +33,46 @@ serve(async (req) => {
     console.log(`🎯 Processing withdrawal event: ${event} for transfer ID: ${transfer.id}`);
 
     // Buscar solicitação de saque no banco
+    console.log(`🔍 Searching for withdrawal with transfer ID: ${transfer.id}`);
+    
     const { data: withdrawal, error: fetchError } = await supabase
       .from('withdrawal_requests')
       .select('*')
       .eq('secretpay_transfer_id', transfer.id)
-      .single();
+      .maybeSingle();
 
-    if (fetchError || !withdrawal) {
+    if (fetchError) {
+      console.error('❌ Database error fetching withdrawal:', fetchError);
+      // Return 200 to prevent Asaas from pausing webhook
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: 'Database error',
+          error: fetchError.message 
+        }), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
+    }
+
+    if (!withdrawal) {
       console.error('❌ Withdrawal request not found for transfer ID:', transfer.id);
-      return new Response(JSON.stringify({ error: 'Withdrawal not found' }), { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 404
-      });
+      console.log('💡 This might mean the transfer was created outside this system or the ID was not saved correctly');
+      
+      // Return 200 to prevent Asaas from pausing webhook, but log the issue
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: 'Withdrawal not found in database',
+          transfer_id: transfer.id 
+        }), 
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200
+        }
+      );
     }
 
     console.log('✅ Withdrawal found:', withdrawal.id);
