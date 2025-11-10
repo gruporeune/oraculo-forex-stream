@@ -499,7 +499,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
             </div>
             <div className="space-y-2">
               <h4 className="font-semibold text-white">PIX (Reais):</h4>
-              <p>• Saques via <span className="font-bold">PIX em até 72 hrs</span> pela Faturefy.</p>
+              <p>• Saques via <span className="font-bold">Pix em até 72 hrs</span> pela M.M Soluções Financeiras.</p>
               <p>• Processamento: <span className="font-bold">Em até 72 horas</span>.</p>
               <p>• <span className="font-bold text-orange-400">Taxa de 5%</span> sobre o valor do saque.</p>
             </div>
