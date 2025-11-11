@@ -30,8 +30,10 @@ serve(async (req) => {
     console.log('🚀 Creating Asaas withdrawal at:', new Date().toISOString());
     console.log('📋 Request ID:', withdrawal_request_id);
     console.log('💰 Amount:', amount);
-    console.log('🔑 PIX Key:', pix_key);
-    console.log('📝 PIX Key Type:', pix_key_type);
+    console.log('🔑 PIX Key RECEIVED FROM FRONTEND:', pix_key);
+    console.log('📝 PIX Key Type RECEIVED FROM FRONTEND:', pix_key_type);
+    console.log('👤 Full Name:', full_name);
+    console.log('📄 User Document:', user_document);
 
     if (!withdrawal_request_id || !amount || !pix_key || !pix_key_type) {
       throw new Error('Missing required parameters');
@@ -59,15 +61,25 @@ serve(async (req) => {
 
     // Criar transferência PIX na Asaas
     console.log('📤 Sending request to Asaas API...');
+    
+    // IMPORTANT: Send the EXACT PIX KEY that the user chose, NOT the CPF/CNPJ
+    // Convert "random" to "EVP" for Asaas API
+    let pixKeyTypeForAsaas = pix_key_type.toUpperCase();
+    if (pixKeyTypeForAsaas === 'RANDOM') {
+      pixKeyTypeForAsaas = 'EVP';  // Asaas expects "EVP" for random keys
+    }
+    
     const asaasPayload = {
       value: amount,
-      pixAddressKey: pix_key,
-      pixAddressKeyType: pix_key_type.toUpperCase(), // CPF, CNPJ, EMAIL, PHONE, EVP
+      pixAddressKey: pix_key,  // This is the PIX key the user chose
+      pixAddressKeyType: pixKeyTypeForAsaas, // CPF, CNPJ, EMAIL, PHONE, EVP
       description: `Saque ORÁCULO - ${full_name || 'Usuário'}`,
       scheduleDate: null // Transfer imediato
     };
     
-    console.log('📦 Asaas payload:', JSON.stringify(asaasPayload, null, 2));
+    console.log('📦 Asaas payload BEING SENT:', JSON.stringify(asaasPayload, null, 2));
+    console.log('🔍 Confirming PIX Key being sent to Asaas:', pix_key);
+    console.log('🔍 Confirming PIX Key Type being sent to Asaas:', pixKeyTypeForAsaas);
 
     const asaasResponse = await fetch('https://api.asaas.com/v3/transfers', {
       method: 'POST',
