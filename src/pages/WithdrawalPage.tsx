@@ -383,24 +383,6 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                               CNPJ
                             </div>
                           </SelectItem>
-                          <SelectItem value="phone" className="text-white hover:bg-white/10">
-                            <div className="flex items-center">
-                              <Smartphone className="mr-2 h-4 w-4" />
-                              Celular
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="email" className="text-white hover:bg-white/10">
-                            <div className="flex items-center">
-                              <Mail className="mr-2 h-4 w-4" />
-                              E-mail
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="random" className="text-white hover:bg-white/10">
-                            <div className="flex items-center">
-                              <Hash className="mr-2 h-4 w-4" />
-                              Chave Aleatória
-                            </div>
-                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
