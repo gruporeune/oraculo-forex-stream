@@ -40,12 +40,12 @@ export const DashboardPopups = () => {
     <>
       {/* First Popup - Bonus Afiliados */}
       <Dialog open={showFirstPopup} onOpenChange={handleCloseFirstPopup}>
-        <DialogContent className="max-w-[90vw] md:max-w-2xl p-0 bg-transparent border-0 overflow-hidden">
+        <DialogContent className="max-w-[85vw] sm:max-w-md md:max-w-lg p-0 bg-transparent border-0 overflow-hidden">
           <button
             onClick={handleCloseFirstPopup}
-            className="absolute -top-3 -right-3 z-50 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors"
+            className="absolute -top-4 -right-4 z-50 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
           >
-            <X className="h-5 w-5 text-gray-700" />
+            <X className="h-6 w-6 text-gray-700" />
           </button>
           <div className="relative w-full">
             <img
@@ -59,12 +59,12 @@ export const DashboardPopups = () => {
 
       {/* Second Popup - Live Matuza */}
       <Dialog open={showSecondPopup} onOpenChange={handleCloseSecondPopup}>
-        <DialogContent className="max-w-[90vw] md:max-w-2xl p-0 bg-transparent border-0 overflow-hidden">
+        <DialogContent className="max-w-[85vw] sm:max-w-md md:max-w-lg p-0 bg-transparent border-0 overflow-hidden">
           <button
             onClick={handleCloseSecondPopup}
-            className="absolute -top-3 -right-3 z-50 bg-white rounded-full p-1.5 shadow-lg hover:bg-gray-100 transition-colors"
+            className="absolute -top-4 -right-4 z-50 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors"
           >
-            <X className="h-5 w-5 text-gray-700" />
+            <X className="h-6 w-6 text-gray-700" />
           </button>
           <div className="relative w-full">
             <img
