@@ -9,16 +9,10 @@ export const DashboardPopups = () => {
   const [showSecondPopup, setShowSecondPopup] = useState(false);
 
   useEffect(() => {
-    // Check if popups were already shown today
-    const lastShown = localStorage.getItem("dashboard_popups_shown");
-    const today = new Date().toDateString();
-    
-    if (lastShown !== today) {
-      // Show first popup after a short delay
-      setTimeout(() => {
-        setShowFirstPopup(true);
-      }, 1000);
-    }
+    // Show first popup after a short delay on every login
+    setTimeout(() => {
+      setShowFirstPopup(true);
+    }, 1000);
   }, []);
 
   const handleCloseFirstPopup = () => {
@@ -31,9 +25,6 @@ export const DashboardPopups = () => {
 
   const handleCloseSecondPopup = () => {
     setShowSecondPopup(false);
-    // Mark as shown for today
-    const today = new Date().toDateString();
-    localStorage.setItem("dashboard_popups_shown", today);
   };
 
   return (
