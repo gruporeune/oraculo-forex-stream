@@ -8,6 +8,7 @@ import { useI18n } from '@/lib/i18n';
 import { BrokersCarousel } from '@/components/BrokersCarousel';
 import { BrazilianStocksCarousel } from '@/components/BrazilianStocksCarousel';
 import { useToast } from '@/hooks/use-toast';
+import { DashboardPopups } from '@/components/DashboardPopups';
 
 interface DashboardHomePageProps {
   user: any;
@@ -70,13 +71,15 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      className="space-y-3 md:space-y-4 lg:space-y-6 bg-white rounded-lg p-3 md:p-4 lg:p-6 max-w-full overflow-hidden"
-    >
-      <DashboardCards
+    <>
+      <DashboardPopups />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="space-y-3 md:space-y-4 lg:space-y-6 bg-white rounded-lg p-3 md:p-4 lg:p-6 max-w-full overflow-hidden"
+      >
+        <DashboardCards
         profile={profile} 
         userPlans={userPlans}
         onWithdraw={handleWithdraw}
@@ -111,6 +114,7 @@ export default function DashboardHomePage({ user, profile, onProfileUpdate }: Da
 
       {/* Earnings History */}
       <EarningsHistory userId={user?.id} />
-    </motion.div>
+      </motion.div>
+    </>
   );
 }
