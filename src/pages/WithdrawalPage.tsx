@@ -22,6 +22,15 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
   const [formLoading, setFormLoading] = useState(false);
   const [withdrawalRequests, setWithdrawalRequests] = useState<any[]>([]);
   
+  const WITHDRAWAL_FEE_PERCENTAGE = 0.05; // 5% taxa de saque
+  
+  // Calcular valores do saque
+  const calculateWithdrawalValues = (requestedAmount: number) => {
+    const fee = requestedAmount * WITHDRAWAL_FEE_PERCENTAGE;
+    const netAmount = requestedAmount - fee;
+    return { fee, netAmount };
+  };
+  
   // Check if today is Monday (1) or Thursday (4) in Brasília timezone
   const isWithdrawalDay = () => {
     const now = new Date();
@@ -189,7 +198,10 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
     }
 
     try {
-      // Subtract from user balance first
+      // Calcular taxa e valor líquido
+      const { fee, netAmount } = calculateWithdrawalValues(amount);
+      
+      // Subtract from user balance first (valor solicitado completo)
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ 
@@ -200,9 +212,10 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
       if (updateError) throw updateError;
 
       // Create withdrawal request in database with pending status
+      // IMPORTANTE: salvamos o valor LÍQUIDO (após dedução da taxa de 5%)
       const withdrawalInsert: any = {
         user_id: user.id,
-        amount: amount,
+        amount: netAmount, // Valor líquido que será transferido
         full_name: saqueData.fullName,
         withdrawal_type: saqueData.withdrawalType,
         status: 'pending'
@@ -232,7 +245,7 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
 
       toast({ 
         title: "Saque solicitado com sucesso!", 
-        description: "Sua solicitação foi enviada para análise. Você será notificado sobre o status." 
+        description: `Valor líquido a receber: R$ ${netAmount.toFixed(2)} (taxa de 5% já deduzida do valor de R$ ${amount.toFixed(2)})` 
       });
       
       setSaqueData({ amount: '', pixKey: '', fullName: '', pixKeyType: '', usdtWallet: '', withdrawalType: 'pix' });
@@ -315,6 +328,26 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
               </CardDescription>
             </CardHeader>
             <CardContent>
+              <Alert className="mb-4 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 border-blue-500/70">
+                <Info className="h-4 w-4 text-blue-300" />
+                <AlertTitle className="text-blue-100 font-bold">Taxa de Saque - 5%</AlertTitle>
+                <AlertDescription className="text-white">
+                  <strong>Cobramos uma taxa de 5% sobre o valor do saque.</strong><br/>
+                  Por exemplo: Se você solicitar R$ 100,00, receberá R$ 95,00 (R$ 5,00 de taxa).<br/>
+                  O valor líquido já é calculado automaticamente.
+                </AlertDescription>
+              </Alert>
+              
+              <Alert className="mb-4 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 border-blue-500/70">
+                <Info className="h-4 w-4 text-blue-300" />
+                <AlertTitle className="text-blue-100 font-bold">Taxa de Saque - 5%</AlertTitle>
+                <AlertDescription className="text-white">
+                  <strong>Cobramos uma taxa de 5% sobre o valor do saque.</strong><br/>
+                  Por exemplo: Se você solicitar R$ 100,00, receberá R$ 95,00 (R$ 5,00 de taxa).<br/>
+                  O valor líquido já é calculado automaticamente.
+                </AlertDescription>
+              </Alert>
+              
               <Alert className="mb-4 bg-gradient-to-r from-red-600/40 to-rose-600/40 border-red-500/70">
                 <AlertCircle className="h-4 w-4 text-red-300" />
                 <AlertTitle className="text-red-100 font-bold">ATENÇÃO - Chave PIX</AlertTitle>
@@ -424,10 +457,24 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
                     min="50"
                     step="0.01"
                   />
-                  <div className="text-xs text-orange-400 flex items-center">
-                    <Info className="mr-1 h-3 w-3" />
-                    Taxa de 5% sobre o valor do saque
-                  </div>
+                  {saqueData.amount && parseFloat(saqueData.amount) > 0 && (
+                    <div className="p-3 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 border border-emerald-500/50 rounded-lg">
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between text-white/80">
+                          <span>Valor solicitado:</span>
+                          <span className="font-semibold">R$ {parseFloat(saqueData.amount).toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between text-red-300">
+                          <span>Taxa (5%):</span>
+                          <span className="font-semibold">- R$ {(parseFloat(saqueData.amount) * WITHDRAWAL_FEE_PERCENTAGE).toFixed(2)}</span>
+                        </div>
+                        <div className="pt-1 border-t border-white/20 flex justify-between text-emerald-300 font-bold">
+                          <span>Você receberá:</span>
+                          <span>R$ {calculateWithdrawalValues(parseFloat(saqueData.amount)).netAmount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <Button 
                   type="submit" 
