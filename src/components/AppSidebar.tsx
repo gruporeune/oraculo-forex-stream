@@ -111,13 +111,13 @@ export function AppSidebar() {
                   <div className="relative">
                     <img 
                       src={supportAgent} 
-                      alt="Damarys - Atendente" 
+                      alt="Eduarda - Atendente" 
                       className="w-12 h-12 rounded-xl object-cover border-2 border-purple-400/50 shadow-lg"
                     />
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900"></div>
                   </div>
                   <div className="flex-1">
-                    <p className="text-white text-sm font-semibold">Damarys</p>
+                    <p className="text-white text-sm font-semibold">Eduarda</p>
                     <p className="text-slate-300 text-xs">Atendente Online</p>
                   </div>
                 </div>
