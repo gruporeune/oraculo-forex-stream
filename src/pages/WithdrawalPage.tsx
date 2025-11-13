@@ -328,25 +328,6 @@ const WithdrawalPage = ({ user, profile, onProfileUpdate }: WithdrawalPageProps)
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Alert className="mb-4 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 border-blue-500/70">
-                <Info className="h-4 w-4 text-blue-300" />
-                <AlertTitle className="text-blue-100 font-bold">Taxa de Saque - 5%</AlertTitle>
-                <AlertDescription className="text-white">
-                  <strong>Cobramos uma taxa de 5% sobre o valor do saque.</strong><br/>
-                  Por exemplo: Se você solicitar R$ 100,00, receberá R$ 95,00 (R$ 5,00 de taxa).<br/>
-                  O valor líquido já é calculado automaticamente.
-                </AlertDescription>
-              </Alert>
-              
-              <Alert className="mb-4 bg-gradient-to-r from-blue-600/40 to-cyan-600/40 border-blue-500/70">
-                <Info className="h-4 w-4 text-blue-300" />
-                <AlertTitle className="text-blue-100 font-bold">Taxa de Saque - 5%</AlertTitle>
-                <AlertDescription className="text-white">
-                  <strong>Cobramos uma taxa de 5% sobre o valor do saque.</strong><br/>
-                  Por exemplo: Se você solicitar R$ 100,00, receberá R$ 95,00 (R$ 5,00 de taxa).<br/>
-                  O valor líquido já é calculado automaticamente.
-                </AlertDescription>
-              </Alert>
               
               <Alert className="mb-4 bg-gradient-to-r from-red-600/40 to-rose-600/40 border-red-500/70">
                 <AlertCircle className="h-4 w-4 text-red-300" />
