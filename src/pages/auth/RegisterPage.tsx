@@ -178,10 +178,13 @@ export default function RegisterPage() {
 
       // Update profile with additional data and referral
       if (data.user) {
+        console.log('🔄 Iniciando processo de atualização do perfil para usuário:', data.user.id);
+        
         let referrerId = null;
         
         // If there's a referral code, find the referrer
         if (referralCode) {
+          console.log('🔍 Buscando referrer com código:', referralCode);
           const { data: referrerData, error: referrerError } = await supabase
             .from('profiles')
             .select('id, username')
@@ -189,23 +192,52 @@ export default function RegisterPage() {
             .maybeSingle();
           
           if (referrerError) {
-            console.error('Erro ao buscar referrer:', referrerError);
+            console.error('❌ Erro ao buscar referrer:', referrerError);
           }
           
           if (referrerData) {
             referrerId = referrerData.id;
             console.log('✅ Referrer encontrado:', referrerData.username, 'ID:', referrerId);
           } else {
-            console.log('⚠️ Nenhum referrer encontrado para o código:', referralCode);
+            console.warn('⚠️ Nenhum referrer encontrado para o código:', referralCode);
           }
         } else {
-          console.log('ℹ️ Nenhum código de referência fornecido');
+          console.log('ℹ️ Nenhum código de referência fornecido - cadastro direto');
         }
         
+        // Wait for trigger to create profile (retry logic)
+        console.log('⏳ Aguardando criação do profile pelo trigger...');
+        let profileExists = false;
+        let retries = 0;
+        const maxRetries = 10;
+        
+        while (!profileExists && retries < maxRetries) {
+          const { data: checkProfile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('id', data.user.id)
+            .maybeSingle();
+          
+          if (checkProfile) {
+            profileExists = true;
+            console.log('✅ Profile criado pelo trigger, prosseguindo com update');
+          } else {
+            retries++;
+            console.log(`⏳ Tentativa ${retries}/${maxRetries} - Profile ainda não existe, aguardando...`);
+            await new Promise(resolve => setTimeout(resolve, 300)); // Wait 300ms
+          }
+        }
+        
+        if (!profileExists) {
+          console.error('❌ Profile não foi criado após múltiplas tentativas');
+          throw new Error('Erro ao criar perfil. Por favor, tente novamente.');
+        }
+        
+        // Now update the profile with all data using UPDATE instead of UPSERT
+        console.log('📝 Atualizando profile com dados completos...');
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({
-            id: data.user.id,
+          .update({
             full_name: formData.fullName,
             username: formData.username,
             phone: formData.phone,
@@ -213,15 +245,22 @@ export default function RegisterPage() {
             date_of_birth: formData.dateOfBirth,
             referred_by: referrerId,
             updated_at: new Date().toISOString(),
-          });
+          })
+          .eq('id', data.user.id);
 
         if (profileError) {
-          console.error('Profile update error:', profileError);
+          console.error('❌ Erro ao atualizar profile:', profileError);
+          throw new Error('Erro ao salvar dados do perfil. Por favor, contate o suporte.');
+        } else {
+          console.log('✅ Profile atualizado com sucesso');
+          if (referrerId) {
+            console.log('✅ Usuário vinculado ao referrer:', referrerId);
+          }
         }
         
         // Create referral relationship if referrer exists
         if (referrerId) {
-          console.log('Creating referral relationship:', { referrerId, userId: data.user.id });
+          console.log('📊 Criando relacionamento de referência...');
           
           const { data: referralData, error: referralError } = await supabase
             .from('user_referrals')
@@ -233,12 +272,11 @@ export default function RegisterPage() {
             .select();
             
           if (referralError) {
-            console.error('Referral creation error:', referralError);
+            console.error('❌ Erro ao criar referral:', referralError);
+            // Não vamos falhar o cadastro por causa disso
           } else {
-            console.log('Referral created successfully:', referralData);
+            console.log('✅ Referral criado com sucesso:', referralData);
           }
-        } else {
-          console.log('No referrer found for code:', referralCode);
         }
       }
 
