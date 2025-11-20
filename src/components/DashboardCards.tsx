@@ -13,10 +13,10 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
   const { t } = useI18n();
   const planLimits = {
     free: { signals: 5, dailyEarnings: 0 },
-    partner: { signals: 20, dailyEarnings: 0.20 },
-    master: { signals: 100, dailyEarnings: 1.00 },
-    pro: { signals: 200, dailyEarnings: 3.00 },
-    premium: { signals: 500, dailyEarnings: 7.50 },
+    partner: { signals: 20, dailyEarnings: 2.00 },
+    master: { signals: 100, dailyEarnings: 6.00 },
+    pro: { signals: 200, dailyEarnings: 10.00 },
+    premium: { signals: 500, dailyEarnings: 41.25 },
     platinum: { signals: 1000, dailyEarnings: 100.00 }
   };
 

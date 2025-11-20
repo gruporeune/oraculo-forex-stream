@@ -138,25 +138,8 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                 })
                 .eq('id', plan.id);
               
-              // Also reset user's daily earnings to allow new cycle
-              const { data: currentProfile } = await supabase
-                .from('profiles')
-                .select('daily_earnings')
-                .eq('id', user.id)
-                .single();
-              
-              if (currentProfile) {
-                const limits = planLimits[plan.plan_name as keyof typeof planLimits];
-                const planEarnings = limits?.dailyTarget || 0;
-                
-                await supabase
-                  .from('profiles')
-                  .update({
-                    daily_earnings: Math.max((currentProfile.daily_earnings || 0) - planEarnings, 0),
-                    updated_at: new Date().toISOString()
-                  })
-                  .eq('id', user.id);
-              }
+              // Note: Daily earnings will be recalculated naturally on next operation
+              // No need to manually adjust profiles table here
 
               // Trigger plans update to refresh UI
               onPlansUpdate();
@@ -356,23 +339,17 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       // Calculate new balance by adding only this operation's profit
       const newBalance = Math.max((currentProfile.available_balance || 0) + operationProfit, 0);
 
-      // Only update if values are different to avoid unnecessary writes
-      const needsUpdate = 
-        Math.abs((currentProfile.daily_earnings || 0) - correctDailyEarnings) > 0.01 ||
-        Math.abs((currentProfile.available_balance || 0) - newBalance) > 0.01;
+      // Always update profiles to ensure synchronization
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          daily_earnings: correctDailyEarnings,
+          available_balance: newBalance,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
 
-      if (needsUpdate) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            daily_earnings: correctDailyEarnings,
-            available_balance: newBalance,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', user.id);
-
-        if (profileError) throw profileError;
-      }
+      if (profileError) throw profileError;
 
       // Update state immediately for instant UI feedback
       onPlansUpdate();
