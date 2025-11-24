@@ -82,7 +82,7 @@ export default function DashboardPage() {
         
         <div className="flex-1 flex flex-col w-full max-w-full overflow-x-hidden">
           {/* Modern Glassmorphic Header */}
-          <header className="sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-purple-900/80 via-purple-800/80 to-indigo-900/80 backdrop-blur-2xl shadow-lg">
+          <header className="sticky top-0 z-40 border-b border-white/10 bg-gradient-to-r from-blue-900/80 via-blue-800/80 to-indigo-900/80 backdrop-blur-2xl shadow-lg">
             <div className="px-3 md:px-6 py-3 md:py-4">
               <div className="flex items-center justify-between gap-3">
                 {/* Left Section */}
@@ -90,7 +90,7 @@ export default function DashboardPage() {
                   <SidebarTrigger className="text-white hover:bg-white/10 rounded-lg p-2 transition-all" />
                   <div className="flex items-center gap-1">
                     <span className="text-lg md:text-xl font-bold text-white tracking-wider">ORÁCULO</span>
-                    <span className="text-lg md:text-xl font-bold text-red-500 tracking-wider">OPTION</span>
+                    <span className="text-lg md:text-xl font-bold text-white tracking-wider">OPTION</span>
                   </div>
                 </div>
                 
@@ -100,7 +100,7 @@ export default function DashboardPage() {
                   
                   {/* User Profile Dropdown */}
                   <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-all border border-white/10">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
                       <User className="w-4 h-4 text-white" />
                     </div>
                     <span className="text-sm font-medium text-white max-w-[120px] truncate">

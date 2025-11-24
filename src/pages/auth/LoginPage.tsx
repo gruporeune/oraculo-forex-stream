@@ -4,6 +4,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import oraculoLogo from "@/assets/oraculo-logo.png";
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
@@ -121,7 +122,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen w-screen bg-black relative overflow-hidden flex items-center justify-center">
       {/* Background gradient effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-500/40 via-purple-700/50 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-500/40 via-blue-700/50 to-black" />
       
       {/* Subtle noise texture overlay */}
       <div className="absolute inset-0 opacity-[0.03] mix-blend-soft-light" 
@@ -132,9 +133,9 @@ export default function LoginPage() {
       />
 
       {/* Top radial glow */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-purple-400/20 blur-[80px]" />
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[120vh] h-[60vh] rounded-b-[50%] bg-blue-400/20 blur-[80px]" />
       <motion.div 
-        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-purple-300/20 blur-[60px]"
+        className="absolute top-0 left-1/2 transform -translate-x-1/2 w-[100vh] h-[60vh] rounded-b-full bg-blue-300/20 blur-[60px]"
         animate={{ 
           opacity: [0.15, 0.3, 0.15],
           scale: [0.98, 1.02, 0.98]
@@ -200,10 +201,11 @@ export default function LoginPage() {
                   initial={{ scale: 0.5, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ type: "spring", duration: 0.8 }}
-                  className="flex items-center justify-center space-x-2 mb-4"
+                  className="flex flex-col items-center justify-center space-y-3 mb-4"
                 >
-                  <span className="text-3xl font-bold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400 tracking-wider">
-                    O ORÁCULO
+                  <img src={oraculoLogo} alt="Oráculo Logo" className="w-16 h-16" />
+                  <span className="text-3xl font-bold font-orbitron bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400 tracking-wider">
+                    ORÁCULO
                   </span>
                 </motion.div>
 
