@@ -66,8 +66,8 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-6 lg:mb-8">
       {/* SEUS PLANOS */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
             <Package className="w-3 h-3 md:w-4 md:h-4" />
@@ -81,8 +81,8 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SEUS SINAIS */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
             <TrendingUp className="w-3 h-3 md:w-4 md:h-4" />
@@ -96,8 +96,8 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* GANHO DO DIA */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
             <DollarSign className="w-3 h-3 md:w-4 md:h-4" />
@@ -113,8 +113,8 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* COMISSÕES DO DIA */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
             <Users className="w-3 h-3 md:w-4 md:h-4" />
@@ -130,8 +130,8 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SALDO DISPONÍVEL */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-purple-600/20 to-purple-400/20 border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all duration-300 group">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/10 to-purple-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
             <Wallet className="w-3 h-3 md:w-4 md:h-4" />
@@ -145,7 +145,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
           <Button 
             size="sm" 
             onClick={onWithdraw}
-            className="mt-2 w-full bg-purple-600 hover:bg-purple-700 text-white text-xs md:text-sm"
+            className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm"
           >
             {t('dashboard.withdraw')}
           </Button>
