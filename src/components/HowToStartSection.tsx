@@ -100,7 +100,7 @@ export function HowToStartSection() {
         >
           <h2 className="text-4xl lg:text-5xl font-bold mb-6">
             Como{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
               Começar
             </span>
           </h2>
@@ -120,11 +120,11 @@ export function HowToStartSection() {
               className="text-center"
             >
               <div className="relative mb-6">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-400 rounded-2xl flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-400 rounded-2xl flex items-center justify-center mx-auto">
                   <span className="text-white font-bold text-xl">{step.number}</span>
                 </div>
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-purple-600/50 to-transparent -translate-y-0.5"></div>
+                  <div className="hidden lg:block absolute top-8 left-full w-full h-0.5 bg-gradient-to-r from-blue-600/50 to-transparent -translate-y-0.5"></div>
                 )}
               </div>
               <h3 className="text-xl font-semibold mb-4">{step.title}</h3>
@@ -145,7 +145,7 @@ export function HowToStartSection() {
         >
           <h3 className="text-3xl lg:text-4xl font-bold mb-6">
             Escolha Seu{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
               Plano
             </span>
           </h3>
@@ -166,7 +166,7 @@ export function HowToStartSection() {
             >
               {plan.popular && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                     MAIS POPULAR
                   </div>
                 </div>
@@ -175,7 +175,7 @@ export function HowToStartSection() {
               <Card className={`h-full ${plan.color} border-2 hover:shadow-lg transition-all duration-300 ${plan.popular ? 'scale-105' : ''}`}>
                 <CardContent className="p-6 text-center">
                   <div className="mb-4">
-                    <plan.icon className="w-8 h-8 mx-auto mb-3 text-purple-600" />
+                    <plan.icon className="w-8 h-8 mx-auto mb-3 text-blue-600" />
                     <h4 className="text-xl font-bold">{plan.name}</h4>
                     <div className="text-2xl font-bold mt-2">{plan.price}</div>
                     {plan.priceInReals && (
@@ -198,8 +198,8 @@ export function HowToStartSection() {
                   <Button
                     variant={plan.buttonVariant}
                     className={`w-full ${plan.buttonVariant === 'default' 
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white' 
-                      : 'border-purple-500 text-purple-600 hover:bg-purple-50'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' 
+                      : 'border-blue-500 text-blue-600 hover:bg-blue-50'
                     }`}
                     onClick={() => window.location.href = '/register'}
                   >

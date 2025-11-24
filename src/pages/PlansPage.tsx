@@ -22,8 +22,7 @@ const plans = [
       "1% feature.profit.daily",
       "feature.members.area exclusiva",
       "feature.support.basic",
-      "feature.market.analysis",
-      "feature.risk.management"
+      "feature.market.analysis"
     ],
     popular: false,
     gradient: "from-green-600 to-green-400",
@@ -44,8 +43,7 @@ const plans = [
       "feature.members.area VIP",
       "feature.support.priority",
       "feature.technical.analysis",
-      "feature.webinars",
-      "feature.reports"
+      "feature.webinars"
     ],
     popular: false,
     gradient: "from-purple-600 to-purple-400",
@@ -64,7 +62,6 @@ const plans = [
       "200 feature.signals.day",
       "1% feature.profit.daily",
       "feature.members.area PRO",
-      "feature.telegram.vip",
       "feature.strategies avançadas",
       "feature.early.access",
       "feature.support.priority"
@@ -86,11 +83,8 @@ const plans = [
       "500 feature.signals.day",
       "1,5% feature.profit.daily",
       "feature.members.area Premium",
-      "feature.telegram.vip",
-      "feature.consultation mensal",
       "feature.strategies",
-      "feature.early.access",
-      "feature.support.24_7"
+      "feature.early.access"
     ],
     popular: false,
     gradient: "from-blue-600 to-blue-400",

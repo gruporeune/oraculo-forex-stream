@@ -12,8 +12,8 @@ export function HeroSection() {
     <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-background to-muted/30">
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-600/20 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl"></div>
       </div>
 
       {/* Content with responsive layout */}
@@ -37,7 +37,7 @@ export function HeroSection() {
             >
               <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-8 leading-tight">
                 Opere opções binárias com a{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
                   inteligência artificial
                 </span>{" "}
                 mais assertiva do mercado financeiro
@@ -78,7 +78,7 @@ export function HeroSection() {
               >
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold min-w-[180px] sm:min-w-[200px]"
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-6 sm:px-8 py-4 text-base sm:text-lg font-semibold min-w-[180px] sm:min-w-[200px]"
                   onClick={() => window.location.href = '/register'}
                 >
                   Abrir sua conta
@@ -86,7 +86,7 @@ export function HeroSection() {
                 <Button 
                   variant="outline" 
                   size="lg" 
-                  className="border-purple-500 text-purple-600 hover:bg-purple-50 px-6 sm:px-8 py-4 text-base sm:text-lg min-w-[180px] sm:min-w-[200px]"
+                  className="border-blue-500 text-blue-600 hover:bg-blue-50 px-6 sm:px-8 py-4 text-base sm:text-lg min-w-[180px] sm:min-w-[200px]"
                   onClick={() => setIsVideoModalOpen(true)}
                 >
                   Ver demonstração
@@ -110,15 +110,15 @@ export function HeroSection() {
                 className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 max-w-2xl"
               >
                 <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">99%</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">99%</div>
                   <div className="text-sm text-muted-foreground">Taxa de assertividade</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">24/7</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">24/7</div>
                   <div className="text-sm text-muted-foreground">Operação automática</div>
                 </div>
                 <div className="text-center lg:text-left">
-                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-2">2%</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-2">2%</div>
                   <div className="text-sm text-muted-foreground">Até 2% lucro diário</div>
                 </div>
               </motion.div>

@@ -4,6 +4,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import { useI18n } from "@/lib/i18n"
 import { Button } from "@/components/ui/button"
 import supportAgent from "@/assets/support-agent.png"
+import oraculoLogo from "@/assets/oraculo-logo.png"
 
 import {
   Sidebar,
@@ -49,12 +50,15 @@ export function AppSidebar() {
         {/* Logo Section */}
         {open && (
           <div className="p-6 border-b border-white/5">
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-1">
-                <h2 className="text-white font-bold text-lg tracking-wider">ORÁCULO</h2>
-                <h2 className="text-red-500 font-bold text-lg tracking-wider">OPTION</h2>
+            <div className="flex items-center gap-3 mb-2">
+              <img src={oraculoLogo} alt="Oráculo Logo" className="w-10 h-10" />
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-1">
+                  <h2 className="text-white font-bold text-lg tracking-wider">ORÁCULO</h2>
+                  <h2 className="text-blue-500 font-bold text-lg tracking-wider">OPTION</h2>
+                </div>
+                <p className="text-slate-400 text-xs">Trading Platform</p>
               </div>
-              <p className="text-slate-400 text-xs">Trading Platform</p>
             </div>
           </div>
         )}
@@ -74,7 +78,7 @@ export function AppSidebar() {
                       className={({ isActive }) => `
                         group flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200
                         ${isActive 
-                          ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-500/30' 
+                          ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
                           : 'text-slate-300 hover:bg-white/5 hover:text-white'
                         }
                       `}
@@ -102,9 +106,9 @@ export function AppSidebar() {
         {/* Modern Support Agent Section */}
         {open && (
           <div className="p-4 border-t border-white/5">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 p-4 backdrop-blur-sm border border-white/10">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 to-indigo-600/20 p-4 backdrop-blur-sm border border-white/10">
               {/* Decorative gradient orb */}
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-purple-500/30 rounded-full blur-3xl"></div>
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-blue-500/30 rounded-full blur-3xl"></div>
               
               <div className="relative space-y-3">
                 <div className="flex items-center gap-3">
@@ -112,7 +116,7 @@ export function AppSidebar() {
                     <img 
                       src={supportAgent} 
                       alt="Eduarda - Atendente" 
-                      className="w-12 h-12 rounded-xl object-cover border-2 border-purple-400/50 shadow-lg"
+                      className="w-12 h-12 rounded-xl object-cover border-2 border-blue-400/50 shadow-lg"
                     />
                     <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-slate-900"></div>
                   </div>

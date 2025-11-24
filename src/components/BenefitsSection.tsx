@@ -38,7 +38,7 @@ export function BenefitsSection() {
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
             Por que escolher o{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
               ORÁCULO
             </span>
           </h2>
@@ -58,8 +58,8 @@ export function BenefitsSection() {
               viewport={{ once: true }}
               className="text-center group"
             >
-              <div className="mb-6 mx-auto w-16 h-16 bg-gradient-to-br from-purple-600/20 to-purple-400/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <benefit.icon className="w-8 h-8 text-purple-600" />
+              <div className="mb-6 mx-auto w-16 h-16 bg-gradient-to-br from-blue-600/20 to-blue-400/20 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <benefit.icon className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-semibold mb-4">{benefit.title}</h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -78,7 +78,7 @@ export function BenefitsSection() {
         >
           <Button
             size="lg"
-            className="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-700 hover:to-purple-600 text-white px-8 py-4 text-lg"
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white px-8 py-4 text-lg"
             onClick={() => window.location.href = '/register'}
           >
             Começar Agora

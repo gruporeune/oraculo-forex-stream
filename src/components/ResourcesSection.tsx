@@ -48,7 +48,7 @@ export function ResourcesSection() {
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6">
             Recursos{" "}
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-purple-400">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-400">
               Exclusivos
             </span>
           </h2>
@@ -66,10 +66,10 @@ export function ResourcesSection() {
               transition={{ duration: 0.8, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="h-full border-border/50 bg-card/50 backdrop-blur-sm hover:border-purple-500/50 transition-all duration-300 group">
+              <Card className="h-full border-border/50 bg-card/50 backdrop-blur-sm hover:border-blue-500/50 transition-all duration-300 group">
                 <CardHeader>
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-600/20 to-purple-400/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <resource.icon className="w-6 h-6 text-purple-600" />
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600/20 to-blue-400/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <resource.icon className="w-6 h-6 text-blue-600" />
                   </div>
                   <CardTitle className="text-xl">{resource.title}</CardTitle>
                 </CardHeader>
