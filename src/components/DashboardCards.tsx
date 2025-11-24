@@ -51,22 +51,17 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
     }).format(value);
   };
 
-  const getPlanColor = (plan: string) => {
-    const colors = {
-      free: 'from-gray-600/20 to-gray-400/20 border-gray-500/50',
-      partner: 'from-blue-600/20 to-blue-400/20 border-blue-500/50',
-      master: 'from-purple-600/20 to-purple-400/20 border-purple-500/50',
-      pro: 'from-amber-600/20 to-amber-400/20 border-amber-500/50',
-      premium: 'from-yellow-600/20 to-yellow-400/20 border-yellow-500/50',
-      platinum: 'from-pink-600/20 to-pink-400/20 border-pink-500/50'
-    };
-    return colors[plan as keyof typeof colors] || colors.free;
+  // Estilo base para cards - COR AZUL
+  const cardBaseClass = "relative overflow-hidden border shadow-sm rounded-lg transition-all duration-300 group";
+  const cardBlueStyle = {
+    background: 'linear-gradient(to bottom right, rgba(37, 99, 235, 0.2), rgba(59, 130, 246, 0.2))',
+    borderColor: 'rgba(59, 130, 246, 0.5)'
   };
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4 lg:gap-6 mb-4 md:mb-6 lg:mb-8">
       {/* SEUS PLANOS */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+      <Card className={cardBaseClass} style={cardBlueStyle}>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
@@ -81,7 +76,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SEUS SINAIS */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+      <Card className={cardBaseClass} style={cardBlueStyle}>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
@@ -96,7 +91,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* GANHO DO DIA */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+      <Card className={cardBaseClass} style={cardBlueStyle}>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
@@ -113,7 +108,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* COMISSÕES DO DIA */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+      <Card className={cardBaseClass} style={cardBlueStyle}>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
@@ -130,7 +125,7 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
       </Card>
 
       {/* SALDO DISPONÍVEL */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-blue-600/20 to-blue-400/20 border-blue-500/50 hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all duration-300 group">
+      <Card className={cardBaseClass} style={cardBlueStyle}>
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
         <CardHeader className="pb-2 relative z-10 p-3 md:p-4 lg:p-6">
           <CardTitle className="text-xs md:text-sm font-medium text-white/70 flex items-center gap-2">
@@ -145,7 +140,10 @@ export function DashboardCards({ profile, userPlans, onWithdraw }: DashboardCard
           <Button 
             size="sm" 
             onClick={onWithdraw}
-            className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs md:text-sm"
+            className="mt-2 w-full text-white text-xs md:text-sm"
+            style={{ backgroundColor: 'rgb(37, 99, 235)' }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgb(29, 78, 216)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgb(37, 99, 235)'}
           >
             {t('dashboard.withdraw')}
           </Button>
