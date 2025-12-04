@@ -429,8 +429,8 @@ export default function UsersAdminPage() {
       case 'partner': return 'bg-blue-500';
       case 'master': return 'bg-purple-500';
       case 'pro': return 'bg-amber-500';
-      case 'premium': return 'bg-gold-500';
-      case 'platinum': return 'bg-pink-500';
+      case 'premium': return 'bg-blue-600';
+      case 'platinum': return 'bg-yellow-500';
       default: return 'bg-gray-500';
     }
   };
@@ -833,6 +833,7 @@ export default function UsersAdminPage() {
                                           <SelectItem value="master">Master</SelectItem>
                                           <SelectItem value="pro">PRO</SelectItem>
                                           <SelectItem value="premium">Premium</SelectItem>
+                                          <SelectItem value="platinum">Platinum</SelectItem>
                                         </SelectContent>
                                       </Select>
                                       <Button onClick={handleAddPlan} size="sm" className="bg-green-600 hover:bg-green-700">

@@ -91,6 +91,27 @@ const plans = [
     borderColor: "border-blue-500/50",
     buttonColor: "bg-blue-600 hover:bg-blue-700",
     paymentType: "both"
+  },
+  {
+    name: "PLATINUM",
+    price: "$909 USD",
+    priceInReals: "R$ 5.000",
+    originalPrice: "$1.250 USD",
+    description: "plan.platinum.description",
+    icon: Crown,
+    features: [
+      "Ilimitado feature.signals.day",
+      "2% feature.profit.daily",
+      "feature.members.area Platinum",
+      "feature.strategies exclusivas",
+      "feature.early.access prioritário",
+      "feature.support VIP 24/7"
+    ],
+    popular: false,
+    gradient: "from-yellow-500 to-amber-400",
+    borderColor: "border-yellow-500/50",
+    buttonColor: "bg-yellow-600 hover:bg-yellow-700",
+    paymentType: "both"
   }
 ];
 
@@ -160,7 +181,7 @@ export default function PlansPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {plans.map((plan, index) => (
           <motion.div
             key={plan.name}
