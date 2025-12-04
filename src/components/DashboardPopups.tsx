@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { X } from "lucide-react";
-import popupBonus from "@/assets/popup-bonus-afiliados.jpeg";
+import popupPlatinum from "@/assets/popup-platinum-promo.jpg";
 
 export const DashboardPopups = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -30,8 +30,8 @@ export const DashboardPopups = () => {
           </button>
           <div className="relative w-full">
             <img
-              src={popupBonus}
-              alt="Bônus Exclusivo para Afiliados"
+              src={popupPlatinum}
+              alt="Promoção Plano Platinum"
               className="w-full h-auto rounded-lg"
             />
           </div>
