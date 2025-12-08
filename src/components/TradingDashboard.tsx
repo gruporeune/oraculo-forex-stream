@@ -92,12 +92,14 @@ export const TradingDashboard = () => {
     // Update user profits occasionally
     if (Math.random() > 0.7 && result.result === "WIN") {
       setUsers(prev => {
+        if (prev.length === 0) return prev;
         const updated = [...prev];
         const randomIndex = Math.floor(Math.random() * updated.length);
+        if (!updated[randomIndex]) return prev;
         updated[randomIndex] = {
           ...updated[randomIndex],
-          profit: updated[randomIndex].profit + Math.abs(result.profit),
-          trades: updated[randomIndex].trades + 1
+          profit: (updated[randomIndex].profit || 0) + Math.abs(result.profit),
+          trades: (updated[randomIndex].trades || 0) + 1
         };
         return updated;
       });
@@ -134,12 +136,14 @@ export const TradingDashboard = () => {
       // Occasionally update user profits
       if (Math.random() > 0.7) {
         setUsers(prev => {
+          if (prev.length === 0) return prev;
           const updated = [...prev];
           const randomIndex = Math.floor(Math.random() * updated.length);
+          if (!updated[randomIndex]) return prev;
           updated[randomIndex] = {
             ...updated[randomIndex],
-            profit: updated[randomIndex].profit + Math.floor(Math.random() * 1000) + 100,
-            trades: updated[randomIndex].trades + 1
+            profit: (updated[randomIndex].profit || 0) + Math.floor(Math.random() * 1000) + 100,
+            trades: (updated[randomIndex].trades || 0) + 1
           };
           return updated;
         });
