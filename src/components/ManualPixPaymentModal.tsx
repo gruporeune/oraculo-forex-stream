@@ -19,26 +19,29 @@ interface ManualPixPaymentModalProps {
   };
 }
 
-const QR_CODES = {
+const QR_CODES: Record<string, string> = {
   partner: '/lovable-uploads/1ccbf7f1-eac6-46d3-a4dc-403f590aad0a.png',
   master: '/lovable-uploads/25468596-0f52-4bd2-8dbc-f3add9160763.png',
-  pro: '/lovable-uploads/1ccbf7f1-eac6-46d3-a4dc-403f590aad0a.png', // Placeholder - admin should update
+  pro: '/lovable-uploads/1ccbf7f1-eac6-46d3-a4dc-403f590aad0a.png',
   premium: '/lovable-uploads/09fc3329-e5fe-4db7-9aff-7c2061295767.png',
-} as const;
+  platinum: '/lovable-uploads/09fc3329-e5fe-4db7-9aff-7c2061295767.png',
+};
 
-const PLAN_VALUES = {
+const PLAN_VALUES: Record<string, number> = {
   partner: 200,
   master: 600,
   pro: 1000,
   premium: 2750,
-} as const;
+  platinum: 5000,
+};
 
-const PIX_CODES = {
+const PIX_CODES: Record<string, string> = {
   partner: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA5204000053039865406200.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304C1C7',
   master: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA5204000053039865406600.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304E39A',
   pro: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA52040000530398654071000.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304XXXX',
   premium: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA52040000530398654072750.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304C3B8',
-} as const;
+  platinum: '00020101021126630014br.gov.bcb.pix0114435344680001790223ORACULO PAGAMENTOS LTDA52040000530398654075000.005802BR5923DUNAMYS N E P FINANCEIR6008SALVADOR62070503***6304XXXX',
+};
 
 export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymentModalProps) => {
   const [email, setEmail] = useState('');
@@ -48,10 +51,10 @@ export const ManualPixPaymentModal = ({ isOpen, onClose, plan }: ManualPixPaymen
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
 
-  const planKey = plan.name.toLowerCase() as keyof typeof QR_CODES;
-  const qrCodeUrl = QR_CODES[planKey];
-  const planValue = PLAN_VALUES[planKey];
-  const pixCode = PIX_CODES[planKey];
+  const planKey = plan.name.toLowerCase();
+  const qrCodeUrl = QR_CODES[planKey] || QR_CODES['partner'];
+  const planValue = PLAN_VALUES[planKey] || 0;
+  const pixCode = PIX_CODES[planKey] || '';
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
