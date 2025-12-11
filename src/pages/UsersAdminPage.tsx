@@ -61,9 +61,8 @@ export default function UsersAdminPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkAdminAuth();
-    loadUsers();
-    loadUserPlans();
+    // Carregar dados em paralelo para melhor performance
+    Promise.all([loadUsers(), loadUserPlans()]).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -107,162 +106,86 @@ export default function UsersAdminPage() {
     setFilteredUsers(filtered);
   }, [searchTerm, dateFilter, showOnlyPaidUsers, showOnlyWithBalance, users, userPlans]);
 
-  const checkAdminAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      navigate('/users-admin/login');
-      return;
-    }
-
-    const { data: adminData } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (!adminData) {
-      navigate('/users-admin/login');
-    }
-  };
+  // Removida checkAdminAuth - já é feita pelo UsersAdminProtectedRoute
 
   const loadUsers = async () => {
     try {
-      // Buscar TODOS os usuários - usar paginação para garantir que pegamos todos
-      let allProfiles: any[] = [];
-      let from = 0;
-      const pageSize = 1000;
-      let hasMore = true;
+      setIsLoading(true);
+      
+      // Buscar todos os profiles de uma vez (sem paginação excessiva para começar)
+      const { data: allProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          full_name,
+          username,
+          plan,
+          available_balance,
+          daily_earnings,
+          daily_commissions,
+          updated_at,
+          phone,
+          referred_by
+        `)
+        .order('updated_at', { ascending: false })
+        .limit(2000);
 
-      console.log('🔄 Iniciando carregamento de TODOS os usuários...');
-
-      while (hasMore) {
-        const { data, error, count } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            full_name,
-            username,
-            plan,
-            available_balance,
-            daily_earnings,
-            daily_commissions,
-            updated_at,
-            phone,
-            referred_by
-          `, { count: 'exact' })
-          .range(from, from + pageSize - 1)
-          .order('updated_at', { ascending: false });
-
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          allProfiles = [...allProfiles, ...data];
-          from += pageSize;
-          hasMore = data.length === pageSize;
-          console.log(`📥 Carregados ${allProfiles.length} usuários... (Total no DB: ${count})`);
-        } else {
-          hasMore = false;
-        }
+      if (profilesError) throw profilesError;
+      
+      if (!allProfiles || allProfiles.length === 0) {
+        setUsers([]);
+        setIsLoading(false);
+        return;
       }
 
-      console.log('✅ Total de usuários carregados:', allProfiles.length);
+      console.log('✅ Usuários carregados:', allProfiles.length);
 
-      // Buscar total de saques aprovados/completos para cada usuário
-      const { data: withdrawalsData, error: withdrawalsError } = await supabase
-        .from('withdrawal_requests')
-        .select('user_id, amount, status');
-
-      if (withdrawalsError) {
-        console.error('Erro ao carregar saques:', withdrawalsError);
-      }
-
-      // Calcular total de saques por usuário
-      const withdrawalsByUser = withdrawalsData?.reduce((acc: any, withdrawal: any) => {
-        if (withdrawal.status === 'approved' || withdrawal.status === 'completed') {
-          if (!acc[withdrawal.user_id]) {
-            acc[withdrawal.user_id] = 0;
-          }
-          acc[withdrawal.user_id] += Number(withdrawal.amount) || 0;
-        }
-        return acc;
-      }, {}) || {};
-
-      // Get real creation dates using our secure function
-      const usersWithCreatedAt = await Promise.all(
-        allProfiles.map(async (profile) => {
-          try {
-            const { data: creationDate, error: dateError } = await supabase
-              .rpc('get_user_creation_date', { user_uuid: profile.id });
-            
-            return {
-              ...profile,
-              created_at: creationDate || profile.updated_at,
-              total_withdrawals: withdrawalsByUser[profile.id] || 0
-            };
-          } catch (error) {
-            // Fallback to updated_at if function fails
-            return {
-              ...profile,
-              created_at: profile.updated_at,
-              total_withdrawals: withdrawalsByUser[profile.id] || 0
-            };
-          }
-        })
-      );
-
-      // Buscar emails dos usuários usando função RPC em lotes
+      // Buscar emails e saques em paralelo
       const userIds = allProfiles.map(u => u.id);
-      let allEmailsData: any[] = [];
       
-      // Processar em lotes de 1000 para evitar limitações de tamanho de array
-      for (let i = 0; i < userIds.length; i += 1000) {
-        const batchIds = userIds.slice(i, i + 1000);
-        const { data: emailsData, error: emailsError } = await supabase
-          .rpc('get_users_emails', { user_uuids: batchIds });
+      const [emailsResult, withdrawalsResult] = await Promise.all([
+        supabase.rpc('get_users_emails', { user_uuids: userIds }),
+        supabase.from('withdrawal_requests')
+          .select('user_id, amount, status')
+          .in('status', ['approved', 'completed'])
+      ]);
+
+      const emailsMap = new Map(
+        (emailsResult.data || []).map((e: any) => [e.user_id, e.email])
+      );
+
+      const withdrawalsByUser = (withdrawalsResult.data || []).reduce((acc: any, w: any) => {
+        acc[w.user_id] = (acc[w.user_id] || 0) + Number(w.amount || 0);
+        return acc;
+      }, {});
+
+      // Buscar referrers em batch
+      const referrerIds = [...new Set(allProfiles.filter(u => u.referred_by).map(u => u.referred_by))];
+      const referrersMap = new Map();
+      
+      if (referrerIds.length > 0) {
+        const { data: referrersData } = await supabase
+          .from('profiles')
+          .select('id, username, full_name')
+          .in('id', referrerIds);
         
-        if (emailsError) {
-          console.error('Erro ao buscar emails do lote:', emailsError);
-        } else if (emailsData) {
-          allEmailsData = [...allEmailsData, ...emailsData];
-        }
+        (referrersData || []).forEach((r: any) => {
+          referrersMap.set(r.id, r.username || r.full_name || 'Usuário');
+        });
       }
-      
-      console.log('📧 Total de emails carregados:', allEmailsData.length);
-      // Load referrer usernames
-      const usersWithReferrers = await Promise.all(
-        usersWithCreatedAt.map(async (user) => {
-          const userEmail = allEmailsData?.find((e: any) => e.user_id === user.id)?.email || null;
-          
-          if (user.referred_by) {
-            try {
-              const { data: referrerData } = await supabase
-                .from('profiles')
-                .select('username, full_name')
-                .eq('id', user.referred_by)
-                .maybeSingle();
-              
-              return {
-                ...user,
-                email: userEmail,
-                referrer_username: referrerData?.username || referrerData?.full_name || 'Usuário não encontrado'
-              };
-            } catch (error) {
-              console.error('Erro ao buscar referrer:', error);
-              return { ...user, email: userEmail, referrer_username: 'Erro ao carregar' };
-            }
-          }
-          return { ...user, email: userEmail, referrer_username: null };
-        })
-      );
 
-      // Sort by creation date (newest first)
-      const sortedUsers = usersWithReferrers.sort((a, b) => 
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
+      // Montar array final
+      const usersWithData = allProfiles.map(profile => ({
+        ...profile,
+        email: emailsMap.get(profile.id) || null,
+        created_at: profile.updated_at, // Usar updated_at como fallback
+        total_withdrawals: withdrawalsByUser[profile.id] || 0,
+        referrer_username: profile.referred_by ? (referrersMap.get(profile.referred_by) || 'Usuário') : null
+      }));
 
-      setUsers(sortedUsers);
+      setUsers(usersWithData);
       
-      // Load main network user - find the root user (without referrer)
+      // Buscar main network user
       const { data: mainUserByEmail } = await supabase
         .from('profiles')
         .select('*')
@@ -278,6 +201,7 @@ export default function UsersAdminPage() {
         });
       }
     } catch (error: any) {
+      console.error('Erro ao carregar usuários:', error);
       toast.error("Erro ao carregar usuários: " + error.message);
     } finally {
       setIsLoading(false);
