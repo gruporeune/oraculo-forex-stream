@@ -47,7 +47,12 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
   const [recentOperations, setRecentOperations] = useState<{[key: string]: RecentOperation[]}>({});
   const { toast } = useToast();
 
-  // Removed total_auto_earnings calculation
+  // TEMPORARILY DISABLED PLANS - Operations blocked until re-enabled
+  const DISABLED_PLANS = ['premium', 'platinum'];
+  
+  const isPlanDisabled = (planName: string) => {
+    return DISABLED_PLANS.includes(planName.toLowerCase());
+  };
 
   // Check if it's weekend in Brazil timezone
   const isWeekendInBrazil = () => {
@@ -80,7 +85,8 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
       const activePlans = userPlans.filter(plan => 
         plan.auto_operations_started && 
         !plan.auto_operations_paused && 
-        !hasReachedTarget(plan)
+        !hasReachedTarget(plan) &&
+        !isPlanDisabled(plan.plan_name) // Skip disabled plans
       );
 
       for (const plan of activePlans) {
@@ -363,7 +369,17 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     return plan.daily_earnings >= target;
   };
 
-  const startOperations = async (planId: string) => {
+  const startOperations = async (planId: string, planName: string) => {
+    // Check if plan is disabled
+    if (isPlanDisabled(planName)) {
+      toast({
+        title: "Operações Indisponíveis",
+        description: "As operações automáticas para este plano estão temporariamente indisponíveis.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(prev => ({ ...prev, [planId]: true }));
     
     try {
@@ -427,7 +443,17 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
     }
   };
 
-  const resumeOperations = async (planId: string) => {
+  const resumeOperations = async (planId: string, planName: string) => {
+    // Check if plan is disabled
+    if (isPlanDisabled(planName)) {
+      toast({
+        title: "Operações Indisponíveis",
+        description: "As operações automáticas para este plano estão temporariamente indisponíveis.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     setIsLoading(prev => ({ ...prev, [planId]: true }));
     
     try {
@@ -645,7 +671,13 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                       </p>
                     </div>
 
-                    {isWeekendInBrazil() ? (
+                    {isPlanDisabled(plan.plan_name) ? (
+                      <div className="text-center p-4 bg-red-600/20 rounded-lg border border-red-500/50">
+                        <AlertCircle className="w-8 h-8 text-red-400 mx-auto mb-2" />
+                        <p className="text-white font-medium mb-1">Operações Temporariamente Indisponíveis</p>
+                        <p className="text-white/70 text-sm">As operações automáticas para o plano {plan.plan_name.toUpperCase()} estão em manutenção. Em breve voltarão a funcionar normalmente.</p>
+                      </div>
+                    ) : isWeekendInBrazil() ? (
                       <div className="text-center p-4 bg-orange-600/20 rounded-lg border border-orange-500/50">
                         <AlertCircle className="w-8 h-8 text-orange-400 mx-auto mb-2" />
                         <p className="text-white font-medium mb-1">Operações Indisponíveis</p>
@@ -655,7 +687,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                       <div className="flex flex-col gap-3">
                         {!plan.auto_operations_started ? (
                           <Button
-                            onClick={() => startOperations(plan.id)}
+                            onClick={() => startOperations(plan.id, plan.plan_name)}
                             disabled={isLoading[plan.id]}
                             className="w-full bg-green-600 hover:bg-green-700 text-white"
                           >
@@ -664,7 +696,7 @@ export default function MultiPlanAutomaticSignals({ user, userPlans, onPlansUpda
                           </Button>
                         ) : plan.auto_operations_paused ? (
                           <Button
-                            onClick={() => resumeOperations(plan.id)}
+                            onClick={() => resumeOperations(plan.id, plan.plan_name)}
                             disabled={isLoading[plan.id]}
                             className="w-full bg-green-600 hover:bg-green-700 text-white"
                           >
