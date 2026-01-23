@@ -2,24 +2,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
-import RegisterPageOld from "./pages/register/RegisterPage";
-import LoginPage from "./pages/auth/LoginPage";
-import RegisterPage from "./pages/auth/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import ConversionLandingPage from "./pages/ConversionLandingPage";
-import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
-import UsersAdminProtectedRoute from "./components/UsersAdminProtectedRoute";
-import AdminLoginPage from "./pages/AdminLoginPage";
-import UsersAdminLoginPage from "./pages/UsersAdminLoginPage";
-import UsersAdminPage from "./pages/UsersAdminPage";
 
 const queryClient = new QueryClient();
 
+// MAINTENANCE MODE - All routes redirect to landing page
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -28,25 +16,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/comece-aqui" element={<ConversionLandingPage />} />
-          <Route path="/dashboard/*" element={<DashboardPage />} />
-          <Route path="/admin/withdrawals" element={
-            <AdminProtectedRoute>
-              <AdminWithdrawalsPage />
-            </AdminProtectedRoute>
-          } />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/users-admin/login" element={<UsersAdminLoginPage />} />
-          <Route path="/users-admin" element={
-            <UsersAdminProtectedRoute>
-              <UsersAdminPage />
-            </UsersAdminProtectedRoute>
-          } />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/register/:plan" element={<RegisterPageOld />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
+          {/* All other routes redirect to maintenance page */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
