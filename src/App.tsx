@@ -4,10 +4,16 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
+import AdminWithdrawalsPage from "./pages/AdminWithdrawalsPage";
+import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import UsersAdminProtectedRoute from "./components/UsersAdminProtectedRoute";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import UsersAdminLoginPage from "./pages/UsersAdminLoginPage";
+import UsersAdminPage from "./pages/UsersAdminPage";
 
 const queryClient = new QueryClient();
 
-// MAINTENANCE MODE - All routes redirect to landing page
+// MAINTENANCE MODE - Only admin routes are accessible
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -16,6 +22,18 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/withdrawals" element={
+            <AdminProtectedRoute>
+              <AdminWithdrawalsPage />
+            </AdminProtectedRoute>
+          } />
+          <Route path="/users-admin/login" element={<UsersAdminLoginPage />} />
+          <Route path="/users-admin" element={
+            <UsersAdminProtectedRoute>
+              <UsersAdminPage />
+            </UsersAdminProtectedRoute>
+          } />
           {/* All other routes redirect to maintenance page */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
